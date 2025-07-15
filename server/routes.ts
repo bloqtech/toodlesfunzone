@@ -174,7 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create booking
   app.post('/api/bookings', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       const validatedData = insertBookingSchema.parse({
         ...req.body,
         userId,
@@ -199,7 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user bookings
   app.get('/api/bookings', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       const bookings = await storage.getBookingsByUser(userId);
       res.json(bookings);
     } catch (error) {
@@ -217,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if user owns this booking or is admin
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       const user = await storage.getUser(userId);
       
       if (booking.userId !== userId && !user?.isAdmin) {
@@ -234,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create birthday party booking
   app.post('/api/birthday-parties', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       const validatedData = insertBirthdayPartySchema.parse({
         ...req.body,
         userId,
@@ -259,7 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user birthday parties
   app.get('/api/birthday-parties', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       const parties = await storage.getBirthdayPartiesByUser(userId);
       res.json(parties);
     } catch (error) {
@@ -304,7 +304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Submit review
   app.post('/api/reviews', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       const validatedData = insertReviewSchema.parse({
         ...req.body,
         userId,
@@ -321,7 +321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes
   const adminAuth = async (req: any, res: any, next: any) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       const user = await storage.getUser(userId);
       
       if (!user?.isAdmin) {

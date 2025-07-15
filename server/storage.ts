@@ -144,14 +144,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPackage(packageData: InsertPackage): Promise<Package> {
-    const [newPackage] = await db.insert(packages).values([packageData]).returning();
+    const [newPackage] = await db.insert(packages).values(packageData as any).returning();
     return newPackage;
   }
 
   async updatePackage(id: number, packageData: Partial<InsertPackage>): Promise<Package> {
     const [updatedPackage] = await db
       .update(packages)
-      .set({ ...packageData, updatedAt: new Date() })
+      .set({ ...packageData, updatedAt: new Date() } as any)
       .where(eq(packages.id, id))
       .returning();
     return updatedPackage;
@@ -186,7 +186,7 @@ export class DatabaseStorage implements IStorage {
 
   // Booking operations
   async createBooking(bookingData: InsertBooking): Promise<Booking> {
-    const [newBooking] = await db.insert(bookings).values([bookingData]).returning();
+    const [newBooking] = await db.insert(bookings).values(bookingData as any).returning();
     return newBooking;
   }
 
@@ -326,14 +326,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDiscountVoucher(voucherData: InsertDiscountVoucher): Promise<DiscountVoucher> {
-    const [newVoucher] = await db.insert(discountVouchers).values([voucherData]).returning();
+    const [newVoucher] = await db.insert(discountVouchers).values(voucherData as any).returning();
     return newVoucher;
   }
 
   async updateDiscountVoucher(id: number, voucherData: Partial<InsertDiscountVoucher>): Promise<DiscountVoucher> {
     const [updatedVoucher] = await db
       .update(discountVouchers)
-      .set(voucherData)
+      .set(voucherData as any)
       .where(eq(discountVouchers.id, id))
       .returning();
     return updatedVoucher;

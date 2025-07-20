@@ -38,6 +38,7 @@ export interface IStorage {
   // User operations (IMPORTANT: mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUserAdminStatus(id: string, isAdmin: boolean): Promise<User>;
   
   // Package operations
   getPackages(): Promise<Package[]>;
@@ -129,6 +130,15 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date(),
         },
       })
+      .returning();
+    return user;
+  }
+
+  async updateUserAdminStatus(id: string, isAdmin: boolean): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ isAdmin, updatedAt: new Date() })
+      .where(eq(users.id, id))
       .returning();
     return user;
   }

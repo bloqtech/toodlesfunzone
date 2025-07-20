@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a full-stack web application for Toodles Funzone, an indoor kids play zone business. The platform provides a comprehensive booking system for play sessions, birthday parties, and includes an admin dashboard for managing operations. The application replicates the functionality of Hamleys' play zone website while being customized for the Toodles brand.
+This is a full-stack web application for Toodles Funzone, an indoor kids play zone business. The platform provides a comprehensive booking system for play sessions, birthday parties, and includes an advanced admin dashboard with role-based access control (RBAC). The system features 4 user roles (Customer, Staff, Manager, Admin) with 14 granular permissions for precise access management. Admins can edit all user details, assign roles, and manage permissions through an intuitive interface.
 
 ## User Preferences
 
@@ -35,11 +35,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Key Components
 
-### User Management
-- Replit Auth integration for secure authentication
-- User profiles with admin role support
-- Session management with PostgreSQL storage
-- Guest checkout functionality for bookings
+### User Management & Role-Based Access Control (RBAC)
+- **Authentication**: Replit Auth integration for secure authentication
+- **User Roles**: 4-tier system (Customer, Staff, Manager, Admin)
+- **Permissions**: 14 granular permissions for precise access control
+- **Advanced User Management**: Full profile editing, role assignment, permission management
+- **Session Management**: PostgreSQL storage with role persistence
+- **Permission System**: Hierarchical permissions with role-based defaults and custom overrides
 
 ### Booking System
 - **Play Session Bookings**: Time slot-based booking system (10 AM - 8 PM)
@@ -53,11 +55,14 @@ Preferred communication style: Simple, everyday language.
 - **Gallery**: Photo gallery with category filtering
 - **Reviews**: Customer testimonials and feedback system
 
-### Admin Dashboard
-- **Booking Management**: View, edit, and manage all bookings
+### Admin Dashboard & RBAC System
+- **User Management**: Advanced interface for editing user profiles, roles, and permissions
+- **Role Management**: 4-tier role system with hierarchical permissions
+- **Permission Control**: 14 granular permissions for precise access control
+- **Booking Management**: View, edit, and manage all bookings (role-based access)
 - **Holiday Calendar**: Mark dates as holidays or private events
 - **Discount Vouchers**: Create and manage promotional codes
-- **Analytics**: Basic reporting on bookings and revenue
+- **Analytics**: Basic reporting on bookings and revenue (manager+ access)
 
 ## Data Flow
 

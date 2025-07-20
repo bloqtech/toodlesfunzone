@@ -487,6 +487,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user role
+  app.patch('/api/admin/users/:userId/role', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { role } = req.body;
+      
+      if (!['customer', 'staff', 'manager', 'admin'].includes(role)) {
+        return res.status(400).json({ message: "Invalid role" });
+      }
+      
+      const updatedUser = await storage.updateUserRole(userId, role);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
+
+  // Update user permissions
+  app.patch('/api/admin/users/:userId/permissions', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { permissions } = req.body;
+      
+      if (!Array.isArray(permissions)) {
+        return res.status(400).json({ message: "Permissions must be an array" });
+      }
+      
+      const updatedUser = await storage.updateUserPermissions(userId, permissions);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user permissions:", error);
+      res.status(500).json({ message: "Failed to update user permissions" });
+    }
+  });
+
+  // Update user profile
+  app.patch('/api/admin/users/:userId/profile', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const profile = req.body;
+      
+      // Remove sensitive fields
+      delete profile.id;
+      delete profile.createdAt;
+      delete profile.updatedAt;
+      
+      const updatedUser = await storage.updateUserProfile(userId, profile);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
+
+  // Get users by role
+  app.get('/api/admin/users/role/:role', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { role } = req.params;
+      const users = await storage.getUsersByRole(role);
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users by role:", error);
+      res.status(500).json({ message: "Failed to fetch users by role" });
+    }
+  });
+
+  // Get available roles and permissions
+  app.get('/api/admin/roles-permissions', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { PERMISSIONS, ROLE_PERMISSIONS } = await import('../shared/schema');
+      res.json({
+        permissions: PERMISSIONS,
+        rolePermissions: ROLE_PERMISSIONS,
+        roles: ['customer', 'staff', 'manager', 'admin']
+      });
+    } catch (error) {
+      console.error("Error fetching roles and permissions:", error);
+      res.status(500).json({ message: "Failed to fetch roles and permissions" });
+    }
+  });
+
   app.patch('/api/admin/packages/:id', isAuthenticated, adminAuth, async (req, res) => {
     try {
       const package_ = await storage.updatePackage(parseInt(req.params.id), req.body);

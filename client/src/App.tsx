@@ -15,7 +15,7 @@ import Contact from "@/pages/contact";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminBookings from "@/pages/admin/bookings";
 import AdminAnalytics from "@/pages/admin/analytics";
-import AdminUsers from "@/pages/admin/users-simple";
+import AdminUsers from "@/pages/admin/users-advanced";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();

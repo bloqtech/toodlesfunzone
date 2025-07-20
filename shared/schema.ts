@@ -29,6 +29,9 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
+// Define user roles enum
+export const userRoles = pgEnum("user_role", ["customer", "staff", "manager", "admin"]);
+
 // User storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
 export const users = pgTable("users", {
@@ -38,7 +41,13 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   phone: varchar("phone"),
-  isAdmin: boolean("is_admin").default(false),
+  address: text("address"),
+  dateOfBirth: date("date_of_birth"),
+  role: userRoles("role").default("customer").notNull(),
+  isAdmin: boolean("is_admin").default(false), // Keep for backward compatibility
+  permissions: jsonb("permissions").$type<string[]>().default([]).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -290,3 +299,61 @@ export type InsertDiscountVoucher = z.infer<typeof insertDiscountVoucherSchema>;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type InsertEnquiry = z.infer<typeof insertEnquirySchema>;
+
+// Define permission constants
+export const PERMISSIONS = {
+  // Package management
+  MANAGE_PACKAGES: 'manage_packages',
+  VIEW_PACKAGES: 'view_packages',
+  
+  // Event management  
+  MANAGE_EVENTS: 'manage_events',
+  VIEW_EVENTS: 'view_events',
+  
+  // Booking management
+  MANAGE_BOOKINGS: 'manage_bookings',
+  VIEW_BOOKINGS: 'view_bookings',
+  
+  // User management
+  MANAGE_USERS: 'manage_users',
+  VIEW_USERS: 'view_users',
+  
+  // Analytics and reports
+  VIEW_ANALYTICS: 'view_analytics',
+  EXPORT_DATA: 'export_data',
+  
+  // System administration
+  MANAGE_ROLES: 'manage_roles',
+  MANAGE_SETTINGS: 'manage_settings',
+  
+  // Content management
+  MANAGE_CONTENT: 'manage_content',
+  MODERATE_REVIEWS: 'moderate_reviews',
+} as const;
+
+// Define default permissions for each role
+export const ROLE_PERMISSIONS = {
+  customer: [
+    PERMISSIONS.VIEW_PACKAGES,
+    PERMISSIONS.VIEW_EVENTS,
+  ],
+  staff: [
+    PERMISSIONS.VIEW_PACKAGES,
+    PERMISSIONS.VIEW_EVENTS,
+    PERMISSIONS.VIEW_BOOKINGS,
+    PERMISSIONS.MANAGE_BOOKINGS,
+  ],
+  manager: [
+    PERMISSIONS.VIEW_PACKAGES,
+    PERMISSIONS.MANAGE_PACKAGES,
+    PERMISSIONS.VIEW_EVENTS,
+    PERMISSIONS.MANAGE_EVENTS,
+    PERMISSIONS.VIEW_BOOKINGS,
+    PERMISSIONS.MANAGE_BOOKINGS,
+    PERMISSIONS.VIEW_USERS,
+    PERMISSIONS.VIEW_ANALYTICS,
+    PERMISSIONS.MANAGE_CONTENT,
+    PERMISSIONS.MODERATE_REVIEWS,
+  ],
+  admin: Object.values(PERMISSIONS),
+} as const;

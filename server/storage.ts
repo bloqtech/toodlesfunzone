@@ -39,8 +39,13 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserAdminStatus(id: string, isAdmin: boolean): Promise<User>;
+  updateUserRole(id: string, role: string): Promise<User>;
+  updateUserPermissions(id: string, permissions: string[]): Promise<User>;
+  updateUserProfile(id: string, profile: Partial<User>): Promise<User>;
   getAllUsers(): Promise<User[]>;
   deleteUser(id: string): Promise<void>;
+  getUsersByRole(role: string): Promise<User[]>;
+  hasPermission(userId: string, permission: string): Promise<boolean>;
   
   // Package operations
   getPackages(): Promise<Package[]>;
@@ -154,6 +159,52 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUser(id: string): Promise<void> {
     await db.delete(users).where(eq(users.id, id));
+  }
+
+  async updateUserRole(id: string, role: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ role: role as any, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async updateUserPermissions(id: string, permissions: string[]): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ permissions, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async updateUserProfile(id: string, profile: Partial<User>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...profile, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async getUsersByRole(role: string): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.role, role as any))
+      .orderBy(desc(users.createdAt));
+  }
+
+  async hasPermission(userId: string, permission: string): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user) return false;
+    
+    // Admin users have all permissions
+    if (user.isAdmin || user.role === 'admin') return true;
+    
+    // Check if user has specific permission
+    return user.permissions?.includes(permission) || false;
   }
 
   // Package operations

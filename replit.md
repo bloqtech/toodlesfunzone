@@ -26,9 +26,11 @@ Preferred communication style: Simple, everyday language.
 - **Session Management**: Express sessions with PostgreSQL store
 
 ### Design System
-- **Color Scheme**: Custom Toodles theme with bright, playful colors
-- **Typography**: Fredoka One for display text, Open Sans for body text
-- **Component Library**: Consistent component system using shadcn/ui
+- **Color Scheme**: Highly festive and vibrant Toodles theme with bright pink, sky blue, sunny yellow, fresh green, vibrant purple, and cheerful orange
+- **Background**: Beautiful gradient backgrounds (pink-to-blue for light mode, purple-to-blue for dark mode)
+- **Typography**: Fredoka One for display text, Open Sans for body text, Baloo 2 for accent text
+- **Animations**: Playful animations including bounce, wiggle, float, rainbow, and pulse-glow effects
+- **Component Library**: Enhanced shadcn/ui components with festive styling
 - **Responsive Design**: Mobile-first approach with Tailwind breakpoints
 
 ## Key Components

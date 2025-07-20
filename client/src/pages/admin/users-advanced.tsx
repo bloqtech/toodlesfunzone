@@ -473,89 +473,95 @@ export default function AdvancedUserManagement() {
 
         {/* Edit User Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-white text-gray-900 border border-gray-200">
             <DialogHeader>
-              <DialogTitle>Edit User Profile</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-lg font-semibold text-gray-900">Edit User Profile</DialogTitle>
+              <DialogDescription className="text-gray-600">
                 Update user details, role, and permissions
               </DialogDescription>
             </DialogHeader>
             
             {selectedUser && (
               <Tabs defaultValue="profile" className="mt-4">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="profile">Profile</TabsTrigger>
-                  <TabsTrigger value="role">Role & Status</TabsTrigger>
-                  <TabsTrigger value="permissions">Permissions</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-3 bg-gray-100 border border-gray-200">
+                  <TabsTrigger value="profile" className="data-[state=active]:bg-white data-[state=active]:text-toodles-primary data-[state=active]:border-toodles-primary text-gray-700">Profile</TabsTrigger>
+                  <TabsTrigger value="role" className="data-[state=active]:bg-white data-[state=active]:text-toodles-primary data-[state=active]:border-toodles-primary text-gray-700">Role & Status</TabsTrigger>
+                  <TabsTrigger value="permissions" className="data-[state=active]:bg-white data-[state=active]:text-toodles-primary data-[state=active]:border-toodles-primary text-gray-700">Permissions</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="profile" className="space-y-4 mt-4">
+                <TabsContent value="profile" className="space-y-4 mt-4 bg-white p-4 rounded-lg border">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="firstName" className="text-gray-900 font-medium">First Name</Label>
                       <Input
                         id="firstName"
                         value={editForm.firstName || ''}
                         onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
+                        className="mt-1 border-gray-300 focus:border-toodles-primary focus:ring-toodles-primary"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="lastName" className="text-gray-900 font-medium">Last Name</Label>
                       <Input
                         id="lastName"
                         value={editForm.lastName || ''}
                         onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
+                        className="mt-1 border-gray-300 focus:border-toodles-primary focus:ring-toodles-primary"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email" className="text-gray-900 font-medium">Email</Label>
                       <Input
                         id="email"
                         type="email"
                         value={editForm.email || ''}
                         onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                        className="mt-1 border-gray-300 focus:border-toodles-primary focus:ring-toodles-primary"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone">Phone</Label>
+                      <Label htmlFor="phone" className="text-gray-900 font-medium">Phone</Label>
                       <Input
                         id="phone"
                         value={editForm.phone || ''}
                         onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                        className="mt-1 border-gray-300 focus:border-toodles-primary focus:ring-toodles-primary"
                       />
                     </div>
                     <div className="col-span-2">
-                      <Label htmlFor="address">Address</Label>
+                      <Label htmlFor="address" className="text-gray-900 font-medium">Address</Label>
                       <Input
                         id="address"
                         value={editForm.address || ''}
                         onChange={(e) => setEditForm({...editForm, address: e.target.value})}
+                        className="mt-1 border-gray-300 focus:border-toodles-primary focus:ring-toodles-primary"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                      <Label htmlFor="dateOfBirth" className="text-gray-900 font-medium">Date of Birth</Label>
                       <Input
                         id="dateOfBirth"
                         type="date"
                         value={editForm.dateOfBirth || ''}
                         onChange={(e) => setEditForm({...editForm, dateOfBirth: e.target.value})}
+                        className="mt-1 border-gray-300 focus:border-toodles-primary focus:ring-toodles-primary"
                       />
                     </div>
                   </div>
                 </TabsContent>
                 
-                <TabsContent value="role" className="space-y-4 mt-4">
+                <TabsContent value="role" className="space-y-4 mt-4 bg-white p-4 rounded-lg border">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="userRole">Role</Label>
+                      <Label htmlFor="userRole" className="text-gray-900 font-medium">Role</Label>
                       <Select
                         value={editForm.role || 'customer'}
                         onValueChange={(role) => setEditForm({...editForm, role: role as any})}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="mt-1 border-gray-300 focus:border-toodles-primary focus:ring-toodles-primary">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white border-gray-200">
                           <SelectItem value="customer">Customer</SelectItem>
                           <SelectItem value="staff">Staff</SelectItem>
                           <SelectItem value="manager">Manager</SelectItem>
@@ -568,14 +574,15 @@ export default function AdvancedUserManagement() {
                         id="isActive"
                         checked={editForm.isActive || false}
                         onCheckedChange={(checked) => setEditForm({...editForm, isActive: checked})}
+                        className="data-[state=checked]:bg-toodles-primary"
                       />
-                      <Label htmlFor="isActive">Account Active</Label>
+                      <Label htmlFor="isActive" className="text-gray-900 font-medium">Account Active</Label>
                     </div>
                   </div>
                   
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <h4 className="font-medium mb-2">Role Description</h4>
-                    <div className="text-sm text-gray-600">
+                  <div className="p-4 bg-gray-50 rounded-lg border">
+                    <h4 className="font-medium mb-2 text-gray-900">Role Description</h4>
+                    <div className="text-sm text-gray-700">
                       {editForm.role === 'customer' && 'Basic access to booking and viewing features'}
                       {editForm.role === 'staff' && 'Can manage bookings and view customer information'}
                       {editForm.role === 'manager' && 'Can manage packages, events, and staff operations'}
@@ -584,20 +591,20 @@ export default function AdvancedUserManagement() {
                   </div>
                 </TabsContent>
                 
-                <TabsContent value="permissions" className="space-y-4 mt-4">
+                <TabsContent value="permissions" className="space-y-4 mt-4 bg-white p-4 rounded-lg border">
                   {rolesPermissions && (
                     <div className="space-y-4">
-                      <Alert>
+                      <Alert className="bg-blue-50 border-blue-200 text-blue-800">
                         <Settings className="h-4 w-4" />
-                        <AlertDescription>
+                        <AlertDescription className="alert-description text-blue-700">
                           Custom permissions will override default role permissions. 
                           Admins automatically have all permissions.
                         </AlertDescription>
                       </Alert>
                       
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="permissions-grid grid grid-cols-2 gap-4">
                         {Object.entries(rolesPermissions.permissions).map(([key, label]) => (
-                          <div key={key} className="flex items-center space-x-2">
+                          <div key={key} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50">
                             <Checkbox
                               id={key}
                               checked={selectedUser.permissions?.includes(key) || false}
@@ -609,8 +616,9 @@ export default function AdvancedUserManagement() {
                                 )
                               }
                               disabled={selectedUser.role === 'admin'}
+                              className="border-2 border-gray-300 data-[state=checked]:bg-toodles-primary data-[state=checked]:border-toodles-primary"
                             />
-                            <Label htmlFor={key} className="text-sm">
+                            <Label htmlFor={key} className="text-sm font-medium text-gray-900 cursor-pointer">
                               {label.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                             </Label>
                           </div>

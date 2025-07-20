@@ -43,6 +43,8 @@ function Router() {
           <Route path="/admin/bookings" component={AdminBookings} />
           <Route path="/admin/analytics" component={AdminAnalytics} />
           <Route path="/admin/users" component={lazy(() => import("./pages/admin/users"))} />
+          <Route path="/admin/packages" component={() => <div className="min-h-screen bg-toodles-background flex items-center justify-center"><div className="text-center"><h1 className="text-3xl font-bold text-toodles-text font-display mb-4">Package Management</h1><p className="text-toodles-text/70">Coming soon! Use the main packages page to view current packages.</p></div></div>} />
+          <Route path="/admin/enquiries" component={() => <div className="min-h-screen bg-toodles-background flex items-center justify-center"><div className="text-center"><h1 className="text-3xl font-bold text-toodles-text font-display mb-4">Enquiry Management</h1><p className="text-toodles-text/70">Coming soon! Contact forms are being collected.</p></div></div>} />
         </>
       )}
       <Route component={NotFound} />

@@ -112,7 +112,7 @@ export default function AdminDashboard() {
   const quickActions = [
     { name: "View Bookings", href: "/admin/bookings", icon: Calendar },
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-    { name: "Manage Packages", href: "/admin/packages", icon: Settings },
+    { name: "User Management", href: "/admin/users", icon: Users },
     { name: "Enquiries", href: "/admin/enquiries", icon: MessageCircle }
   ];
 

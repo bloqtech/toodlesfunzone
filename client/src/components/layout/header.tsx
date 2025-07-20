@@ -65,6 +65,33 @@ export function Header() {
                     </Button>
                   </Link>
                 )}
+                {/* Admin Access Button for non-admin users */}
+                {!user?.isAdmin && (
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    className="hidden md:inline-flex bg-toodles-accent hover:bg-toodles-accent/90 text-toodles-text font-medium"
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/make-me-admin', {
+                          method: 'POST',
+                          credentials: 'include'
+                        });
+                        if (response.ok) {
+                          alert('Admin access granted! Refreshing page...');
+                          window.location.reload();
+                        } else {
+                          alert('Failed to grant admin access. Please ensure you are logged in.');
+                        }
+                      } catch (error) {
+                        alert('Error granting admin access');
+                      }
+                    }}
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    Get Admin Access
+                  </Button>
+                )}
                 <Button 
                   variant="outline" 
                   className="hidden md:inline-flex"
@@ -121,6 +148,32 @@ export function Header() {
                               Admin Panel
                             </Button>
                           </Link>
+                        )}
+                        {/* Mobile Admin Access Button */}
+                        {!user?.isAdmin && (
+                          <Button 
+                            variant="secondary"
+                            className="w-full mb-2 bg-toodles-accent hover:bg-toodles-accent/90 text-toodles-text"
+                            onClick={async () => {
+                              try {
+                                const response = await fetch('/api/make-me-admin', {
+                                  method: 'POST',
+                                  credentials: 'include'
+                                });
+                                if (response.ok) {
+                                  alert('Admin access granted! Refreshing page...');
+                                  window.location.reload();
+                                } else {
+                                  alert('Failed to grant admin access. Please ensure you are logged in.');
+                                }
+                              } catch (error) {
+                                alert('Error granting admin access');
+                              }
+                            }}
+                          >
+                            <Shield className="h-4 w-4 mr-2" />
+                            Get Admin Access
+                          </Button>
                         )}
                         <Button 
                           variant="outline" 

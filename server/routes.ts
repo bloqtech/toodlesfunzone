@@ -616,6 +616,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Temporary endpoint for development - make user admin
+  app.post('/api/make-me-admin', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      const updatedUser = await storage.updateUserAdminStatus(userId, true);
+      res.json({ message: "Admin access granted!", user: updatedUser });
+    } catch (error) {
+      console.error("Error granting admin access:", error);
+      res.status(500).json({ message: "Failed to grant admin access" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

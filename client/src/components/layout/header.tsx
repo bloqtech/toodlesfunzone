@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
-import { Menu, User, LogOut } from "lucide-react";
+import { Menu, User, LogOut, Shield } from "lucide-react";
 
 export function Header() {
   const [location] = useLocation();
@@ -59,8 +59,9 @@ export function Header() {
                 </div>
                 {user?.isAdmin && (
                   <Link href="/admin/dashboard">
-                    <Button variant="outline" className="hidden md:inline-flex">
-                      Admin
+                    <Button variant="default" className="hidden md:inline-flex bg-toodles-primary hover:bg-toodles-primary/90 text-white">
+                      <Shield className="h-4 w-4 mr-2" />
+                      Admin Panel
                     </Button>
                   </Link>
                 )}
@@ -115,7 +116,8 @@ export function Header() {
                         </div>
                         {user?.isAdmin && (
                           <Link href="/admin/dashboard">
-                            <Button variant="outline" className="w-full mb-2">
+                            <Button variant="default" className="w-full mb-2 bg-toodles-primary hover:bg-toodles-primary/90">
+                              <Shield className="h-4 w-4 mr-2" />
                               Admin Panel
                             </Button>
                           </Link>

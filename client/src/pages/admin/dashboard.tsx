@@ -171,6 +171,39 @@ export default function AdminDashboard() {
           })}
         </div>
 
+        {/* Admin Navigation */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-toodles-text font-display">Admin Panel</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link href="/admin/bookings">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-primary/10 border-toodles-primary/30">
+                  <Calendar className="h-6 w-6 text-toodles-primary" />
+                  <span className="font-medium">Bookings</span>
+                </Button>
+              </Link>
+              <Link href="/admin/analytics">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-secondary/10 border-toodles-secondary/30">
+                  <BarChart3 className="h-6 w-6 text-toodles-secondary" />
+                  <span className="font-medium">Analytics</span>
+                </Button>
+              </Link>
+              <Link href="/admin/users">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-accent/10 border-toodles-accent/30">
+                  <Users className="h-6 w-6 text-toodles-accent" />
+                  <span className="font-medium">User Management</span>
+                </Button>
+              </Link>
+              <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-success/10 border-toodles-success/30">
+                <Settings className="h-6 w-6 text-toodles-success" />
+                <span className="font-medium">Settings</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Quick Actions */}
         <Card className="mb-8">
           <CardHeader>

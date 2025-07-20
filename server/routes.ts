@@ -420,6 +420,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: User Management Routes
+  
+  // Get all users
+  app.get('/api/admin/users', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Update user admin status
+  app.patch('/api/admin/users/:userId/admin-status', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { isAdmin } = req.body;
+      
+      if (typeof isAdmin !== 'boolean') {
+        return res.status(400).json({ message: "isAdmin must be a boolean" });
+      }
+      
+      const updatedUser = await storage.updateUserAdminStatus(userId, isAdmin);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user admin status:", error);
+      res.status(500).json({ message: "Failed to update user admin status" });
+    }
+  });
+
+  // Delete user (with safety checks)
+  app.delete('/api/admin/users/:userId', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const currentUserId = (req.user as any)?.claims?.sub;
+      
+      // Prevent self-deletion
+      if (userId === currentUserId) {
+        return res.status(400).json({ message: "Cannot delete your own account" });
+      }
+      
+      await storage.deleteUser(userId);
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // Get user details by ID
+  app.get('/api/admin/users/:userId', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      res.status(500).json({ message: "Failed to fetch user details" });
+    }
+  });
+
   app.patch('/api/admin/packages/:id', isAuthenticated, adminAuth, async (req, res) => {
     try {
       const package_ = await storage.updatePackage(parseInt(req.params.id), req.body);

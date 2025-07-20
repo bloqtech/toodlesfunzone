@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,9 @@ export default function UsersManagement() {
   // Fetch users
   const { data: users = [], isLoading, error } = useQuery<User[]>({
     queryKey: ['/api/admin/users'],
-    retry: 1
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false
   });
 
   // Update user admin status mutation
@@ -111,9 +113,11 @@ export default function UsersManagement() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-        <div className="h-64 bg-gray-200 rounded"></div>
+      <div className="min-h-screen bg-toodles-background p-6">
+        <div className="space-y-6 animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
       </div>
     );
   }
@@ -129,13 +133,14 @@ export default function UsersManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-toodles-text font-display">User Management</h1>
-          <p className="text-toodles-text/70 font-accent">Manage user accounts and permissions</p>
+    <div className="min-h-screen bg-toodles-background p-6">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-toodles-text font-display">User Management</h1>
+            <p className="text-toodles-text/70 font-accent">Manage user accounts and permissions</p>
+          </div>
         </div>
-      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

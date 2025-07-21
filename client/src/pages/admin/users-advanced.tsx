@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -242,8 +245,32 @@ export default function AdvancedUserManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-toodles-background p-6">
-      <div className="space-y-6">
+    <div className="min-h-screen bg-toodles-background festive-background">
+      {/* Festive Background Elements */}
+      <div className="balloon balloon-1"></div>
+      <div className="balloon balloon-2"></div>
+      <div className="balloon balloon-3"></div>
+      
+      <div className="doodle doodle-star">⭐</div>
+      <div className="doodle doodle-heart">💖</div>
+      <div className="doodle doodle-smiley">😄</div>
+      
+      <div className="spray-paint spray-1"></div>
+      <div className="spray-paint spray-2"></div>
+
+      {/* Confetti */}
+      {Array.from({length: 8}, (_, i) => (
+        <div key={i} className="confetti" style={{
+          left: `${Math.random() * 100}%`,
+          animationDelay: `${Math.random() * 3}s`,
+          animationDuration: `${3 + Math.random() * 2}s`
+        }}></div>
+      ))}
+
+      <Header />
+      
+      <div className="p-6 relative z-10">
+        <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -643,7 +670,11 @@ export default function AdvancedUserManagement() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
+
+      <Footer />
+      <FloatingWhatsApp />
     </div>
   );
 }

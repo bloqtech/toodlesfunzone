@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -119,23 +122,47 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-toodles-background">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+    <div className="min-h-screen bg-toodles-background festive-background">
+      {/* Festive Background Elements */}
+      <div className="balloon balloon-1"></div>
+      <div className="balloon balloon-2"></div>
+      <div className="balloon balloon-3"></div>
+      
+      <div className="doodle doodle-star">⭐</div>
+      <div className="doodle doodle-heart">💖</div>
+      <div className="doodle doodle-smiley">😄</div>
+      
+      <div className="spray-paint spray-1"></div>
+      <div className="spray-paint spray-2"></div>
+
+      {/* Confetti */}
+      {Array.from({length: 8}, (_, i) => (
+        <div key={i} className="confetti" style={{
+          left: `${Math.random() * 100}%`,
+          animationDelay: `${Math.random() * 3}s`,
+          animationDuration: `${3 + Math.random() * 2}s`
+        }}></div>
+      ))}
+
+      <Header />
+
+      {/* Admin Header */}
+      <div className="bg-gradient-to-r from-toodles-primary to-toodles-secondary shadow-sm border-b border-gray-200 z-10 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
-              <h1 className="text-2xl font-display text-toodles-text">Admin Dashboard</h1>
-              <p className="text-gray-600 font-accent">Welcome back, {user?.firstName || 'Admin'}!</p>
+              <h1 className="text-2xl font-display text-white animate-bounce-gentle">Admin Dashboard 🎪</h1>
+              <p className="text-white/80 font-accent">Welcome back, {user?.firstName || 'Admin'}! ✨</p>
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/">
-                <Button variant="outline">
+                <Button variant="outline" className="border-white text-white hover:bg-white hover:text-toodles-primary">
                   View Website
                 </Button>
               </Link>
               <Button 
                 variant="outline" 
+                className="border-white text-white hover:bg-white hover:text-toodles-primary"
                 onClick={() => window.location.href = '/api/logout'}
               >
                 Logout
@@ -143,7 +170,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -174,34 +201,34 @@ export default function AdminDashboard() {
         </div>
 
         {/* Admin Navigation */}
-        <Card className="mb-8">
+        <Card className="mb-8 border-2 border-toodles-primary/20 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-toodles-text font-display">Admin Panel</CardTitle>
+            <CardTitle className="text-toodles-text font-display animate-rainbow">Admin Panel 🎯</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link href="/admin/bookings">
-                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-primary/10 border-toodles-primary/30">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-primary/10 border-toodles-primary/30 hover:animate-wiggle transform hover:scale-105 transition-all">
                   <Calendar className="h-6 w-6 text-toodles-primary" />
-                  <span className="font-medium">Bookings</span>
+                  <span className="font-medium">Bookings 📅</span>
                 </Button>
               </Link>
               <Link href="/admin/analytics">
-                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-secondary/10 border-toodles-secondary/30">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-secondary/10 border-toodles-secondary/30 hover:animate-bounce-gentle transform hover:scale-105 transition-all">
                   <BarChart3 className="h-6 w-6 text-toodles-secondary" />
-                  <span className="font-medium">Analytics</span>
+                  <span className="font-medium">Analytics 📊</span>
                 </Button>
               </Link>
               <Link href="/admin/users">
-                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-accent/10 border-toodles-accent/30">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-accent/10 border-toodles-accent/30 hover:animate-float transform hover:scale-105 transition-all">
                   <Users className="h-6 w-6 text-toodles-accent" />
-                  <span className="font-medium">User Management</span>
+                  <span className="font-medium">User Management 👥</span>
                 </Button>
               </Link>
               <Link href="/admin/packages">
-                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-purple/10 border-toodles-purple/30">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-purple/10 border-toodles-purple/30 hover:animate-pulse-glow transform hover:scale-105 transition-all">
                   <Package className="h-6 w-6 text-toodles-purple" />
-                  <span className="font-medium">Package Management</span>
+                  <span className="font-medium">Package Management 📦</span>
                 </Button>
               </Link>
             </div>
@@ -313,6 +340,9 @@ export default function AdminDashboard() {
           </Card>
         </div>
       </main>
+
+      <Footer />
+      <FloatingWhatsApp />
     </div>
   );
 }

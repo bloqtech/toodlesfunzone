@@ -329,6 +329,316 @@
   background: var(--toodles-secondary);
 }
 
+/* Festive Background Elements */
+.festive-background {
+  position: relative;
+  overflow: hidden;
+}
+
+.festive-background::before,
+.festive-background::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Floating Balloons */
+.balloon {
+  position: absolute;
+  width: 40px;
+  height: 60px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: float 6s ease-in-out infinite;
+  z-index: 2;
+}
+
+.balloon::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 50px;
+  background: #8B4513;
+}
+
+.balloon-1 {
+  background: linear-gradient(45deg, #FF69B4, #FF1493);
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.balloon-2 {
+  background: linear-gradient(45deg, #00BFFF, #1E90FF);
+  top: 30%;
+  right: 15%;
+  animation-delay: -2s;
+}
+
+.balloon-3 {
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  top: 15%;
+  left: 80%;
+  animation-delay: -4s;
+}
+
+.balloon-4 {
+  background: linear-gradient(45deg, #32CD32, #00FF32);
+  top: 40%;
+  left: 5%;
+  animation-delay: -1s;
+}
+
+.balloon-5 {
+  background: linear-gradient(45deg, #9370DB, #8A2BE2);
+  top: 25%;
+  right: 5%;
+  animation-delay: -3s;
+}
+
+/* Confetti Animation */
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #FFD700;
+  animation: confetti-fall 3s linear infinite;
+  z-index: 2;
+}
+
+.confetti:nth-child(odd) {
+  background: #FF69B4;
+  border-radius: 50%;
+}
+
+.confetti:nth-child(even) {
+  background: #00BFFF;
+  transform: rotate(45deg);
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Graffiti-style Text Decorations */
+.graffiti-text {
+  position: relative;
+  display: inline-block;
+}
+
+.graffiti-text::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: rgba(255, 105, 180, 0.3);
+  transform: translate(2px, 2px);
+  z-index: -1;
+}
+
+.graffiti-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: rgba(0, 191, 255, 0.3);
+  transform: translate(-2px, -2px);
+  z-index: -1;
+}
+
+/* Doodle Decorations */
+.doodle {
+  position: absolute;
+  font-size: 2rem;
+  animation: doodle-bounce 4s ease-in-out infinite;
+  z-index: 2;
+  opacity: 0.7;
+}
+
+.doodle-star {
+  top: 20%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.doodle-heart {
+  top: 60%;
+  right: 20%;
+  animation-delay: -2s;
+}
+
+.doodle-smiley {
+  bottom: 30%;
+  left: 15%;
+  animation-delay: -1s;
+}
+
+.doodle-rainbow {
+  top: 40%;
+  right: 40%;
+  animation-delay: -3s;
+}
+
+@keyframes doodle-bounce {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(-3deg);
+  }
+  75% {
+    transform: translateY(-15px) rotate(3deg);
+  }
+}
+
+/* Party Streamers */
+.streamer {
+  position: absolute;
+  width: 100%;
+  height: 20px;
+  background: repeating-linear-gradient(
+    45deg,
+    #FF69B4,
+    #FF69B4 20px,
+    #00BFFF 20px,
+    #00BFFF 40px,
+    #FFD700 40px,
+    #FFD700 60px,
+    #32CD32 60px,
+    #32CD32 80px
+  );
+  animation: streamer-wave 3s ease-in-out infinite;
+  z-index: 1;
+  opacity: 0.8;
+}
+
+.streamer-top {
+  top: 0;
+  transform: rotate(-5deg);
+}
+
+.streamer-bottom {
+  bottom: 0;
+  transform: rotate(5deg);
+}
+
+@keyframes streamer-wave {
+  0%, 100% {
+    transform: rotate(-5deg) scaleY(1);
+  }
+  50% {
+    transform: rotate(5deg) scaleY(1.1);
+  }
+}
+
+/* Spray Paint Effects */
+.spray-paint {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.1;
+  animation: spray-fade 8s ease-in-out infinite;
+  z-index: 1;
+}
+
+.spray-1 {
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, #FF69B4 0%, transparent 70%);
+  top: 10%;
+  left: 5%;
+  animation-delay: 0s;
+}
+
+.spray-2 {
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, #00BFFF 0%, transparent 70%);
+  bottom: 20%;
+  right: 10%;
+  animation-delay: -4s;
+}
+
+.spray-3 {
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, #FFD700 0%, transparent 70%);
+  top: 50%;
+  left: 70%;
+  animation-delay: -2s;
+}
+
+@keyframes spray-fade {
+  0%, 100% {
+    opacity: 0.05;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.15;
+    transform: scale(1.2);
+  }
+}
+
+/* Bubble Effects */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  animation: bubble-float 8s linear infinite;
+  z-index: 2;
+}
+
+.bubble:nth-child(1) {
+  width: 30px;
+  height: 30px;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.bubble:nth-child(2) {
+  width: 20px;
+  height: 20px;
+  left: 20%;
+  animation-delay: -2s;
+}
+
+.bubble:nth-child(3) {
+  width: 25px;
+  height: 25px;
+  left: 70%;
+  animation-delay: -4s;
+}
+
+@keyframes bubble-float {
+  0% {
+    transform: translateY(100vh) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) scale(1);
+    opacity: 0;
+  }
+}
+
 /* Dialog and Modal Visibility Fixes */
 [data-state="open"][data-radix-dialog-overlay] {
   background-color: rgba(0, 0, 0, 0.7) !important;

@@ -84,20 +84,53 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-toodles-background">
+    <div className="min-h-screen bg-toodles-background festive-background">
+      {/* Festive Background Elements */}
+      <div className="balloon balloon-1"></div>
+      <div className="balloon balloon-2"></div>
+      <div className="balloon balloon-3"></div>
+      <div className="balloon balloon-4"></div>
+      <div className="balloon balloon-5"></div>
+      
+      <div className="streamer streamer-top"></div>
+      <div className="streamer streamer-bottom"></div>
+      
+      <div className="spray-paint spray-1"></div>
+      <div className="spray-paint spray-2"></div>
+      <div className="spray-paint spray-3"></div>
+      
+      <div className="doodle doodle-star">⭐</div>
+      <div className="doodle doodle-heart">💖</div>
+      <div className="doodle doodle-smiley">😄</div>
+      <div className="doodle doodle-rainbow">🌈</div>
+
+      {/* Confetti */}
+      {Array.from({length: 20}, (_, i) => (
+        <div key={i} className="confetti" style={{
+          left: `${Math.random() * 100}%`,
+          animationDelay: `${Math.random() * 3}s`,
+          animationDuration: `${3 + Math.random() * 2}s`
+        }}></div>
+      ))}
+
+      {/* Bubbles */}
+      <div className="bubble"></div>
+      <div className="bubble"></div>
+      <div className="bubble"></div>
+
       <Header />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-toodles-primary via-toodles-secondary to-toodles-accent">
+      <section className="relative overflow-hidden bg-gradient-to-br from-toodles-primary via-toodles-secondary to-toodles-accent z-10">
         <div className="absolute inset-0 bg-black bg-opacity-20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="text-center lg:text-left">
-              <h1 className="text-4xl md:text-6xl font-display text-white leading-tight mb-6">
-                Welcome to <span className="text-toodles-accent">Toodles Funzone!</span>
+              <h1 className="text-4xl md:text-6xl font-display text-white leading-tight mb-6 graffiti-text animate-bounce-gentle" data-text="Welcome to Toodles Funzone!">
+                Welcome to <span className="text-toodles-accent animate-wiggle">Toodles Funzone!</span>
               </h1>
-              <p className="text-xl md:text-2xl text-white mb-8 font-accent">
-                Big fun for little feet ✨
+              <p className="text-xl md:text-2xl text-white mb-8 font-accent animate-float">
+                Big fun for little feet ✨🎈🎉🎊
               </p>
               <p className="text-lg text-white mb-8 leading-relaxed">
                 Embark on a magical adventure at Toodles Funzone, where every corner is filled with wonder and joy. Our indoor playground is designed to spark imagination in children aged 2-8 years, combining safety with endless fun!
@@ -105,19 +138,19 @@ export default function Landing() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button 
                   size="lg" 
-                  className="bg-toodles-accent hover:bg-yellow-400 text-toodles-text font-accent font-bold text-lg"
+                  className="bg-toodles-accent hover:bg-yellow-400 text-toodles-text font-accent font-bold text-lg animate-pulse-glow hover:animate-wiggle"
                   onClick={() => setShowBookingModal(true)}
                 >
                   <Calendar className="mr-2 h-5 w-5" />
-                  Book Your Slot
+                  Book Your Slot 🚀
                 </Button>
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-white text-white hover:bg-white hover:text-toodles-text font-accent font-bold text-lg"
+                  className="border-white text-white hover:bg-white hover:text-toodles-text font-accent font-bold text-lg hover:animate-bounce-gentle"
                 >
                   <PlayCircle className="mr-2 h-5 w-5" />
-                  Call Now
+                  Call Now 📞
                 </Button>
               </div>
             </div>

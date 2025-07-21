@@ -15,7 +15,8 @@ import {
   Clock,
   Settings,
   BarChart3,
-  MessageCircle
+  MessageCircle,
+  Package
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -113,6 +114,7 @@ export default function AdminDashboard() {
     { name: "View Bookings", href: "/admin/bookings", icon: Calendar },
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "User Management", href: "/admin/users", icon: Users },
+    { name: "Package Management", href: "/admin/packages", icon: Package },
     { name: "Enquiries", href: "/admin/enquiries", icon: MessageCircle }
   ];
 
@@ -196,10 +198,12 @@ export default function AdminDashboard() {
                   <span className="font-medium">User Management</span>
                 </Button>
               </Link>
-              <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-success/10 border-toodles-success/30">
-                <Settings className="h-6 w-6 text-toodles-success" />
-                <span className="font-medium">Settings</span>
-              </Button>
+              <Link href="/admin/packages">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2 hover:bg-toodles-purple/10 border-toodles-purple/30">
+                  <Package className="h-6 w-6 text-toodles-purple" />
+                  <span className="font-medium">Package Management</span>
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
@@ -210,7 +214,7 @@ export default function AdminDashboard() {
             <CardTitle className="text-xl font-display text-toodles-text">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               {quickActions.map((action, index) => {
                 const IconComponent = action.icon;
                 return (

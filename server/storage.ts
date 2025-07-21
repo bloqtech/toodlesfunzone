@@ -46,6 +46,11 @@ export interface IStorage {
   deleteUser(id: string): Promise<void>;
   getUsersByRole(role: string): Promise<User[]>;
   hasPermission(userId: string, permission: string): Promise<boolean>;
+
+  // Package management operations
+  createPackage(packageData: Omit<Package, 'id' | 'createdAt' | 'updatedAt'>): Promise<Package>;
+  updatePackage(id: number, packageData: Partial<Package>): Promise<Package>;
+  deletePackage(id: number): Promise<void>;
   
   // Package operations
   getPackages(): Promise<Package[]>;
@@ -207,6 +212,28 @@ export class DatabaseStorage implements IStorage {
     return user.permissions?.includes(permission) || false;
   }
 
+  // Package management operations
+  async createPackage(packageData: Omit<Package, 'id' | 'createdAt' | 'updatedAt'>): Promise<Package> {
+    const [newPackage] = await db
+      .insert(packages)
+      .values(packageData)
+      .returning();
+    return newPackage;
+  }
+
+  async updatePackage(id: number, packageData: Partial<Package>): Promise<Package> {
+    const [updatedPackage] = await db
+      .update(packages)
+      .set(packageData)
+      .where(eq(packages.id, id))
+      .returning();
+    return updatedPackage;
+  }
+
+  async deletePackage(id: number): Promise<void> {
+    await db.delete(packages).where(eq(packages.id, id));
+  }
+
   // Package operations
   async getPackages(): Promise<Package[]> {
     return await db.select().from(packages).orderBy(asc(packages.type));
@@ -215,20 +242,6 @@ export class DatabaseStorage implements IStorage {
   async getPackageById(id: number): Promise<Package | undefined> {
     const [packageData] = await db.select().from(packages).where(eq(packages.id, id));
     return packageData;
-  }
-
-  async createPackage(packageData: InsertPackage): Promise<Package> {
-    const [newPackage] = await db.insert(packages).values(packageData as any).returning();
-    return newPackage;
-  }
-
-  async updatePackage(id: number, packageData: Partial<InsertPackage>): Promise<Package> {
-    const [updatedPackage] = await db
-      .update(packages)
-      .set({ ...packageData, updatedAt: new Date() } as any)
-      .where(eq(packages.id, id))
-      .returning();
-    return updatedPackage;
   }
 
   // Time slot operations

@@ -569,6 +569,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Package management routes
+  app.post('/api/admin/packages', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const packageData = req.body;
+      const newPackage = await storage.createPackage(packageData);
+      res.status(201).json(newPackage);
+    } catch (error) {
+      console.error("Error creating package:", error);
+      res.status(500).json({ message: "Failed to create package" });
+    }
+  });
+
+  app.patch('/api/admin/packages/:id', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const packageData = req.body;
+      const updatedPackage = await storage.updatePackage(parseInt(id), packageData);
+      res.json(updatedPackage);
+    } catch (error) {
+      console.error("Error updating package:", error);
+      res.status(500).json({ message: "Failed to update package" });
+    }
+  });
+
+  app.delete('/api/admin/packages/:id', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deletePackage(parseInt(id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting package:", error);
+      res.status(500).json({ message: "Failed to delete package" });
+    }
+  });
+
   app.patch('/api/admin/packages/:id', isAuthenticated, adminAuth, async (req, res) => {
     try {
       const package_ = await storage.updatePackage(parseInt(req.params.id), req.body);

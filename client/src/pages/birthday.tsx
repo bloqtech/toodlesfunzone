@@ -157,7 +157,31 @@ export default function Birthday() {
   ];
 
   return (
-    <div className="min-h-screen bg-toodles-background">
+    <div className="min-h-screen bg-toodles-background festive-background">
+      {/* Festive Background Elements */}
+      <div className="balloon balloon-1"></div>
+      <div className="balloon balloon-2"></div>
+      <div className="balloon balloon-3"></div>
+      <div className="balloon balloon-4"></div>
+      <div className="balloon balloon-5"></div>
+      
+      <div className="streamer streamer-top"></div>
+      <div className="streamer streamer-bottom"></div>
+      
+      <div className="doodle doodle-star">⭐</div>
+      <div className="doodle doodle-heart">💖</div>
+      <div className="doodle doodle-smiley">😄</div>
+      <div className="doodle doodle-rainbow">🌈</div>
+
+      {/* Extra confetti for birthday page */}
+      {Array.from({length: 15}, (_, i) => (
+        <div key={i} className="confetti" style={{
+          left: `${Math.random() * 100}%`,
+          animationDelay: `${Math.random() * 3}s`,
+          animationDuration: `${3 + Math.random() * 2}s`
+        }}></div>
+      ))}
+      
       <Header />
       
       {/* Hero Section */}

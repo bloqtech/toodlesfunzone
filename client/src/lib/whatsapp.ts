@@ -11,7 +11,7 @@ export const sendWhatsAppMessage = (phoneNumber: string, message: string) => {
 };
 
 export const getDefaultWhatsAppNumber = () => {
-  return "+919876543210"; // Default Toodles WhatsApp number
+  return "+919901218980"; // Default Toodles WhatsApp number
 };
 
 export const getBookingWhatsAppMessage = (bookingDetails?: any) => {

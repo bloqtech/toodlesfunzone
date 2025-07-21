@@ -245,31 +245,10 @@ export default function AdvancedUserManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-toodles-background festive-background">
-      {/* Festive Background Elements */}
-      <div className="balloon balloon-1"></div>
-      <div className="balloon balloon-2"></div>
-      <div className="balloon balloon-3"></div>
-      
-      <div className="doodle doodle-star">⭐</div>
-      <div className="doodle doodle-heart">💖</div>
-      <div className="doodle doodle-smiley">😄</div>
-      
-      <div className="spray-paint spray-1"></div>
-      <div className="spray-paint spray-2"></div>
-
-      {/* Confetti */}
-      {Array.from({length: 8}, (_, i) => (
-        <div key={i} className="confetti" style={{
-          left: `${Math.random() * 100}%`,
-          animationDelay: `${Math.random() * 3}s`,
-          animationDuration: `${3 + Math.random() * 2}s`
-        }}></div>
-      ))}
-
+    <div className="min-h-screen bg-toodles-background">
       <Header />
       
-      <div className="p-6 relative z-10">
+      <div className="p-6">
         <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

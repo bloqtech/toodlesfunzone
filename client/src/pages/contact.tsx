@@ -80,13 +80,13 @@ export default function Contact() {
     {
       icon: MapPin,
       title: "Visit Us",
-      details: ["123 Fun Street", "Playground City, PC 12345", "Near Central Mall"],
+      details: ["Opposite Vishnu Leela Veg", "Kodathi, Off Sarjapur Road", "Bangalore"],
       color: "from-toodles-primary to-pink-400"
     },
     {
       icon: Phone,
       title: "Call Us",
-      details: ["+91 98765 43210", "+91 98765 43211", "WhatsApp: +91 98765 43212"],
+      details: ["+91 99012 18980", "WhatsApp: +91 99012 18980", "Same number for calls & WhatsApp"],
       color: "from-toodles-secondary to-teal-400"
     },
     {

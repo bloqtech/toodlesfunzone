@@ -63,11 +63,11 @@ export function Footer() {
             <div className="space-y-3">
               <div className="flex items-center">
                 <div className="text-toodles-primary mr-3">📍</div>
-                <span className="text-gray-300">123 Fun Street, Playground City, PC 12345</span>
+                <span className="text-gray-300">Opposite Vishnu Leela Veg, Kodathi, Off Sarjapur Road, Bangalore</span>
               </div>
               <div className="flex items-center">
                 <div className="text-toodles-primary mr-3">📞</div>
-                <span className="text-gray-300">+91 98765 43210</span>
+                <span className="text-gray-300">+91 99012 18980</span>
               </div>
               <div className="flex items-center">
                 <div className="text-toodles-primary mr-3">✉️</div>

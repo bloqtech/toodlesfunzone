@@ -1,6 +1,5 @@
 import { Hero } from "@/components/sections/hero";
 import { Features } from "@/components/sections/features";
-import { Testimonials } from "@/components/sections/testimonials";
 import { CTA } from "@/components/sections/cta";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -30,11 +29,6 @@ export default function LandingSEO() {
         {/* Features Section with Analytics */}
         <section onMouseEnter={() => handleFeatureView('features_section')}>
           <Features />
-        </section>
-        
-        {/* Testimonials Section with Analytics */}
-        <section onMouseEnter={() => handleFeatureView('testimonials_section')}>
-          <Testimonials />
         </section>
         
         {/* Call to Action with Analytics */}

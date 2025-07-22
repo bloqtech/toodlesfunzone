@@ -10,9 +10,6 @@ import { useState } from "react";
 import { 
   Camera, 
   Play, 
-  Users, 
-  Star,
-  Heart,
   Smile,
   Calendar,
   ZoomIn
@@ -30,9 +27,9 @@ export default function Gallery() {
   const categories = [
     { id: 'all', name: 'All Photos', icon: Camera },
     { id: 'play', name: 'Play Activities', icon: Play },
-    { id: 'birthday', name: 'Birthday Parties', icon: Heart },
+    { id: 'birthday', name: 'Birthday Parties', icon: Calendar },
     { id: 'kids', name: 'Happy Kids', icon: Smile },
-    { id: 'facilities', name: 'Facilities', icon: Star }
+    { id: 'facilities', name: 'Facilities', icon: Camera }
   ];
 
   const galleryImages = [
@@ -231,38 +228,6 @@ export default function Gallery() {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Happy Moments Section */}
-      <section className="py-20 bg-gradient-to-br from-toodles-background to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display text-toodles-text mb-4">
-              Happy <span className="text-toodles-primary">Moments</span>
-            </h2>
-            <p className="text-xl text-gray-600 font-accent">Creating memories that last a lifetime</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="p-8 text-center bg-gradient-to-br from-toodles-primary to-pink-400 text-white">
-              <Users className="h-12 w-12 mx-auto mb-4" />
-              <h3 className="text-2xl font-display mb-2">500+</h3>
-              <p className="font-accent">Happy Families</p>
-            </Card>
-            
-            <Card className="p-8 text-center bg-gradient-to-br from-toodles-secondary to-teal-400 text-white">
-              <Heart className="h-12 w-12 mx-auto mb-4" />
-              <h3 className="text-2xl font-display mb-2">1000+</h3>
-              <p className="font-accent">Smiles Created</p>
-            </Card>
-            
-            <Card className="p-8 text-center bg-gradient-to-br from-toodles-accent to-orange-400 text-white">
-              <Star className="h-12 w-12 mx-auto mb-4" />
-              <h3 className="text-2xl font-display mb-2">50+</h3>
-              <p className="font-accent">Birthday Parties</p>
-            </Card>
           </div>
         </div>
       </section>

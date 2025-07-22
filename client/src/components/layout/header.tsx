@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
 import { Menu, User, LogOut, Shield } from "lucide-react";
+import toodlesLogo from "@assets/Logo Toodles - Edited (1)_1753203790787.png";
 
 export function Header() {
   const [location] = useLocation();
@@ -27,12 +28,11 @@ export function Header() {
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
             <Link href="/">
-              <div className="cursor-pointer">
-                <h1 className="text-2xl font-display font-bold text-toodles-primary">
-                  Toodles
-                </h1>
-                <p className="text-xs font-accent text-toodles-secondary -mt-1">Funzone</p>
-              </div>
+              <img 
+                src={toodlesLogo} 
+                alt="Toodles Funzone Logo" 
+                className="h-12 w-auto cursor-pointer"
+              />
             </Link>
           </div>
           

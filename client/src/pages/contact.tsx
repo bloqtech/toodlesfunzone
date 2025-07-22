@@ -89,12 +89,7 @@ export default function Contact() {
       details: ["+91 99012 18980", "WhatsApp: +91 99012 18980", "Same number for calls & WhatsApp"],
       color: "from-toodles-secondary to-teal-400"
     },
-    {
-      icon: Mail,
-      title: "Email Us",
-      details: ["hello@toodlesfunzone.com", "bookings@toodlesfunzone.com", "parties@toodlesfunzone.com"],
-      color: "from-toodles-accent to-orange-400"
-    },
+
     {
       icon: Clock,
       title: "Operating Hours",
@@ -199,7 +194,7 @@ export default function Contact() {
             <p className="text-xl text-gray-600 font-accent">Multiple ways to reach us</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {contactInfo.map((info, index) => {
               const IconComponent = info.icon;
               return (

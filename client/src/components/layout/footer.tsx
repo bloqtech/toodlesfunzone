@@ -69,10 +69,7 @@ export function Footer() {
                 <div className="text-toodles-primary mr-3">📞</div>
                 <span className="text-gray-300">+91 99012 18980</span>
               </div>
-              <div className="flex items-center">
-                <div className="text-toodles-primary mr-3">✉️</div>
-                <span className="text-gray-300">hello@toodlesfunzone.com</span>
-              </div>
+
               <div className="flex items-center">
                 <div className="text-toodles-primary mr-3">🕒</div>
                 <span className="text-gray-300">10 AM - 8 PM Daily</span>

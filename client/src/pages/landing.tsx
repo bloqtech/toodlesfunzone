@@ -33,56 +33,9 @@ export default function Landing() {
     queryKey: ["/api/reviews"],
   });
 
-  const activities = [
-    {
-      title: "Soft Play Zone",
-      description: "Safe foam blocks, tunnels, and climbing structures for toddlers",
-      image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200",
-      gradient: "from-toodles-primary to-pink-400"
-    },
-    {
-      title: "Adventure Zone",
-      description: "Slides, climbing walls, and obstacle courses for active kids",
-      image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200",
-      gradient: "from-toodles-secondary to-blue-400"
-    },
-    {
-      title: "Ball Pit Paradise",
-      description: "Thousands of colorful balls for endless diving fun",
-      image: "https://images.unsplash.com/photo-1570554886111-e80fcca6a029?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200",
-      gradient: "from-toodles-accent to-orange-400"
-    },
-    {
-      title: "Bouncy Castle",
-      description: "Safe trampolines and bounce houses for jumping joy",
-      image: "https://pixabay.com/get/gb1920997e34194c0a6df14b76cedbb086800e74192608c7fd1daceead1ae4d0f878e01b8e77d5c945f2d265b58138617bdc5a2b48ba2c3fd0f50dbafe43661d1_1280.jpg",
-      gradient: "from-toodles-success to-green-400"
-    },
-    {
-      title: "Sensory Play",
-      description: "Textures, sounds, and interactive elements for development",
-      image: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200",
-      gradient: "from-purple-400 to-pink-500"
-    },
-    {
-      title: "Creative Corner",
-      description: "Arts, crafts, and imaginative play activities",
-      image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200",
-      gradient: "from-indigo-400 to-purple-500"
-    },
-    {
-      title: "Mini Rides",
-      description: "Safe ride-on toys and mini train adventures",
-      image: "https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200",
-      gradient: "from-teal-400 to-cyan-500"
-    },
-    {
-      title: "Toddler Zone",
-      description: "Special area designed for our youngest visitors (2-4 years)",
-      image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200",
-      gradient: "from-red-400 to-pink-500"
-    }
-  ];
+  const { data: activities = [] } = useQuery({
+    queryKey: ["/api/activities"],
+  });
 
   return (
     <div className="min-h-screen bg-toodles-background festive-background">
@@ -179,8 +132,8 @@ export default function Landing() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {activities.map((activity, index) => (
-              <Card key={index} className={`bg-gradient-to-br ${activity.gradient} text-white transform hover:scale-105 transition-all shadow-lg hover:shadow-xl rounded-3xl overflow-hidden`}>
+            {activities?.map((activity: any, index: number) => (
+              <Card key={activity.id || index} className={`bg-gradient-to-br ${activity.gradient} text-white transform hover:scale-105 transition-all shadow-lg hover:shadow-xl rounded-3xl overflow-hidden`}>
                 <CardContent className="p-6">
                   <img 
                     src={activity.image} 

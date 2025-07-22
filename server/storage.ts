@@ -40,11 +40,13 @@ import { eq, and, gte, lte, desc, asc, sql, count } from "drizzle-orm";
 export interface IStorage {
   // User operations (IMPORTANT: mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
+  getUserById(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserAdminStatus(id: string, isAdmin: boolean): Promise<User>;
   updateUserRole(id: string, role: string): Promise<User>;
   updateUserPermissions(id: string, permissions: string[]): Promise<User>;
   updateUserProfile(id: string, profile: Partial<User>): Promise<User>;
+  updateUserLastLogin(id: string): Promise<User>;
   getAllUsers(): Promise<User[]>;
   deleteUser(id: string): Promise<void>;
   getUsersByRole(role: string): Promise<User[]>;
@@ -138,6 +140,20 @@ export class DatabaseStorage implements IStorage {
   // User operations (IMPORTANT: mandatory for Replit Auth)
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserById(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async updateUserLastLogin(id: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ lastLoginAt: new Date(), updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
     return user;
   }
 

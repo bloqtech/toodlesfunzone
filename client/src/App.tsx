@@ -27,6 +27,7 @@ import AdminBirthday from "@/pages/admin/birthday-management";
 import AdminCapacity from "@/pages/admin/capacity-management";
 import AdminOperatingHours from "@/pages/admin/operating-hours";
 import AdminAddOns from "@/pages/admin/addons-management";
+import AdminLoginPage from "@/pages/admin-login";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -71,7 +72,8 @@ function Router() {
         </>
       )}
       
-      {/* Public route for operating hours testing */}
+      {/* Public routes */}
+      <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/test/operating-hours" component={AdminOperatingHours} />
       <Route component={NotFound} />
     </Switch>

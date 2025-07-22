@@ -48,6 +48,7 @@ export const users = pgTable("users", {
   permissions: jsonb("permissions").$type<string[]>().default([]).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   lastLoginAt: timestamp("last_login_at"),
+  passwordHash: varchar("password_hash"), // For local admin accounts
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -39,12 +39,14 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### User Management & Role-Based Access Control (RBAC)
-- **Authentication**: Replit Auth integration for secure authentication
+- **Authentication**: Dual authentication system - Replit Auth for regular users and local admin authentication for superuser access
+- **Admin Superuser**: Local admin account (username: raspik2025) with bcryptjs password hashing for secure admin access
 - **User Roles**: 4-tier system (Customer, Staff, Manager, Admin)
 - **Permissions**: 14 granular permissions for precise access control
 - **Advanced User Management**: Full profile editing, role assignment, permission management
 - **Session Management**: PostgreSQL storage with role persistence
 - **Permission System**: Hierarchical permissions with role-based defaults and custom overrides
+- **Admin Portal**: Dedicated admin login route (/admin/login) for local administrator access
 
 ### Sequential Video Showcase System
 - **Sequential Video Display**: Displays 10 uploaded videos in sequence with auto-advance and loop functionality

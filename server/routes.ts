@@ -18,6 +18,7 @@ import {
 import { sendBookingConfirmation, sendBirthdayPartyConfirmation, sendEnquiryNotification } from "./services/email";
 import { sendWhatsAppNotification } from "./services/whatsapp";
 import { createPaymentOrder, verifyPayment } from "./services/payment";
+import bcrypt from "bcryptjs";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -53,9 +54,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/attached_assets', express.static(path.resolve(process.cwd(), 'attached_assets')));
   app.use('/uploads', express.static(uploadDir));
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Local admin login route
+  app.post('/api/admin/login', async (req, res) => {
     try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+      
+      // Check if it's the admin user
+      if (username === 'raspik2025') {
+        const user = await storage.getUserById('raspik2025');
+        if (user && user.passwordHash) {
+          const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+          if (isValidPassword) {
+            // Set user session for admin
+            (req as any).session.userId = 'raspik2025';
+            (req as any).session.isAdmin = true;
+            
+            // Update last login
+            await storage.updateUserLastLogin('raspik2025');
+            
+            return res.json({
+              success: true,
+              user: {
+                id: user.id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                role: user.role,
+                isAdmin: user.isAdmin,
+                permissions: user.permissions
+              }
+            });
+          }
+        }
+      }
+      
+      res.status(401).json({ message: "Invalid credentials" });
+    } catch (error) {
+      console.error("Admin login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Auth routes
+  app.get('/api/auth/user', async (req: any, res) => {
+    try {
+      // Check for admin session first
+      if ((req as any).session?.userId === 'raspik2025' && (req as any).session?.isAdmin) {
+        const user = await storage.getUserById('raspik2025');
+        if (user) {
+          return res.json(user);
+        }
+      }
+      
+      // Check Replit auth
+      if (!req.user?.claims?.sub) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const userId = req.user.claims.sub;
       let user = await storage.getUser(userId);
       

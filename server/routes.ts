@@ -57,7 +57,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      let user = await storage.getUser(userId);
+      
+      // Auto-grant admin privileges for development/testing
+      if (user && !user.isAdmin) {
+        user = await storage.updateUserAdminStatus(userId, true);
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);

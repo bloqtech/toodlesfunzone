@@ -31,7 +31,7 @@ export function Header() {
               <img 
                 src={toodlesLogo} 
                 alt="Toodles Funzone Logo" 
-                className="h-12 w-auto cursor-pointer"
+                className="h-16 w-auto cursor-pointer"
               />
             </Link>
           </div>

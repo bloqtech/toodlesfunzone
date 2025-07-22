@@ -255,18 +255,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ available: false, reason: holiday.name });
       }
 
-      // Get bookings for the date and time slot
-      const bookings = await storage.getBookingsByDate(date);
-      const timeSlotBookings = bookings.filter(b => b.timeSlotId === parseInt(timeSlotId));
-      
-      // Get total children count for this slot
-      const totalChildren = timeSlotBookings.reduce((sum, booking) => sum + (booking.numberOfChildren || 0), 0);
-      
-      // Check capacity (15 children per slot)
-      const available = totalChildren < 15;
-      const remainingCapacity = 15 - totalChildren;
-      
-      res.json({ available, remainingCapacity });
+      // Use the same availability logic as the time slots endpoint
+      const availability = await storage.getTimeSlotAvailability(parseInt(timeSlotId), date);
+      res.json({
+        available: availability.available,
+        remainingCapacity: availability.remaining,
+        capacity: availability.capacity,
+        booked: availability.booked
+      });
     } catch (error) {
       console.error("Error checking availability:", error);
       res.status(500).json({ message: "Failed to check availability" });

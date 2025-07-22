@@ -82,6 +82,7 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
     try {
       const response = await fetch(`/api/availability/${formData.bookingDate}/${formData.timeSlotId}`);
       const data = await response.json();
+      console.log('Availability response:', data); // Debug log
       setAvailability(data);
     } catch (error) {
       console.error('Error checking availability:', error);
@@ -326,7 +327,7 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
                 <div className={`p-4 rounded-lg ${availability.available ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
                   <p className={`font-medium ${availability.available ? 'text-green-800' : 'text-red-800'}`}>
                     {availability.available 
-                      ? `Available! ${availability.remainingCapacity} spots remaining.`
+                      ? `Available! ${availability.remainingCapacity || availability.remaining || 0} spots remaining out of ${availability.capacity || 20}.`
                       : availability.reason || 'This slot is not available.'
                     }
                   </p>

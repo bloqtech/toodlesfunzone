@@ -199,15 +199,15 @@ export default function BirthdayManagement() {
   ];
 
   return (
-    <div className="min-h-screen bg-toodles-background">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-display text-toodles-text mb-2">Birthday Party Management</h1>
-              <p className="text-toodles-text/70">Manage birthday party packages and themes</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Birthday Party Management</h1>
+              <p className="text-gray-600 dark:text-gray-400">Manage birthday party packages and themes</p>
             </div>
             
             <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>

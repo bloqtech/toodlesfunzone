@@ -160,15 +160,15 @@ export default function ActivitiesManagement() {
   ];
 
   return (
-    <div className="min-h-screen bg-toodles-background">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-display text-toodles-text mb-2">Activities Management</h1>
-              <p className="text-toodles-text/70">Manage play zone activities and attractions</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Activities Management</h1>
+              <p className="text-gray-600 dark:text-gray-400">Manage play zone activities and attractions</p>
             </div>
             
             <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
@@ -178,64 +178,69 @@ export default function ActivitiesManagement() {
                   Add Activity
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <DialogHeader>
-                  <DialogTitle>Add New Activity</DialogTitle>
+                  <DialogTitle className="text-gray-900 dark:text-white">Add New Activity</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="title">Title</Label>
+                      <Label htmlFor="title" className="text-gray-700 dark:text-gray-300">Title</Label>
                       <Input
                         id="title"
                         value={formData.title}
                         onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                         required
                       />
                     </div>
                     <div>
-                      <Label htmlFor="icon">Icon/Emoji</Label>
+                      <Label htmlFor="icon" className="text-gray-700 dark:text-gray-300">Icon/Emoji</Label>
                       <Input
                         id="icon"
                         value={formData.icon}
                         onChange={(e) => setFormData(prev => ({ ...prev, icon: e.target.value }))}
                         placeholder="🎪"
+                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       />
                     </div>
                   </div>
                   
                   <div>
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description" className="text-gray-700 dark:text-gray-300">Description</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       required
                     />
                   </div>
                   
                   <div>
-                    <Label htmlFor="image">Image URL</Label>
+                    <Label htmlFor="image" className="text-gray-700 dark:text-gray-300">Image URL</Label>
                     <Input
                       id="image"
                       value={formData.image}
                       onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
                       placeholder="https://example.com/image.jpg"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="ageGroup">Age Group</Label>
+                      <Label htmlFor="ageGroup" className="text-gray-700 dark:text-gray-300">Age Group</Label>
                       <Input
                         id="ageGroup"
                         value={formData.ageGroup}
                         onChange={(e) => setFormData(prev => ({ ...prev, ageGroup: e.target.value }))}
                         placeholder="2-5 years"
+                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="safetyRating">Safety Rating (1-5)</Label>
+                      <Label htmlFor="safetyRating" className="text-gray-700 dark:text-gray-300">Safety Rating (1-5)</Label>
                       <Input
                         id="safetyRating"
                         type="number"
@@ -243,17 +248,18 @@ export default function ActivitiesManagement() {
                         max="5"
                         value={formData.safetyRating}
                         onChange={(e) => setFormData(prev => ({ ...prev, safetyRating: parseInt(e.target.value) }))}
+                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       />
                     </div>
                   </div>
                   
                   <div>
-                    <Label htmlFor="gradient">Color Gradient</Label>
+                    <Label htmlFor="gradient" className="text-gray-700 dark:text-gray-300">Color Gradient</Label>
                     <select
                       id="gradient"
                       value={formData.gradient}
                       onChange={(e) => setFormData(prev => ({ ...prev, gradient: e.target.value }))}
-                      className="w-full p-2 border rounded-md"
+                      className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     >
                       {gradientOptions.map(gradient => (
                         <option key={gradient} value={gradient}>{gradient}</option>
@@ -267,8 +273,9 @@ export default function ActivitiesManagement() {
                       id="isActive"
                       checked={formData.isActive}
                       onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                      className="w-4 h-4 text-toodles-primary bg-white border-gray-300 rounded focus:ring-toodles-primary"
                     />
-                    <Label htmlFor="isActive">Active (visible to customers)</Label>
+                    <Label htmlFor="isActive" className="text-gray-700 dark:text-gray-300">Active (visible to customers)</Label>
                   </div>
                   
                   <div className="flex justify-end space-x-2">

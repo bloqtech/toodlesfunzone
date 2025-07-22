@@ -22,7 +22,6 @@ interface Activity {
   gradient: string;
   icon: string;
   ageGroup: string;
-  safetyRating: number;
   isActive: boolean;
 }
 
@@ -37,7 +36,6 @@ export default function ActivitiesManagement() {
     gradient: 'from-toodles-primary to-pink-400',
     icon: '🎪',
     ageGroup: '',
-    safetyRating: 5,
     isActive: true
   });
 
@@ -122,7 +120,6 @@ export default function ActivitiesManagement() {
       gradient: 'from-toodles-primary to-pink-400',
       icon: '🎪',
       ageGroup: '',
-      safetyRating: 5,
       isActive: true
     });
   };
@@ -173,7 +170,6 @@ export default function ActivitiesManagement() {
       gradient: activity.gradient,
       icon: activity.icon,
       ageGroup: activity.ageGroup,
-      safetyRating: activity.safetyRating,
       isActive: activity.isActive
     });
   };
@@ -305,29 +301,15 @@ export default function ActivitiesManagement() {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="ageGroup" className="text-gray-700 dark:text-gray-300">Age Group</Label>
-                      <Input
-                        id="ageGroup"
-                        value={formData.ageGroup}
-                        onChange={(e) => setFormData(prev => ({ ...prev, ageGroup: e.target.value }))}
-                        placeholder="2-5 years"
-                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="safetyRating" className="text-gray-700 dark:text-gray-300">Safety Rating (1-5)</Label>
-                      <Input
-                        id="safetyRating"
-                        type="number"
-                        min="1"
-                        max="5"
-                        value={formData.safetyRating}
-                        onChange={(e) => setFormData(prev => ({ ...prev, safetyRating: parseInt(e.target.value) }))}
-                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                      />
-                    </div>
+                  <div>
+                    <Label htmlFor="ageGroup" className="text-gray-700 dark:text-gray-300">Age Group</Label>
+                    <Input
+                      id="ageGroup"
+                      value={formData.ageGroup}
+                      onChange={(e) => setFormData(prev => ({ ...prev, ageGroup: e.target.value }))}
+                      placeholder="2-5 years"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                    />
                   </div>
                   
                   <div>
@@ -428,7 +410,6 @@ export default function ActivitiesManagement() {
                     <p className="text-sm text-gray-600 mb-3">{activity.description}</p>
                     <div className="flex justify-between text-xs text-gray-500">
                       <span>Age: {activity.ageGroup}</span>
-                      <span>Safety: {"★".repeat(activity.safetyRating)}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -526,29 +507,15 @@ export default function ActivitiesManagement() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="edit-ageGroup" className="text-gray-700 dark:text-gray-300">Age Group</Label>
-                    <Input
-                      id="edit-ageGroup"
-                      value={formData.ageGroup}
-                      onChange={(e) => setFormData(prev => ({ ...prev, ageGroup: e.target.value }))}
-                      placeholder="2-5 years"
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-safetyRating" className="text-gray-700 dark:text-gray-300">Safety Rating (1-5)</Label>
-                    <Input
-                      id="edit-safetyRating"
-                      type="number"
-                      min="1"
-                      max="5"
-                      value={formData.safetyRating}
-                      onChange={(e) => setFormData(prev => ({ ...prev, safetyRating: parseInt(e.target.value) }))}
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                    />
-                  </div>
+                <div>
+                  <Label htmlFor="edit-ageGroup" className="text-gray-700 dark:text-gray-300">Age Group</Label>
+                  <Input
+                    id="edit-ageGroup"
+                    value={formData.ageGroup}
+                    onChange={(e) => setFormData(prev => ({ ...prev, ageGroup: e.target.value }))}
+                    placeholder="2-5 years"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  />
                 </div>
                 
                 <div>

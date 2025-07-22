@@ -27,11 +27,12 @@ export function Header() {
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
             <Link href="/">
-              <img 
-                src="https://toodlesfunzone.com/assets/Toodles%20logo_1750663392538-BrPmoFIh.jpg" 
-                alt="Toodles Funzone Logo" 
-                className="h-12 w-auto cursor-pointer"
-              />
+              <div className="cursor-pointer">
+                <h1 className="text-2xl font-display font-bold text-toodles-primary">
+                  Toodles
+                </h1>
+                <p className="text-xs font-accent text-toodles-secondary -mt-1">Funzone</p>
+              </div>
             </Link>
           </div>
           

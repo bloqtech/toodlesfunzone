@@ -8,11 +8,12 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <img 
-              src="https://toodlesfunzone.com/assets/Toodles%20logo_1750663392538-BrPmoFIh.jpg" 
-              alt="Toodles Funzone" 
-              className="h-12 w-auto mb-4"
-            />
+            <div className="mb-4">
+              <h2 className="text-2xl font-display font-bold text-toodles-primary">
+                Toodles
+              </h2>
+              <p className="text-sm font-accent text-toodles-accent -mt-1">Funzone</p>
+            </div>
             <p className="text-gray-300 mb-4">
               India's premier indoor playground experience where big fun meets little feet.
             </p>

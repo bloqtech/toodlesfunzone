@@ -339,12 +339,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Google OAuth authentication routes
   app.get('/api/auth/google', (req, res) => {
     try {
+      if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+        return res.status(503).json({ 
+          message: "Google OAuth not configured. Please provide GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables." 
+        });
+      }
+      
       const { getGoogleAuthUrl } = require('./googleAuth');
       const authUrl = getGoogleAuthUrl();
       res.redirect(authUrl);
     } catch (error) {
       console.error("Error initiating Google auth:", error);
-      res.status(500).json({ message: "Failed to initiate Google authentication" });
+      res.status(500).json({ message: "Google OAuth credentials not configured" });
     }
   });
 
@@ -441,6 +447,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ message: "Logged out successfully" });
     });
+  });
+
+  // Legacy Replit Auth route redirects (for backwards compatibility)
+  app.get('/api/login', (req, res) => {
+    res.redirect('/auth');
+  });
+
+  app.get('/api/logout', (req, res) => {
+    res.redirect('/');
   });
 
   // Enhanced booking creation with account option

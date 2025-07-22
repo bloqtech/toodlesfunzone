@@ -93,6 +93,17 @@ export const timeSlots = pgTable("time_slots", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Operating hours table
+export const operatingHours = pgTable("operating_hours", {
+  id: serial("id").primaryKey(),
+  dayOfWeek: integer("day_of_week").notNull(), // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  openTime: time("open_time").notNull(),
+  closeTime: time("close_time").notNull(),
+  isOpen: boolean("is_open").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Bookings table
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
@@ -277,6 +288,7 @@ export const insertDiscountVoucherSchema = createInsertSchema(discountVouchers);
 export const insertReviewSchema = createInsertSchema(reviews);
 export const insertBlogPostSchema = createInsertSchema(blogPosts);
 export const insertEnquirySchema = createInsertSchema(enquiries);
+export const insertOperatingHoursSchema = createInsertSchema(operatingHours);
 
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
@@ -290,6 +302,7 @@ export type DiscountVoucher = typeof discountVouchers.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type Enquiry = typeof enquiries.$inferSelect;
+export type OperatingHours = typeof operatingHours.$inferSelect;
 export type InsertPackage = z.infer<typeof insertPackageSchema>;
 export type InsertTimeSlot = z.infer<typeof insertTimeSlotSchema>;
 export type InsertBooking = z.infer<typeof insertBookingSchema>;
@@ -299,6 +312,7 @@ export type InsertDiscountVoucher = z.infer<typeof insertDiscountVoucherSchema>;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type InsertEnquiry = z.infer<typeof insertEnquirySchema>;
+export type InsertOperatingHours = z.infer<typeof insertOperatingHoursSchema>;
 
 // Define permission constants
 export const PERMISSIONS = {

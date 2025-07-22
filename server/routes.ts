@@ -706,6 +706,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Operating hours management
+  app.get('/api/admin/operating-hours', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const operatingHours = await storage.getOperatingHours();
+      res.json(operatingHours);
+    } catch (error) {
+      console.error("Error fetching operating hours:", error);
+      res.status(500).json({ message: "Failed to fetch operating hours" });
+    }
+  });
+
+  app.put('/api/admin/operating-hours', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const hoursData = req.body;
+      const updatedHours = await storage.updateOperatingHours(hoursData);
+      res.json(updatedHours);
+    } catch (error) {
+      console.error("Error updating operating hours:", error);
+      res.status(500).json({ message: "Failed to update operating hours" });
+    }
+  });
+
+  // Public endpoint to get operating hours for a specific day
+  app.get('/api/operating-hours/:dayOfWeek', async (req, res) => {
+    try {
+      const dayOfWeek = parseInt(req.params.dayOfWeek);
+      const hours = await storage.getOperatingHoursByDay(dayOfWeek);
+      res.json(hours || { dayOfWeek, isOpen: false });
+    } catch (error) {
+      console.error("Error fetching operating hours by day:", error);
+      res.status(500).json({ message: "Failed to fetch operating hours" });
+    }
+  });
+
   // Admin: Manage holidays
   app.get('/api/admin/holidays', isAuthenticated, adminAuth, async (req, res) => {
     try {

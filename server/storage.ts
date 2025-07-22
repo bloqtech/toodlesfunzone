@@ -9,6 +9,7 @@ import {
   reviews,
   blogPosts,
   enquiries,
+  operatingHours,
   type User,
   type UpsertUser,
   type Package,
@@ -20,6 +21,7 @@ import {
   type Review,
   type BlogPost,
   type Enquiry,
+  type OperatingHours,
   type InsertPackage,
   type InsertTimeSlot,
   type InsertBooking,
@@ -29,6 +31,7 @@ import {
   type InsertReview,
   type InsertBlogPost,
   type InsertEnquiry,
+  type InsertOperatingHours,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, asc, sql, count } from "drizzle-orm";
@@ -124,6 +127,11 @@ export interface IStorage {
   getRevenueAnalytics(): Promise<any>;
   getPopularPackages(): Promise<any>;
   getTopCustomers(): Promise<any>;
+  
+  // Operating hours operations
+  getOperatingHours(): Promise<OperatingHours[]>;
+  updateOperatingHours(hoursData: { [key: number]: { openTime: string; closeTime: string; isOpen: boolean } }): Promise<OperatingHours[]>;
+  getOperatingHoursByDay(dayOfWeek: number): Promise<OperatingHours | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -646,6 +654,62 @@ export class DatabaseStorage implements IStorage {
       .groupBy(bookings.userId, bookings.parentName, bookings.parentEmail)
       .orderBy(desc(count()))
       .limit(10);
+  }
+
+  // Operating hours operations
+  async getOperatingHours(): Promise<OperatingHours[]> {
+    return await db.select().from(operatingHours).orderBy(asc(operatingHours.dayOfWeek));
+  }
+
+  async updateOperatingHours(hoursData: { [key: number]: { openTime: string; closeTime: string; isOpen: boolean } }): Promise<OperatingHours[]> {
+    const results: OperatingHours[] = [];
+    
+    for (const [dayOfWeek, hours] of Object.entries(hoursData)) {
+      const dayNum = parseInt(dayOfWeek);
+      
+      // Check if record exists
+      const existing = await db
+        .select()
+        .from(operatingHours)
+        .where(eq(operatingHours.dayOfWeek, dayNum));
+      
+      if (existing.length > 0) {
+        // Update existing record
+        const [updated] = await db
+          .update(operatingHours)
+          .set({
+            openTime: hours.openTime,
+            closeTime: hours.closeTime,
+            isOpen: hours.isOpen,
+            updatedAt: new Date()
+          })
+          .where(eq(operatingHours.dayOfWeek, dayNum))
+          .returning();
+        results.push(updated);
+      } else {
+        // Create new record
+        const [created] = await db
+          .insert(operatingHours)
+          .values({
+            dayOfWeek: dayNum,
+            openTime: hours.openTime,
+            closeTime: hours.closeTime,
+            isOpen: hours.isOpen
+          })
+          .returning();
+        results.push(created);
+      }
+    }
+    
+    return results;
+  }
+
+  async getOperatingHoursByDay(dayOfWeek: number): Promise<OperatingHours | undefined> {
+    const [hours] = await db
+      .select()
+      .from(operatingHours)
+      .where(eq(operatingHours.dayOfWeek, dayOfWeek));
+    return hours;
   }
 }
 

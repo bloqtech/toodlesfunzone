@@ -21,6 +21,7 @@ import AdminActivities from "@/pages/admin/activities-management";
 import AdminGallery from "@/pages/admin/gallery-management";
 import AdminBirthday from "@/pages/admin/birthday-management";
 import AdminCapacity from "@/pages/admin/capacity-management";
+import AdminOperatingHours from "@/pages/admin/operating-hours";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -53,6 +54,7 @@ function Router() {
           <Route path="/admin/gallery" component={AdminGallery} />
           <Route path="/admin/birthday" component={AdminBirthday} />
           <Route path="/admin/capacity" component={AdminCapacity} />
+          <Route path="/admin/operating-hours" component={AdminOperatingHours} />
           <Route path="/admin/enquiries" component={() => <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center"><div className="text-center"><h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Enquiry Management</h1><p className="text-gray-600 dark:text-gray-400">Coming soon! Contact forms are being collected.</p></div></div>} />
         </>
       )}

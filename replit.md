@@ -44,10 +44,11 @@ Preferred communication style: Simple, everyday language.
 - **Permission System**: Hierarchical permissions with role-based defaults and custom overrides
 
 ### Booking System
-- **Play Session Bookings**: Time slot-based booking system (10 AM - 8 PM)
+- **Play Session Bookings**: Time slot-based booking system with admin-configurable hours
 - **Birthday Party Bookings**: Specialized party booking with themes and packages
 - **Package Management**: Different pricing tiers (walk-in, weekend, monthly)
-- **Capacity Management**: Maximum 15 kids per slot with availability tracking
+- **Capacity Management**: Admin-controlled capacity limits per time slot with real-time availability tracking
+- **Operating Hours**: Flexible daily schedule definition (default: Mon-Fri 10am-8pm, Sat 9am-9pm, Sun closed)
 
 ### Content Management
 - **Activities**: Showcase of play zone facilities and equipment
@@ -63,6 +64,8 @@ Preferred communication style: Simple, everyday language.
 - **Holiday Calendar**: Mark dates as holidays or private events
 - **Discount Vouchers**: Create and manage promotional codes
 - **Analytics**: Basic reporting on bookings and revenue (manager+ access)
+- **Capacity Management**: Define individual time slot capacity limits and bulk updates
+- **Operating Hours Management**: Define custom daily operating hours for flexible scheduling
 
 ## Data Flow
 

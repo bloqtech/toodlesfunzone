@@ -124,6 +124,7 @@ export default function AdminDashboard() {
     { name: "Gallery Management", href: "/admin/gallery", icon: Image },
     { name: "Birthday Management", href: "/admin/birthday", icon: Gift },
     { name: "Capacity Management", href: "/admin/capacity", icon: Clock },
+    { name: "Operating Hours", href: "/admin/operating-hours", icon: Clock },
     { name: "Enquiries", href: "/admin/enquiries", icon: MessageCircle }
   ];
 

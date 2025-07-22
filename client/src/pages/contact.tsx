@@ -1,16 +1,8 @@
-import { useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
 import { 
   MapPin, 
   Phone, 
@@ -26,54 +18,6 @@ import {
 } from "lucide-react";
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
-    type: 'general'
-  });
-  
-  const { toast } = useToast();
-
-  const enquiryMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      const response = await apiRequest('POST', '/api/enquiry', data);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Enquiry Submitted",
-        description: "Thank you for your enquiry. We'll get back to you soon!",
-      });
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        message: '',
-        type: 'general'
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to submit enquiry. Please try again.",
-        variant: "destructive",
-      });
-    }
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    enquiryMutation.mutate(formData);
-  };
-
-  const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
 
   const contactInfo = [
     {
@@ -216,145 +160,83 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* Contact Form & Map */}
+      {/* Location Map */}
       <section className="py-20 bg-toodles-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Form */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-display text-toodles-text">Send us a Message</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name">Your Name *</Label>
-                      <Input
-                        id="name"
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => handleChange('name', e.target.value)}
-                        placeholder="Enter your name"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="phone">Phone Number *</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => handleChange('phone', e.target.value)}
-                        placeholder="+91 98765 43210"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="email">Email Address *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleChange('email', e.target.value)}
-                      placeholder="your@email.com"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="type">Enquiry Type</Label>
-                    <Select value={formData.type} onValueChange={(value) => handleChange('type', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select enquiry type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="general">General Enquiry</SelectItem>
-                        <SelectItem value="booking">Booking Enquiry</SelectItem>
-                        <SelectItem value="birthday">Birthday Party</SelectItem>
-                        <SelectItem value="complaint">Complaint</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="message">Your Message *</Label>
-                    <Textarea
-                      id="message"
-                      value={formData.message}
-                      onChange={(e) => handleChange('message', e.target.value)}
-                      placeholder="Tell us how we can help you..."
-                      rows={5}
-                      required
-                    />
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-toodles-primary hover:bg-red-600 text-white font-accent font-bold"
-                    disabled={enquiryMutation.isPending}
-                  >
-                    {enquiryMutation.isPending ? 'Sending...' : 'Send Message'}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Map & Location */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-display text-toodles-text">Find Us</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Map placeholder */}
-                  <div className="bg-gray-200 rounded-lg h-64 flex items-center justify-center">
-                    <div className="text-center">
-                      <Navigation className="h-12 w-12 mx-auto mb-2 text-toodles-primary" />
-                      <p className="text-gray-600">Interactive Map Coming Soon</p>
-                      <p className="text-sm text-gray-500">123 Fun Street, Playground City</p>
-                    </div>
-                  </div>
-                  
-                  {/* Quick Actions */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Button 
-                      variant="outline" 
-                      className="border-toodles-primary text-toodles-primary hover:bg-toodles-primary hover:text-white"
-                    >
-                      <Navigation className="mr-2 h-4 w-4" />
-                      Get Directions
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="border-toodles-secondary text-toodles-secondary hover:bg-toodles-secondary hover:text-white"
-                    >
-                      <MessageCircle className="mr-2 h-4 w-4" />
-                      WhatsApp Us
-                    </Button>
-                  </div>
-                  
-                  {/* Social Media */}
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-display text-toodles-text mb-4">
+              Find <span className="text-toodles-primary">Us</span>
+            </h2>
+            <p className="text-xl text-gray-600 font-accent">Visit us at our exciting location</p>
+          </div>
+          
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              {/* Google Maps Embed */}
+              <div className="relative h-96 lg:h-[500px]">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.8267888888895!2d77.7037!3d12.9141!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae13b7a5555555%3A0x1234567890abcdef!2sKodathi%2C%20Sarjapur%20Road%2C%20Bangalore%2C%20Karnataka%2C%20India!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Toodles Funzone Location"
+                  className="rounded-lg"
+                />
+              </div>
+              
+              {/* Location Details Overlay */}
+              <div className="p-6 bg-white">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center">
-                    <h3 className="text-lg font-display text-toodles-text mb-4">Follow Us</h3>
-                    <div className="flex justify-center space-x-4">
-                      <Button variant="outline" size="icon">
-                        <Facebook className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="icon">
-                        <Instagram className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="icon">
-                        <Youtube className="h-4 w-4" />
-                      </Button>
+                    <div className="bg-toodles-primary text-white rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                      <MapPin className="h-6 w-6" />
                     </div>
+                    <h3 className="font-display text-toodles-text mb-2">Address</h3>
+                    <p className="text-gray-600 text-sm">Opposite Vishnu Leela Veg, Kodathi, Off Sarjapur Road, Bangalore</p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="bg-toodles-secondary text-white rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                      <Phone className="h-6 w-6" />
+                    </div>
+                    <h3 className="font-display text-toodles-text mb-2">Call Us</h3>
+                    <p className="text-gray-600 text-sm">+91 99012 18980</p>
+                    <p className="text-gray-500 text-xs">WhatsApp Available</p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="bg-toodles-success text-white rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                      <Clock className="h-6 w-6" />
+                    </div>
+                    <h3 className="font-display text-toodles-text mb-2">Hours</h3>
+                    <p className="text-gray-600 text-sm">10:00 AM - 8:00 PM</p>
+                    <p className="text-gray-500 text-xs">Monday - Sunday</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                  <Button 
+                    className="bg-toodles-primary hover:bg-red-600 text-white font-accent font-bold"
+                    onClick={() => window.open('https://maps.google.com/maps?q=Kodathi,+Sarjapur+Road,+Bangalore', '_blank')}
+                  >
+                    <Navigation className="mr-2 h-4 w-4" />
+                    Get Directions
+                  </Button>
+                  <Button 
+                    className="bg-toodles-secondary hover:bg-teal-600 text-white font-accent font-bold"
+                    onClick={() => window.open('https://wa.me/919901218980', '_blank')}
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    WhatsApp Us
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 

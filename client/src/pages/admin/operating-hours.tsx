@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -37,7 +37,11 @@ export default function OperatingHours() {
 
   const { data: hours, isLoading } = useQuery({
     queryKey: ["/api/admin/operating-hours"],
-    onSuccess: (data: OperatingHours[]) => {
+  });
+
+  // Process data when it loads
+  useEffect(() => {
+    if (hours) {
       const hoursMap: { [key: number]: { openTime: string; closeTime: string; isOpen: boolean } } = {};
       
       // Initialize all days with default values
@@ -50,7 +54,7 @@ export default function OperatingHours() {
       });
       
       // Override with actual data if exists
-      data?.forEach((hour: OperatingHours) => {
+      (hours as OperatingHours[])?.forEach((hour: OperatingHours) => {
         hoursMap[hour.dayOfWeek] = {
           openTime: hour.openTime.substring(0, 5), // Remove seconds
           closeTime: hour.closeTime.substring(0, 5), // Remove seconds
@@ -60,7 +64,7 @@ export default function OperatingHours() {
       
       setOperatingHours(hoursMap);
     }
-  });
+  }, [hours]);
 
   const updateHoursMutation = useMutation({
     mutationFn: async (hoursData: { [key: number]: { openTime: string; closeTime: string; isOpen: boolean } }) => {

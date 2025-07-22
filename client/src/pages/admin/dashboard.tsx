@@ -19,7 +19,9 @@ import {
   Settings,
   BarChart3,
   MessageCircle,
-  Package
+  Package,
+  PlayCircle,
+  Image
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -118,6 +120,9 @@ export default function AdminDashboard() {
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "User Management", href: "/admin/users", icon: Users },
     { name: "Package Management", href: "/admin/packages", icon: Package },
+    { name: "Activities Management", href: "/admin/activities", icon: PlayCircle },
+    { name: "Gallery Management", href: "/admin/gallery", icon: Image },
+    { name: "Birthday Management", href: "/admin/birthday", icon: Gift },
     { name: "Enquiries", href: "/admin/enquiries", icon: MessageCircle }
   ];
 

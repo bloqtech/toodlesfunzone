@@ -17,6 +17,9 @@ import AdminBookings from "@/pages/admin/bookings";
 import AdminAnalytics from "@/pages/admin/analytics";
 import AdminUsers from "@/pages/admin/users-advanced";
 import AdminPackages from "@/pages/admin/packages";
+import AdminActivities from "@/pages/admin/activities-management";
+import AdminGallery from "@/pages/admin/gallery-management";
+import AdminBirthday from "@/pages/admin/birthday-management";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -45,6 +48,9 @@ function Router() {
           <Route path="/admin/analytics" component={AdminAnalytics} />
           <Route path="/admin/users" component={AdminUsers} />
           <Route path="/admin/packages" component={AdminPackages} />
+          <Route path="/admin/activities" component={AdminActivities} />
+          <Route path="/admin/gallery" component={AdminGallery} />
+          <Route path="/admin/birthday" component={AdminBirthday} />
           <Route path="/admin/enquiries" component={() => <div className="min-h-screen bg-toodles-background flex items-center justify-center"><div className="text-center"><h1 className="text-3xl font-bold text-toodles-text font-display mb-4">Enquiry Management</h1><p className="text-toodles-text/70">Coming soon! Contact forms are being collected.</p></div></div>} />
         </>
       )}

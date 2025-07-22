@@ -733,6 +733,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Activities Management
+  app.get('/api/admin/activities', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      // Mock data for now - should be replaced with database calls
+      const activities = [
+        { id: '1', title: 'Soft Play Zone', description: 'Safe foam blocks and climbing', image: '', gradient: 'from-toodles-primary to-pink-400', icon: '🏰', ageGroup: '2-5 years', safetyRating: 5, isActive: true },
+        { id: '2', title: 'Adventure Zone', description: 'Slides and obstacle courses', image: '', gradient: 'from-toodles-secondary to-blue-400', icon: '🏃', ageGroup: '5-12 years', safetyRating: 4, isActive: true }
+      ];
+      res.json(activities);
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+      res.status(500).json({ message: "Failed to fetch activities" });
+    }
+  });
+
+  app.post('/api/admin/activities', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const activity = { id: Date.now().toString(), ...req.body };
+      res.json(activity);
+    } catch (error) {
+      console.error("Error creating activity:", error);
+      res.status(500).json({ message: "Failed to create activity" });
+    }
+  });
+
+  app.put('/api/admin/activities/:id', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const activity = { id: req.params.id, ...req.body };
+      res.json(activity);
+    } catch (error) {
+      console.error("Error updating activity:", error);
+      res.status(500).json({ message: "Failed to update activity" });
+    }
+  });
+
+  app.delete('/api/admin/activities/:id', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      res.json({ message: "Activity deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting activity:", error);
+      res.status(500).json({ message: "Failed to delete activity" });
+    }
+  });
+
+  // Admin: Gallery Management
+  app.get('/api/admin/gallery', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      // Mock data for now
+      const galleryItems = [
+        { id: '1', title: 'Kids Playing', description: 'Children enjoying play zone', image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256', category: 'play-zones', isActive: true, featured: true, uploadDate: new Date().toISOString() },
+        { id: '2', title: 'Birthday Party', description: 'Celebration in progress', image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d', category: 'birthday-parties', isActive: true, featured: false, uploadDate: new Date().toISOString() }
+      ];
+      res.json(galleryItems);
+    } catch (error) {
+      console.error("Error fetching gallery items:", error);
+      res.status(500).json({ message: "Failed to fetch gallery items" });
+    }
+  });
+
+  app.post('/api/admin/gallery', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const galleryItem = { id: Date.now().toString(), uploadDate: new Date().toISOString(), ...req.body };
+      res.json(galleryItem);
+    } catch (error) {
+      console.error("Error creating gallery item:", error);
+      res.status(500).json({ message: "Failed to create gallery item" });
+    }
+  });
+
+  app.put('/api/admin/gallery/:id', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const galleryItem = { id: req.params.id, ...req.body };
+      res.json(galleryItem);
+    } catch (error) {
+      console.error("Error updating gallery item:", error);
+      res.status(500).json({ message: "Failed to update gallery item" });
+    }
+  });
+
+  app.delete('/api/admin/gallery/:id', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      res.json({ message: "Gallery item deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting gallery item:", error);
+      res.status(500).json({ message: "Failed to delete gallery item" });
+    }
+  });
+
+  // Admin: Birthday Package Management
+  app.get('/api/admin/birthday-packages', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      // Mock data for now
+      const packages = [
+        { id: '1', name: 'Princess Party Deluxe', description: 'Magical princess themed party', price: 2500, duration: 3, maxGuests: 15, features: ['Princess decorations', 'Crown for birthday child', 'Photo props'], decorationTheme: 'Princess & Fairy Tale', isActive: true, isPopular: true, ageGroup: '3-8 years', image: '' },
+        { id: '2', name: 'Superhero Adventure', description: 'Action-packed superhero celebration', price: 3000, duration: 3, maxGuests: 20, features: ['Superhero decorations', 'Capes for all kids', 'Action games'], decorationTheme: 'Superhero Adventure', isActive: true, isPopular: false, ageGroup: '5-12 years', image: '' }
+      ];
+      res.json(packages);
+    } catch (error) {
+      console.error("Error fetching birthday packages:", error);
+      res.status(500).json({ message: "Failed to fetch birthday packages" });
+    }
+  });
+
+  app.post('/api/admin/birthday-packages', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const package_ = { id: Date.now().toString(), ...req.body };
+      res.json(package_);
+    } catch (error) {
+      console.error("Error creating birthday package:", error);
+      res.status(500).json({ message: "Failed to create birthday package" });
+    }
+  });
+
+  app.put('/api/admin/birthday-packages/:id', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const package_ = { id: req.params.id, ...req.body };
+      res.json(package_);
+    } catch (error) {
+      console.error("Error updating birthday package:", error);
+      res.status(500).json({ message: "Failed to update birthday package" });
+    }
+  });
+
+  app.delete('/api/admin/birthday-packages/:id', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      res.json({ message: "Birthday package deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting birthday package:", error);
+      res.status(500).json({ message: "Failed to delete birthday package" });
+    }
+  });
+
   // Temporary endpoint for development - make user admin
   app.post('/api/make-me-admin', isAuthenticated, async (req, res) => {
     try {

@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import fs from "fs";
 import path from "path";
@@ -21,6 +21,9 @@ import { createPaymentOrder, verifyPayment } from "./services/payment";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+  
+  // Serve video files statically
+  app.use('/attached_assets', express.static(path.resolve(process.cwd(), 'attached_assets')));
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -1080,7 +1083,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/video/:filename', (req, res) => {
     try {
       const filename = req.params.filename;
-      const videoPath = path.join(__dirname, '../attached_assets', filename);
+      const videoPath = path.resolve('attached_assets', filename);
       
       if (!fs.existsSync(videoPath)) {
         return res.status(404).json({ message: 'Video not found' });

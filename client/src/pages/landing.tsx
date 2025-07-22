@@ -9,7 +9,7 @@ import { BookingModal } from "@/components/booking/booking-modal";
 import { BirthdayForm } from "@/components/booking/birthday-form";
 import { Testimonials } from "@/components/common/testimonials";
 import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
-import { RandomVideoPlayer } from "@/components/common/random-video-player";
+import { FallbackVideoPlayer } from "@/components/common/fallback-video-player";
 import { 
   Calendar, 
   Clock, 
@@ -157,18 +157,11 @@ export default function Landing() {
             </div>
             <div className="relative">
               <div className="bg-white rounded-3xl shadow-2xl p-4 transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                <RandomVideoPlayer 
+                <FallbackVideoPlayer 
                   className="rounded-2xl shadow-lg w-full h-80 md:h-96"
-                  autoPlay={true}
-                  muted={true}
-                  loop={true}
-                  controls={false}
+                  autoAdvance={true}
+                  advanceInterval={8}
                 />
-              </div>
-              
-              {/* Video overlay text */}
-              <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-2 rounded-lg">
-                <div className="text-sm font-accent">Live from Toodles!</div>
               </div>
             </div>
           </div>

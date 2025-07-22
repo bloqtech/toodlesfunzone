@@ -76,8 +76,8 @@ export function VideoShowcase({
       
       {/* Video information overlay */}
       <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-2 rounded-lg">
-        <div className="text-sm font-accent">Toodles Funzone in Action</div>
-        <div className="text-xs opacity-75">Refresh for new video</div>
+        <div className="text-sm font-accent">Toodles Funzone</div>
+        <div className="text-xs opacity-75">Fun moments captured</div>
       </div>
     </div>
   );

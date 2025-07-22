@@ -46,12 +46,12 @@ Preferred communication style: Simple, everyday language.
 - **Session Management**: PostgreSQL storage with role persistence
 - **Permission System**: Hierarchical permissions with role-based defaults and custom overrides
 
-### Random Video Showcase System
-- **Dynamic Video Display**: Randomly selects one of 10 uploaded videos on each page load/refresh
+### Sequential Video Showcase System
+- **Sequential Video Display**: Displays 10 uploaded videos in sequence with auto-advance and loop functionality
 - **Video Player Component**: Custom video player with analytics tracking for play/pause events
-- **Streaming Endpoint**: Efficient video serving with HTTP range request support for smooth playback
-- **Responsive Design**: Optimized video display across different device sizes
-- **Auto-Play Support**: Muted auto-play with user controls for volume and video switching
+- **Static File Serving**: Direct video file serving with Express static middleware for reliable playback
+- **Responsive Design**: Optimized video display across different device sizes  
+- **Auto-Advance Support**: Muted auto-play with configurable advance timing and manual controls
 
 ### Booking System
 - **Play Session Bookings**: Time slot-based booking system with admin-configurable hours

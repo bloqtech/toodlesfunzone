@@ -46,6 +46,13 @@ Preferred communication style: Simple, everyday language.
 - **Session Management**: PostgreSQL storage with role persistence
 - **Permission System**: Hierarchical permissions with role-based defaults and custom overrides
 
+### Random Video Showcase System
+- **Dynamic Video Display**: Randomly selects one of 10 uploaded videos on each page load/refresh
+- **Video Player Component**: Custom video player with analytics tracking for play/pause events
+- **Streaming Endpoint**: Efficient video serving with HTTP range request support for smooth playback
+- **Responsive Design**: Optimized video display across different device sizes
+- **Auto-Play Support**: Muted auto-play with user controls for volume and video switching
+
 ### Booking System
 - **Play Session Bookings**: Time slot-based booking system with admin-configurable hours
 - **Birthday Party Bookings**: Specialized party booking with themes and packages
@@ -103,8 +110,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Communication Services
 - **Email Service**: Nodemailer for booking confirmations and notifications
-- **WhatsApp Business API**: Automated messaging for booking updates
-- **SMS Integration**: Backup notification system
+- **WhatsApp Business API**: Comprehensive automated messaging system for dual notifications
+- **Dual Notification System**: Both customers and business receive WhatsApp notifications for bookings
+- **Multi-Event Notifications**: Booking confirmations, birthday party bookings, payment confirmations, and cancellations
+- **Rich Message Format**: Structured messages with booking details, business information, and branding
 
 ### Database and Infrastructure
 - **Neon Database**: Serverless PostgreSQL hosting

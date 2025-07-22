@@ -9,6 +9,7 @@ import { BookingModal } from "@/components/booking/booking-modal";
 import { BirthdayForm } from "@/components/booking/birthday-form";
 import { Testimonials } from "@/components/common/testimonials";
 import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
+import { RandomVideoPlayer } from "@/components/common/random-video-player";
 import { 
   Calendar, 
   Clock, 
@@ -155,12 +156,19 @@ export default function Landing() {
               </div>
             </div>
             <div className="relative">
-              <div className="bg-white rounded-3xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                <img 
-                  src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" 
-                  alt="Toodles Funzone Indoor Playground" 
-                  className="rounded-2xl shadow-lg w-full h-auto"
+              <div className="bg-white rounded-3xl shadow-2xl p-4 transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                <RandomVideoPlayer 
+                  className="rounded-2xl shadow-lg w-full h-80 md:h-96"
+                  autoPlay={true}
+                  muted={true}
+                  loop={true}
+                  controls={false}
                 />
+              </div>
+              
+              {/* Video overlay text */}
+              <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-2 rounded-lg">
+                <div className="text-sm font-accent">Live from Toodles!</div>
               </div>
             </div>
           </div>

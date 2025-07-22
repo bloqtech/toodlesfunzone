@@ -1,5 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import fs from "fs";
+import path from "path";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
@@ -1071,6 +1073,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error granting admin access:", error);
       res.status(500).json({ message: "Failed to grant admin access" });
+    }
+  });
+
+  // Video serving endpoint
+  app.get('/api/video/:filename', (req, res) => {
+    try {
+      const filename = req.params.filename;
+      const videoPath = path.join(__dirname, '../attached_assets', filename);
+      
+      if (!fs.existsSync(videoPath)) {
+        return res.status(404).json({ message: 'Video not found' });
+      }
+      
+      const stat = fs.statSync(videoPath);
+      const fileSize = stat.size;
+      const range = req.headers.range;
+      
+      if (range) {
+        const parts = range.replace(/bytes=/, "").split("-");
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+        const chunkSize = (end - start) + 1;
+        
+        res.writeHead(206, {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunkSize,
+          'Content-Type': 'video/mp4',
+        });
+        
+        const stream = fs.createReadStream(videoPath, { start, end });
+        stream.pipe(res);
+      } else {
+        res.writeHead(200, {
+          'Content-Length': fileSize,
+          'Content-Type': 'video/mp4',
+        });
+        
+        const stream = fs.createReadStream(videoPath);
+        stream.pipe(res);
+      }
+    } catch (error) {
+      console.error('Error serving video:', error);
+      res.status(500).json({ message: 'Error serving video' });
     }
   });
 

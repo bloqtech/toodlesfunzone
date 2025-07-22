@@ -39,11 +39,11 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### User Management & Role-Based Access Control (RBAC)
-- **Authentication**: Dual authentication system - Replit Auth for regular users and local admin authentication for superuser access
+- **Authentication**: Google OAuth for customer authentication (setup pending credentials) and local admin authentication for superuser access
 - **Admin Superuser**: Local admin account (username: raspik2025) with bcryptjs password hashing for secure admin access
-- **Customer Registration**: Customers can create accounts during booking process with email/password authentication
+- **Customer Authentication**: Google OAuth integration with fallback to guest checkout system
 - **Guest Checkout**: Complete guest booking system without requiring account creation
-- **Booking Integration**: Seamless account creation during booking flow with optional password setup
+- **Booking Integration**: Seamless account creation during booking flow with Google authentication or guest mode
 - **User Roles**: 4-tier system (Customer, Staff, Manager, Admin)
 - **Permissions**: 14 granular permissions for precise access control
 - **Advanced User Management**: Full profile editing, role assignment, permission management

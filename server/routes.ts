@@ -4,7 +4,6 @@ import fs from "fs";
 import path from "path";
 import multer from "multer";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
   insertBookingSchema, 
   insertBirthdayPartySchema, 
@@ -19,6 +18,7 @@ import { sendBookingConfirmation, sendBirthdayPartyConfirmation, sendEnquiryNoti
 import { sendWhatsAppNotification } from "./services/whatsapp";
 import { createPaymentOrder, verifyPayment } from "./services/payment";
 import bcrypt from "bcryptjs";
+import session from "express-session";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -46,9 +46,28 @@ const upload = multer({
   }
 });
 
+// Simple authentication middleware for Google OAuth
+const isAuthenticated = (req: any, res: any, next: any) => {
+  const userId = req.session?.userId;
+  if (!userId) {
+    return res.status(401).json({ message: "Authentication required" });
+  }
+  req.userId = userId;
+  next();
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Session configuration for Google OAuth
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'fallback-session-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: false, // Set to true in production with HTTPS
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
   
   // Serve static files
   app.use('/attached_assets', express.static(path.resolve(process.cwd(), 'attached_assets')));
@@ -700,14 +719,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Submit review
-  app.post('/api/reviews', isAuthenticated, async (req, res) => {
+  app.post('/api/reviews', async (req, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub;
-      const validatedData = insertReviewSchema.parse({
-        ...req.body,
-        userId,
-      });
-      
+      const validatedData = insertReviewSchema.parse(req.body);
       const review = await storage.createReview(validatedData);
       res.json(review);
     } catch (error) {
@@ -717,13 +731,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Temporary endpoint to make current user admin (for testing)
-  app.post('/api/make-me-admin', isAuthenticated, async (req, res) => {
+  app.post('/api/make-me-admin', async (req, res) => {
     try {
-      const userId = (req.user as any)?.claims?.sub;
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ message: "User ID required" });
+      }
+      
       await storage.updateUserAdminStatus(userId, true);
       
       res.json({ 
-        message: "You are now an admin user!", 
+        message: "User is now an admin!", 
         userId,
         isAdmin: true 
       });
@@ -736,7 +754,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes
   const adminAuth = async (req: any, res: any, next: any) => {
     try {
-      const userId = (req.user as any)?.claims?.sub;
+      const userId = req.userId || req.session?.userId;
       const user = await storage.getUser(userId);
       
       if (!user?.isAdmin) {

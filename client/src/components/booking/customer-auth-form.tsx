@@ -78,6 +78,10 @@ export function CustomerAuthForm({
               >
                 Continue as Guest
               </Button>
+              <div className="text-center text-sm text-gray-500 mt-4">
+                <p>Note: Google OAuth will be available once credentials are configured.</p>
+                <p>For now, you can continue as a guest to test booking functionality.</p>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

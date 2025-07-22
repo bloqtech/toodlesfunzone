@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
+// Removed Replit Auth - using Google OAuth now
 import { useEffect } from "react";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
@@ -28,10 +28,9 @@ import AdminCapacity from "@/pages/admin/capacity-management";
 import AdminOperatingHours from "@/pages/admin/operating-hours";
 import AdminAddOns from "@/pages/admin/addons-management";
 import AdminLoginPage from "@/pages/admin-login";
+import AuthPage from "@/pages/auth";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
-  
   // Track page views when routes change
   useAnalytics();
   
@@ -40,41 +39,34 @@ function Router() {
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/activities" component={Activities} />
-          <Route path="/packages" component={Packages} />
-          <Route path="/birthday" component={Birthday} />
-          <Route path="/gallery" component={Gallery} />
-          <Route path="/contact" component={Contact} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/activities" component={Activities} />
-          <Route path="/packages" component={Packages} />
-          <Route path="/birthday" component={Birthday} />
-          <Route path="/gallery" component={Gallery} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/admin/dashboard" component={AdminDashboard} />
-          <Route path="/admin/bookings" component={AdminBookings} />
-          <Route path="/admin/analytics" component={AdminAnalytics} />
-          <Route path="/admin/users" component={AdminUsers} />
-          <Route path="/admin/packages" component={AdminPackages} />
-          <Route path="/admin/activities" component={AdminActivities} />
-          <Route path="/admin/gallery" component={AdminGallery} />
-          <Route path="/admin/birthday" component={AdminBirthday} />
-          <Route path="/admin/capacity" component={AdminCapacity} />
-          <Route path="/admin/operating-hours" component={AdminOperatingHours} />
-          <Route path="/admin/addons" component={AdminAddOns} />
-          <Route path="/admin/enquiries" component={() => <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center"><div className="text-center"><h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Enquiry Management</h1><p className="text-gray-600 dark:text-gray-400">Coming soon! Contact forms are being collected.</p></div></div>} />
-        </>
-      )}
+      {/* Public routes available to all users */}
+      <Route path="/" component={Landing} />
+      <Route path="/activities" component={Activities} />
+      <Route path="/packages" component={Packages} />
+      <Route path="/birthday" component={Birthday} />
+      <Route path="/gallery" component={Gallery} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/auth" component={AuthPage} />
       
-      {/* Public routes */}
+      {/* Admin routes */}
       <Route path="/admin/login" component={AdminLoginPage} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/bookings" component={AdminBookings} />
+      <Route path="/admin/analytics" component={AdminAnalytics} />
+      <Route path="/admin/users" component={AdminUsers} />
+      <Route path="/admin/packages" component={AdminPackages} />
+      <Route path="/admin/activities" component={AdminActivities} />
+      <Route path="/admin/gallery" component={AdminGallery} />
+      <Route path="/admin/birthday" component={AdminBirthday} />
+      <Route path="/admin/capacity" component={AdminCapacity} />
+      <Route path="/admin/operating-hours" component={AdminOperatingHours} />
+      <Route path="/admin/add-ons" component={AdminAddOns} />
+      <Route path="/admin/enquiries" component={() => <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center"><div className="text-center"><h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Enquiry Management</h1><p className="text-gray-600 dark:text-gray-400">Coming soon! Contact forms are being collected.</p></div></div>} />
+      
+      {/* Test routes */}
       <Route path="/test/operating-hours" component={AdminOperatingHours} />
+      
+      {/* 404 page */}
       <Route component={NotFound} />
     </Switch>
   );

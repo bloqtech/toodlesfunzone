@@ -8,10 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus, Edit, Trash2, Image, Save, X } from "lucide-react";
+import { Plus, Edit, Trash2, Image, Save, X, Palette } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Activity {
   id: string;
@@ -41,7 +42,7 @@ export default function ActivitiesManagement() {
 
   const { toast } = useToast();
 
-  const { data: activities, isLoading } = useQuery({
+  const { data: activities = [], isLoading } = useQuery<Activity[]>({
     queryKey: ["/api/admin/activities"],
   });
 
@@ -149,14 +150,14 @@ export default function ActivitiesManagement() {
   };
 
   const gradientOptions = [
-    'from-toodles-primary to-pink-400',
-    'from-toodles-secondary to-blue-400',
-    'from-toodles-accent to-orange-400',
-    'from-toodles-success to-green-400',
-    'from-purple-400 to-pink-500',
-    'from-indigo-400 to-purple-500',
-    'from-teal-400 to-cyan-500',
-    'from-red-400 to-pink-500'
+    { value: 'from-toodles-primary to-pink-400', label: 'Pink Toodles', preview: 'bg-gradient-to-r from-pink-500 to-pink-400' },
+    { value: 'from-toodles-secondary to-blue-400', label: 'Blue Adventure', preview: 'bg-gradient-to-r from-blue-500 to-blue-400' },
+    { value: 'from-toodles-accent to-orange-400', label: 'Orange Energy', preview: 'bg-gradient-to-r from-orange-500 to-orange-400' },
+    { value: 'from-toodles-success to-green-400', label: 'Green Nature', preview: 'bg-gradient-to-r from-green-500 to-green-400' },
+    { value: 'from-purple-400 to-pink-500', label: 'Purple Fantasy', preview: 'bg-gradient-to-r from-purple-400 to-pink-500' },
+    { value: 'from-indigo-400 to-purple-500', label: 'Indigo Dream', preview: 'bg-gradient-to-r from-indigo-400 to-purple-500' },
+    { value: 'from-teal-400 to-cyan-500', label: 'Ocean Blue', preview: 'bg-gradient-to-r from-teal-400 to-cyan-500' },
+    { value: 'from-red-400 to-pink-500', label: 'Warm Sunset', preview: 'bg-gradient-to-r from-red-400 to-pink-500' }
   ];
 
   return (
@@ -178,9 +179,15 @@ export default function ActivitiesManagement() {
                   Add Activity
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <DialogHeader>
-                  <DialogTitle className="text-gray-900 dark:text-white">Add New Activity</DialogTitle>
+                  <DialogTitle className="text-gray-900 dark:text-white flex items-center">
+                    <Plus className="h-5 w-5 mr-2 text-toodles-primary" />
+                    Add New Activity
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-600 dark:text-gray-400">
+                    Create a new activity that will be displayed on the homepage for customers to see.
+                  </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -254,17 +261,25 @@ export default function ActivitiesManagement() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="gradient" className="text-gray-700 dark:text-gray-300">Color Gradient</Label>
-                    <select
-                      id="gradient"
-                      value={formData.gradient}
-                      onChange={(e) => setFormData(prev => ({ ...prev, gradient: e.target.value }))}
-                      className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                    >
-                      {gradientOptions.map(gradient => (
-                        <option key={gradient} value={gradient}>{gradient}</option>
-                      ))}
-                    </select>
+                    <Label htmlFor="gradient" className="text-gray-700 dark:text-gray-300 flex items-center mb-2">
+                      <Palette className="h-4 w-4 mr-2" />
+                      Color Gradient
+                    </Label>
+                    <Select value={formData.gradient} onValueChange={(value) => setFormData(prev => ({ ...prev, gradient: value }))}>
+                      <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                        <SelectValue placeholder="Choose a gradient" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {gradientOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div className="flex items-center space-x-2">
+                              <div className={`w-6 h-4 rounded ${option.preview}`}></div>
+                              <span>{option.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   
                   <div className="flex items-center space-x-2">
@@ -353,61 +368,75 @@ export default function ActivitiesManagement() {
 
           {/* Edit Dialog */}
           <Dialog open={!!editingActivity} onOpenChange={() => setEditingActivity(null)}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               <DialogHeader>
-                <DialogTitle>Edit Activity</DialogTitle>
+                <DialogTitle className="text-gray-900 dark:text-white flex items-center">
+                  <Edit className="h-5 w-5 mr-2 text-toodles-primary" />
+                  Edit Activity
+                </DialogTitle>
+                <DialogDescription className="text-gray-600 dark:text-gray-400">
+                  Modify this activity's details. Changes will be reflected on the homepage immediately.
+                </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="edit-title">Title</Label>
+                    <Label htmlFor="edit-title" className="text-gray-700 dark:text-gray-300">Title</Label>
                     <Input
                       id="edit-title"
                       value={formData.title}
                       onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="edit-icon">Icon/Emoji</Label>
+                    <Label htmlFor="edit-icon" className="text-gray-700 dark:text-gray-300">Icon/Emoji</Label>
                     <Input
                       id="edit-icon"
                       value={formData.icon}
                       onChange={(e) => setFormData(prev => ({ ...prev, icon: e.target.value }))}
+                      placeholder="🎪"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <Label htmlFor="edit-description">Description</Label>
+                  <Label htmlFor="edit-description" className="text-gray-700 dark:text-gray-300">Description</Label>
                   <Textarea
                     id="edit-description"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     required
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="edit-image">Image URL</Label>
+                  <Label htmlFor="edit-image" className="text-gray-700 dark:text-gray-300">Image URL</Label>
                   <Input
                     id="edit-image"
                     value={formData.image}
                     onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                    placeholder="https://example.com/image.jpg"
+                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="edit-ageGroup">Age Group</Label>
+                    <Label htmlFor="edit-ageGroup" className="text-gray-700 dark:text-gray-300">Age Group</Label>
                     <Input
                       id="edit-ageGroup"
                       value={formData.ageGroup}
                       onChange={(e) => setFormData(prev => ({ ...prev, ageGroup: e.target.value }))}
+                      placeholder="2-5 years"
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="edit-safetyRating">Safety Rating (1-5)</Label>
+                    <Label htmlFor="edit-safetyRating" className="text-gray-700 dark:text-gray-300">Safety Rating (1-5)</Label>
                     <Input
                       id="edit-safetyRating"
                       type="number"
@@ -415,22 +444,31 @@ export default function ActivitiesManagement() {
                       max="5"
                       value={formData.safetyRating}
                       onChange={(e) => setFormData(prev => ({ ...prev, safetyRating: parseInt(e.target.value) }))}
+                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <Label htmlFor="edit-gradient">Color Gradient</Label>
-                  <select
-                    id="edit-gradient"
-                    value={formData.gradient}
-                    onChange={(e) => setFormData(prev => ({ ...prev, gradient: e.target.value }))}
-                    className="w-full p-2 border rounded-md"
-                  >
-                    {gradientOptions.map(gradient => (
-                      <option key={gradient} value={gradient}>{gradient}</option>
-                    ))}
-                  </select>
+                  <Label htmlFor="edit-gradient" className="text-gray-700 dark:text-gray-300 flex items-center mb-2">
+                    <Palette className="h-4 w-4 mr-2" />
+                    Color Gradient
+                  </Label>
+                  <Select value={formData.gradient} onValueChange={(value) => setFormData(prev => ({ ...prev, gradient: value }))}>
+                    <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+                      <SelectValue placeholder="Choose a gradient" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {gradientOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-6 h-4 rounded ${option.preview}`}></div>
+                            <span>{option.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="flex items-center space-x-2">
@@ -439,8 +477,9 @@ export default function ActivitiesManagement() {
                     id="edit-isActive"
                     checked={formData.isActive}
                     onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                    className="w-4 h-4 text-toodles-primary bg-white border-gray-300 rounded focus:ring-toodles-primary"
                   />
-                  <Label htmlFor="edit-isActive">Active (visible to customers)</Label>
+                  <Label htmlFor="edit-isActive" className="text-gray-700 dark:text-gray-300">Active (visible to customers)</Label>
                 </div>
                 
                 <div className="flex justify-end space-x-2">

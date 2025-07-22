@@ -321,94 +321,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Customer authentication routes
-  app.post('/api/customer/login', async (req, res) => {
+  // Google OAuth authentication routes
+  app.get('/api/auth/google', (req, res) => {
     try {
-      const { email, password } = req.body;
-      
-      if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
-      }
-      
-      const user = await storage.getUserByEmail(email);
-      if (!user || !user.passwordHash) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
-      
-      if (!isValidPassword) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // Update last login
-      await storage.updateUserLastLogin(user.id);
-      
-      // Set user session
-      (req as any).session.userId = user.id;
-      (req as any).session.userRole = user.role;
-      
-      res.json({
-        success: true,
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          phone: user.phone,
-          role: user.role,
-        }
-      });
+      const { getGoogleAuthUrl } = require('./googleAuth');
+      const authUrl = getGoogleAuthUrl();
+      res.redirect(authUrl);
     } catch (error) {
-      console.error("Customer login error:", error);
-      res.status(500).json({ message: "Login failed" });
+      console.error("Error initiating Google auth:", error);
+      res.status(500).json({ message: "Failed to initiate Google authentication" });
     }
   });
 
-  // Customer registration endpoint
-  app.post('/api/customer/register', async (req, res) => {
+  app.get('/api/auth/google/callback', async (req, res) => {
     try {
-      const { email, password, firstName, lastName, phone } = req.body;
+      const { code } = req.query;
       
-      if (!email || !password || !firstName || !lastName || !phone) {
-        return res.status(400).json({ message: "All fields are required" });
+      if (!code) {
+        return res.status(400).json({ message: "Authorization code is required" });
       }
+
+      const { getGoogleUserInfo } = await import('./googleAuth');
+      const googleUser = await getGoogleUserInfo(code as string);
       
-      // Check if user already exists
-      const existingUser = await storage.getUserByEmail(email);
-      if (existingUser) {
-        return res.status(409).json({ message: "Account with this email already exists" });
+      // Check if user exists or create new user
+      let user = await storage.getUserByEmail(googleUser.email!);
+      
+      if (!user) {
+        // Create new user from Google account
+        user = await storage.upsertUser({
+          id: `google_${googleUser.id}`,
+          email: googleUser.email!,
+          firstName: googleUser.firstName || '',
+          lastName: googleUser.lastName || '',
+          profileImageUrl: googleUser.profileImageUrl,
+          role: 'customer',
+          registrationSource: 'google_oauth',
+          isGuest: false,
+        });
+      } else {
+        // Update existing user's Google info
+        user = await storage.upsertUser({
+          id: user.id,
+          email: user.email!,
+          firstName: googleUser.firstName || user.firstName,
+          lastName: googleUser.lastName || user.lastName,
+          profileImageUrl: googleUser.profileImageUrl || user.profileImageUrl,
+          lastLoginAt: new Date(),
+        });
       }
-      
-      // Create new customer account
-      const user = await storage.createCustomerAccount({
-        email,
-        firstName,
-        lastName,
-        phone,
-        password,
-        isGuest: false,
-      });
       
       // Set user session
       (req as any).session.userId = user.id;
       (req as any).session.userRole = user.role;
+      (req as any).session.isGoogleAuth = true;
       
-      res.status(201).json({
-        success: true,
-        user: {
+      // Redirect to booking page or dashboard
+      res.redirect('/?auth=success');
+    } catch (error) {
+      console.error("Google auth callback error:", error);
+      res.redirect('/?auth=error');
+    }
+  });
+
+  // Get current user session
+  app.get('/api/auth/user', (req, res) => {
+    try {
+      const userId = (req as any).session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      
+      // Get user info from database
+      storage.getUser(userId).then(user => {
+        if (!user) {
+          return res.status(401).json({ message: "User not found" });
+        }
+        
+        res.json({
           id: user.id,
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
           phone: user.phone,
           role: user.role,
-        }
+          profileImageUrl: user.profileImageUrl,
+        });
+      }).catch(error => {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Failed to fetch user" });
       });
     } catch (error) {
-      console.error("Customer registration error:", error);
-      res.status(500).json({ message: "Registration failed" });
+      console.error("User session error:", error);
+      res.status(500).json({ message: "Session error" });
     }
+  });
+
+  // Logout endpoint
+  app.post('/api/auth/logout', (req, res) => {
+    (req as any).session.destroy((err: any) => {
+      if (err) {
+        return res.status(500).json({ message: "Failed to logout" });
+      }
+      res.json({ message: "Logged out successfully" });
+    });
   });
 
   // Enhanced booking creation with account option

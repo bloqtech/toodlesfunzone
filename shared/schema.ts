@@ -215,6 +215,23 @@ export const enquiries = pgTable("enquiries", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Add-ons table
+export const addOns = pgTable("add_ons", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  icon: varchar("icon"), // emoji or icon name
+  image: varchar("image"),
+  category: varchar("category"), // general, birthday, photography, food, etc.
+  isRequired: boolean("is_required").default(false), // for socks, etc.
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  applicablePackages: jsonb("applicable_packages").$type<string[]>(), // which packages can use this addon
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   bookings: many(bookings),
@@ -289,6 +306,7 @@ export const insertReviewSchema = createInsertSchema(reviews);
 export const insertBlogPostSchema = createInsertSchema(blogPosts);
 export const insertEnquirySchema = createInsertSchema(enquiries);
 export const insertOperatingHoursSchema = createInsertSchema(operatingHours);
+export const insertAddOnSchema = createInsertSchema(addOns);
 
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
@@ -313,6 +331,8 @@ export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type InsertEnquiry = z.infer<typeof insertEnquirySchema>;
 export type InsertOperatingHours = z.infer<typeof insertOperatingHoursSchema>;
+export type AddOn = typeof addOns.$inferSelect;
+export type InsertAddOn = z.infer<typeof insertAddOnSchema>;
 
 // Define permission constants
 export const PERMISSIONS = {

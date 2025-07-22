@@ -121,6 +121,7 @@ export default function AdminDashboard() {
     { name: "User Management", href: "/admin/users", icon: Users },
     { name: "Package Management", href: "/admin/packages", icon: Package },
     { name: "Activities Management", href: "/admin/activities", icon: PlayCircle },
+    { name: "Add-ons Management", href: "/admin/addons", icon: Package },
     { name: "Gallery Management", href: "/admin/gallery", icon: Image },
     { name: "Birthday Management", href: "/admin/birthday", icon: Gift },
     { name: "Capacity Management", href: "/admin/capacity", icon: Clock },

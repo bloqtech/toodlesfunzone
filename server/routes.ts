@@ -1046,7 +1046,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin: Gallery Management
+  // Admin: Add-ons Management
+  app.get('/api/admin/add-ons', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      // Mock data for now - should be replaced with database calls
+      const addOns = [
+        { 
+          id: '1', 
+          name: 'Photography Package', 
+          description: 'Professional photos of your child\'s play session', 
+          price: 299, 
+          icon: '📸', 
+          image: '', 
+          category: 'photography', 
+          isRequired: false, 
+          isActive: true, 
+          displayOrder: 1,
+          applicablePackages: ['walk_in', 'weekend', 'monthly']
+        },
+        { 
+          id: '2', 
+          name: 'Snack Combo', 
+          description: 'Healthy snacks and juice for your little one', 
+          price: 149, 
+          icon: '🍎', 
+          image: '', 
+          category: 'food', 
+          isRequired: false, 
+          isActive: true, 
+          displayOrder: 2,
+          applicablePackages: ['walk_in', 'weekend', 'monthly']
+        },
+        { 
+          id: '3', 
+          name: 'Socks (Required)', 
+          description: 'Non-slip socks for safe play (if forgotten)', 
+          price: 49, 
+          icon: '🧦', 
+          image: '', 
+          category: 'general', 
+          isRequired: true, 
+          isActive: true, 
+          displayOrder: 3,
+          applicablePackages: ['walk_in', 'weekend', 'monthly']
+        },
+        { 
+          id: '4', 
+          name: 'Extended Play Time', 
+          description: 'Add 1 extra hour to your session', 
+          price: 449, 
+          icon: '⏰', 
+          image: '', 
+          category: 'time', 
+          isRequired: false, 
+          isActive: true, 
+          displayOrder: 4,
+          applicablePackages: ['walk_in', 'weekend']
+        }
+      ];
+      res.json(addOns);
+    } catch (error) {
+      console.error("Error fetching add-ons:", error);
+      res.status(500).json({ message: "Failed to fetch add-ons" });
+    }
+  });
+
+  app.post('/api/admin/add-ons', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const addOn = { id: Date.now().toString(), ...req.body };
+      res.json(addOn);
+    } catch (error) {
+      console.error("Error creating add-on:", error);
+      res.status(500).json({ message: "Failed to create add-on" });
+    }
+  });
+
+  app.put('/api/admin/add-ons/:id', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const addOn = { id: req.params.id, ...req.body };
+      res.json(addOn);
+    } catch (error) {
+      console.error("Error updating add-on:", error);
+      res.status(500).json({ message: "Failed to update add-on" });
+    }
+  });
+
+  app.delete('/api/admin/add-ons/:id', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      res.json({ message: "Add-on deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting add-on:", error);
+      res.status(500).json({ message: "Failed to delete add-on" });
+    }
+  });
+
   app.get('/api/admin/gallery', isAuthenticated, adminAuth, async (req, res) => {
     try {
       // Mock data for now

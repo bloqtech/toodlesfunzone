@@ -230,12 +230,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const booking = await storage.createBooking(validatedData);
       
-      // Send notifications
+      // Send email notification
       await sendBookingConfirmation(booking);
-      await sendWhatsAppNotification(
-        booking.parentPhone,
-        `Booking confirmed for ${booking.bookingDate}. Booking ID: ${booking.id}`
-      );
+      
+      // Send WhatsApp notifications to both customer and Toodles
+      try {
+        const { sendBookingConfirmationToCustomer, sendBookingNotificationToToodles } = await import('./whatsapp');
+        
+        // Get package and time slot details for notification
+        const packageDetails = await storage.getPackageById(booking.packageId);
+        const timeSlot = await storage.getTimeSlotById(booking.timeSlotId);
+        
+        if (packageDetails && timeSlot) {
+          const notificationData = {
+            bookingId: booking.id.toString(),
+            customerName: booking.parentName,
+            customerPhone: booking.parentPhone,
+            packageName: packageDetails.name,
+            date: booking.bookingDate,
+            timeSlot: `${timeSlot.startTime} - ${timeSlot.endTime}`,
+            numberOfChildren: booking.numberOfChildren,
+            totalAmount: booking.totalAmount,
+            status: booking.status
+          };
+
+          // Send notifications to both customer and Toodles simultaneously
+          await Promise.all([
+            sendBookingConfirmationToCustomer(notificationData),
+            sendBookingNotificationToToodles(notificationData)
+          ]);
+        }
+      } catch (whatsappError) {
+        console.error('Error sending WhatsApp notifications:', whatsappError);
+        // Don't fail the booking if WhatsApp fails
+      }
       
       res.json(booking);
     } catch (error) {
@@ -290,12 +318,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const party = await storage.createBirthdayParty(validatedData);
       
-      // Send notifications
+      // Send email notification
       await sendBirthdayPartyConfirmation(party);
-      await sendWhatsAppNotification(
-        party.parentPhone,
-        `Birthday party booking confirmed for ${party.partyDate}. Party ID: ${party.id}`
-      );
+      
+      // Send WhatsApp notifications for birthday party
+      try {
+        const { sendBirthdayPartyConfirmation: sendWhatsAppBirthdayConfirmation } = await import('./whatsapp');
+        
+        const partyNotificationData = {
+          customerName: party.parentName,
+          customerPhone: party.parentPhone,
+          childName: party.childName,
+          childAge: party.childAge,
+          date: party.partyDate,
+          timeSlot: party.timeSlot,
+          guestCount: party.guestCount,
+          theme: party.theme,
+          totalAmount: party.totalAmount,
+          partyId: party.id.toString()
+        };
+
+        await sendWhatsAppBirthdayConfirmation(partyNotificationData);
+      } catch (whatsappError) {
+        console.error('Error sending WhatsApp birthday party notifications:', whatsappError);
+        // Don't fail the booking if WhatsApp fails
+      }
       
       res.json(party);
     } catch (error) {
@@ -337,7 +384,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isValid) {
         // Update booking payment status
         await storage.updateBookingPayment(bookingId, paymentId, 'completed');
-        await storage.updateBookingStatus(bookingId, 'confirmed');
+        const updatedBooking = await storage.updateBookingStatus(bookingId, 'confirmed');
+        
+        // Send payment confirmation WhatsApp message
+        try {
+          const { sendWhatsAppMessage } = await import('./whatsapp');
+          await sendWhatsAppMessage(
+            updatedBooking.parentPhone,
+            `🎉 Payment Confirmed! Your booking #${updatedBooking.id} for ${updatedBooking.bookingDate} is now confirmed. See you at Toodles Funzone!`
+          );
+        } catch (whatsappError) {
+          console.error('Error sending payment confirmation WhatsApp:', whatsappError);
+        }
         
         res.json({ success: true });
       } else {
@@ -737,6 +795,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching operating hours by day:", error);
       res.status(500).json({ message: "Failed to fetch operating hours" });
+    }
+  });
+
+  // Analytics endpoints
+  app.get('/api/admin/analytics/users', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { getUserAnalytics } = await import('./analytics');
+      await getUserAnalytics(req, res);
+    } catch (error) {
+      console.error("Error fetching user analytics:", error);
+      res.status(500).json({ message: "Failed to fetch user analytics" });
+    }
+  });
+
+  app.get('/api/admin/analytics/bookings', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { getBookingAnalytics } = await import('./analytics');
+      await getBookingAnalytics(req, res);
+    } catch (error) {
+      console.error("Error fetching booking analytics:", error);
+      res.status(500).json({ message: "Failed to fetch booking analytics" });
+    }
+  });
+
+  app.get('/api/admin/analytics/revenue', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { getRevenueAnalytics } = await import('./analytics');
+      await getRevenueAnalytics(req, res);
+    } catch (error) {
+      console.error("Error fetching revenue analytics:", error);
+      res.status(500).json({ message: "Failed to fetch revenue analytics" });
     }
   });
 

@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+Allow: /activities
+Allow: /packages
+Allow: /birthday
+Allow: /gallery
+Allow: /contact
+
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /test/
+
+Sitemap: https://toodles-funzone.replit.app/sitemap.xml
+
+# For Google Images
+User-agent: Googlebot-Image
+Allow: /
+
+# For major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /

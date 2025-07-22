@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { MetaTags, pageMetaConfigs } from "@/components/seo/meta-tags";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";

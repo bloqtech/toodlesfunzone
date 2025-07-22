@@ -17,6 +17,9 @@ Preferred communication style: Simple, everyday language.
 - **State Management**: React Query (TanStack Query) for server state
 - **Routing**: Wouter for lightweight client-side routing
 - **Build Tool**: Vite for fast development and optimized builds
+- **Analytics**: Google Analytics 4 integration with custom event tracking
+- **SEO**: Comprehensive meta tags, structured data, sitemap, and robots.txt
+- **Performance**: Core Web Vitals tracking and user engagement metrics
 
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript
@@ -63,9 +66,10 @@ Preferred communication style: Simple, everyday language.
 - **Booking Management**: View, edit, and manage all bookings (role-based access)
 - **Holiday Calendar**: Mark dates as holidays or private events
 - **Discount Vouchers**: Create and manage promotional codes
-- **Analytics**: Basic reporting on bookings and revenue (manager+ access)
+- **Advanced Analytics**: Comprehensive user behavior, booking conversion, and revenue analytics
 - **Capacity Management**: Define individual time slot capacity limits and bulk updates
 - **Operating Hours Management**: Define custom daily operating hours for flexible scheduling
+- **Performance Monitoring**: Real-time tracking of Core Web Vitals and user engagement
 
 ## Data Flow
 

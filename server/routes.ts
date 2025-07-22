@@ -45,14 +45,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get time slots
+  // Get time slots with availability
   app.get('/api/time-slots', async (req, res) => {
     try {
+      const { date } = req.query;
       const timeSlots = await storage.getActiveTimeSlots();
-      res.json(timeSlots);
+      
+      if (date) {
+        // Add availability information for the requested date
+        const slotsWithAvailability = await Promise.all(
+          timeSlots.map(async (slot) => {
+            const availability = await storage.getTimeSlotAvailability(slot.id, date as string);
+            return {
+              ...slot,
+              availability
+            };
+          })
+        );
+        res.json(slotsWithAvailability);
+      } else {
+        res.json(timeSlots);
+      }
     } catch (error) {
       console.error("Error fetching time slots:", error);
       res.status(500).json({ message: "Failed to fetch time slots" });
+    }
+  });
+
+  // Check time slot availability
+  app.get('/api/time-slots/:id/availability', async (req, res) => {
+    try {
+      const { date } = req.query;
+      if (!date) {
+        return res.status(400).json({ message: "Date parameter is required" });
+      }
+      
+      const availability = await storage.getTimeSlotAvailability(parseInt(req.params.id), date as string);
+      res.json(availability);
+    } catch (error) {
+      console.error("Error checking availability:", error);
+      res.status(500).json({ message: "Failed to check availability" });
     }
   });
 
@@ -179,6 +211,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         userId,
       });
+      
+      // Check availability before creating booking
+      const availability = await storage.getTimeSlotAvailability(validatedData.timeSlotId, validatedData.bookingDate);
+      if (!availability.available) {
+        return res.status(400).json({ 
+          message: "Time slot is full", 
+          details: `Only ${availability.remaining} spots remaining` 
+        });
+      }
+      
+      if ((validatedData.numberOfChildren || 1) > availability.remaining) {
+        return res.status(400).json({ 
+          message: "Not enough capacity", 
+          details: `Only ${availability.remaining} spots remaining, but you requested ${validatedData.numberOfChildren || 1} children` 
+        });
+      }
       
       const booking = await storage.createBooking(validatedData);
       
@@ -633,6 +681,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating time slot:", error);
       res.status(500).json({ message: "Failed to create time slot" });
+    }
+  });
+
+  app.put('/api/admin/time-slots/:id', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { maxCapacity, isActive } = req.body;
+      const timeSlot = await storage.updateTimeSlot(parseInt(req.params.id), { maxCapacity, isActive });
+      res.json(timeSlot);
+    } catch (error) {
+      console.error("Error updating time slot:", error);
+      res.status(500).json({ message: "Failed to update time slot" });
+    }
+  });
+
+  app.put('/api/admin/time-slots/bulk-capacity', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const { maxCapacity } = req.body;
+      await storage.bulkUpdateTimeSlotCapacity(maxCapacity);
+      res.json({ message: "All time slot capacities updated successfully" });
+    } catch (error) {
+      console.error("Error bulk updating time slots:", error);
+      res.status(500).json({ message: "Failed to bulk update time slots" });
     }
   });
 

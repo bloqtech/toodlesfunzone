@@ -63,6 +63,8 @@ export interface IStorage {
   getActiveTimeSlots(): Promise<TimeSlot[]>;
   createTimeSlot(timeSlotData: InsertTimeSlot): Promise<TimeSlot>;
   updateTimeSlot(id: number, timeSlotData: Partial<InsertTimeSlot>): Promise<TimeSlot>;
+  bulkUpdateTimeSlotCapacity(maxCapacity: number): Promise<TimeSlot[]>;
+  getTimeSlotAvailability(timeSlotId: number, bookingDate: string): Promise<any>;
   
   // Booking operations
   createBooking(bookingData: InsertBooking): Promise<Booking>;
@@ -269,6 +271,40 @@ export class DatabaseStorage implements IStorage {
       .where(eq(timeSlots.id, id))
       .returning();
     return updatedTimeSlot;
+  }
+
+  async bulkUpdateTimeSlotCapacity(maxCapacity: number): Promise<TimeSlot[]> {
+    const updatedSlots = await db
+      .update(timeSlots)
+      .set({ maxCapacity })
+      .returning();
+    return updatedSlots;
+  }
+
+  async getTimeSlotAvailability(timeSlotId: number, bookingDate: string): Promise<any> {
+    const slot = await db.select().from(timeSlots).where(eq(timeSlots.id, timeSlotId));
+    if (!slot.length || !slot[0].isActive) return { available: false, capacity: 0, booked: 0 };
+
+    const bookingsOnDate = await db.select({
+      numberOfChildren: bookings.numberOfChildren
+    }).from(bookings)
+      .where(
+        and(
+          eq(bookings.timeSlotId, timeSlotId),
+          eq(bookings.bookingDate, bookingDate),
+          sql`${bookings.status} != 'cancelled'`
+        )
+      );
+
+    const totalBooked = bookingsOnDate.reduce((sum, booking) => sum + (booking.numberOfChildren || 0), 0);
+    const maxCapacity = slot[0].maxCapacity || 20;
+    
+    return {
+      available: totalBooked < maxCapacity,
+      capacity: maxCapacity,
+      booked: totalBooked,
+      remaining: maxCapacity - totalBooked
+    };
   }
 
   // Booking operations

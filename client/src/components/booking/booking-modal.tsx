@@ -39,7 +39,15 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
   const queryClient = useQueryClient();
 
   const { data: timeSlots } = useQuery({
-    queryKey: ["/api/time-slots"],
+    queryKey: ["/api/time-slots", formData.bookingDate],
+    queryFn: async () => {
+      const url = formData.bookingDate ? 
+        `/api/time-slots?date=${formData.bookingDate}` : 
+        '/api/time-slots';
+      const response = await fetch(url);
+      return response.json();
+    },
+    enabled: !!formData.bookingDate,
   });
 
   const bookingMutation = useMutation({
@@ -247,11 +255,46 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
                     <SelectContent>
                       {timeSlots?.map((slot: any) => (
                         <SelectItem key={slot.id} value={slot.id.toString()}>
-                          {slot.startTime} - {slot.endTime}
+                          <div className="flex justify-between items-center w-full">
+                            <span>
+                              {new Date(`1970-01-01T${slot.startTime}`).toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true
+                              })} - {new Date(`1970-01-01T${slot.endTime}`).toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true
+                              })}
+                            </span>
+                            {slot.availability && (
+                              <span className={`text-xs ml-2 ${slot.availability.available ? 'text-green-600' : 'text-red-600'}`}>
+                                {slot.availability.remaining > 0 ? 
+                                  `${slot.availability.remaining} spots left` : 
+                                  'Full'
+                                }
+                              </span>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  
+                  {/* Show availability info if slot is selected */}
+                  {selectedTimeSlot?.availability && (
+                    <div className={`p-3 mt-2 rounded-lg ${selectedTimeSlot.availability.available ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border`}>
+                      <div className="flex items-center space-x-2">
+                        <Users className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          {selectedTimeSlot.availability.available ? 
+                            `${selectedTimeSlot.availability.remaining} spots available out of ${selectedTimeSlot.availability.capacity}` :
+                            `Time slot is full (${selectedTimeSlot.availability.capacity}/${selectedTimeSlot.availability.capacity})`
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               

@@ -782,3 +782,90 @@ button[role="tab"][data-state="active"] {
 .dark .alert-description {
   color: hsl(240, 10%, 70%) !important;
 }
+
+/* Toodles Logo Hover Animations */
+.toodles-logo-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.6, 1);
+  transform-origin: center;
+}
+
+.toodles-logo-hover:hover {
+  animation: toodles-mascot-dance 0.6s ease-in-out;
+  transform: scale(1.1);
+  filter: drop-shadow(0 10px 25px rgba(255, 105, 180, 0.3)) 
+          drop-shadow(0 5px 15px rgba(0, 191, 255, 0.2))
+          brightness(1.1) saturate(1.2);
+}
+
+@keyframes toodles-mascot-dance {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  15% {
+    transform: scale(1.05) rotate(-3deg) translateY(-2px);
+  }
+  30% {
+    transform: scale(1.08) rotate(3deg) translateY(-4px);
+  }
+  45% {
+    transform: scale(1.1) rotate(-2deg) translateY(-3px);
+  }
+  60% {
+    transform: scale(1.08) rotate(2deg) translateY(-5px);
+  }
+  75% {
+    transform: scale(1.05) rotate(-1deg) translateY(-2px);
+  }
+  100% {
+    transform: scale(1.1) rotate(0deg) translateY(0px);
+  }
+}
+
+/* Additional playful effects on hover */
+.toodles-logo-hover:hover::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: radial-gradient(circle, 
+    rgba(255, 105, 180, 0.1) 0%, 
+    rgba(0, 191, 255, 0.1) 30%, 
+    rgba(255, 215, 0, 0.1) 60%, 
+    transparent 100%);
+  border-radius: 50%;
+  animation: toodles-glow-pulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes toodles-glow-pulse {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.6;
+  }
+}
+
+/* Mascot wiggle on hover */
+.toodles-logo-hover:hover {
+  animation: toodles-mascot-dance 0.6s ease-in-out, 
+             toodles-wiggle 0.8s ease-in-out 0.3s;
+}
+
+@keyframes toodles-wiggle {
+  0%, 100% { transform: scale(1.1) rotate(0deg); }
+  10% { transform: scale(1.1) rotate(-1deg); }
+  20% { transform: scale(1.1) rotate(1deg); }
+  30% { transform: scale(1.1) rotate(-1deg); }
+  40% { transform: scale(1.1) rotate(1deg); }
+  50% { transform: scale(1.1) rotate(-0.5deg); }
+  60% { transform: scale(1.1) rotate(0.5deg); }
+  70% { transform: scale(1.1) rotate(-0.5deg); }
+  80% { transform: scale(1.1) rotate(0.5deg); }
+  90% { transform: scale(1.1) rotate(-0.2deg); }
+}

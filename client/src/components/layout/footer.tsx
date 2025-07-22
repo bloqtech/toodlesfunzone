@@ -12,7 +12,7 @@ export function Footer() {
             <img 
               src={toodlesLogo} 
               alt="Toodles Funzone" 
-              className="h-24 w-auto mb-4"
+              className="h-24 w-auto mb-4 toodles-logo-hover transition-all duration-300"
             />
             <p className="text-gray-300 mb-4">
               India's premier indoor playground experience where big fun meets little feet.

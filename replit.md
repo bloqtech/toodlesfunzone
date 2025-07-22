@@ -41,12 +41,17 @@ Preferred communication style: Simple, everyday language.
 ### User Management & Role-Based Access Control (RBAC)
 - **Authentication**: Dual authentication system - Replit Auth for regular users and local admin authentication for superuser access
 - **Admin Superuser**: Local admin account (username: raspik2025) with bcryptjs password hashing for secure admin access
+- **Customer Registration**: Customers can create accounts during booking process with email/password authentication
+- **Guest Checkout**: Complete guest booking system without requiring account creation
+- **Booking Integration**: Seamless account creation during booking flow with optional password setup
 - **User Roles**: 4-tier system (Customer, Staff, Manager, Admin)
 - **Permissions**: 14 granular permissions for precise access control
 - **Advanced User Management**: Full profile editing, role assignment, permission management
-- **Session Management**: PostgreSQL storage with role persistence
+- **Session Management**: PostgreSQL storage with role persistence and customer sessions
 - **Permission System**: Hierarchical permissions with role-based defaults and custom overrides
 - **Admin Portal**: Dedicated admin login route (/admin/login) for local administrator access
+- **Customer Portal**: Customer login/registration routes (/api/customer/login, /api/customer/register)
+- **Booking History**: Customers can view booking history by email (guest) or account (registered users)
 
 ### Sequential Video Showcase System
 - **Sequential Video Display**: Displays 10 uploaded videos in sequence with auto-advance and loop functionality
@@ -56,11 +61,15 @@ Preferred communication style: Simple, everyday language.
 - **Auto-Advance Support**: Muted auto-play with configurable advance timing and manual controls
 
 ### Booking System
+- **Enhanced Booking Flow**: Multi-step booking process with package selection, time slots, date picking, and customer information
+- **Guest & Registered Bookings**: Dual booking system supporting both guest checkout and account-based bookings
+- **Account Creation During Booking**: Optional customer account creation during the booking process with password setup
 - **Play Session Bookings**: Time slot-based booking system with admin-configurable hours
-- **Birthday Party Bookings**: Specialized party booking with themes and packages
+- **Birthday Party Bookings**: Specialized party booking with themes and packages (supports guest and registered users)
 - **Package Management**: Different pricing tiers (walk-in, weekend, monthly)
 - **Capacity Management**: Admin-controlled capacity limits per time slot with real-time availability tracking
 - **Operating Hours**: Flexible daily schedule definition (default: Mon-Fri 10am-8pm, Sat 9am-9pm, Sun closed)
+- **Booking History**: Email-based booking lookup for guests and account dashboard for registered users
 
 ### Content Management
 - **Activities**: Showcase of play zone facilities and equipment

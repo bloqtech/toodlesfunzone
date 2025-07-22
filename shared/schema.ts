@@ -48,7 +48,9 @@ export const users = pgTable("users", {
   permissions: jsonb("permissions").$type<string[]>().default([]).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   lastLoginAt: timestamp("last_login_at"),
-  passwordHash: varchar("password_hash"), // For local admin accounts
+  passwordHash: varchar("password_hash"), // For local admin and customer accounts
+  isGuest: boolean("is_guest").default(false), // Track guest accounts
+  registrationSource: varchar("registration_source").default("booking"), // Track how user registered
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -108,7 +110,7 @@ export const operatingHours = pgTable("operating_hours", {
 // Bookings table
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id),
+  userId: varchar("user_id").references(() => users.id), // Optional for guest bookings
   packageId: integer("package_id").references(() => packages.id),
   timeSlotId: integer("time_slot_id").references(() => timeSlots.id),
   bookingDate: date("booking_date").notNull(),
@@ -122,6 +124,9 @@ export const bookings = pgTable("bookings", {
   parentPhone: varchar("parent_phone").notNull(),
   parentEmail: varchar("parent_email").notNull(),
   childrenAges: jsonb("children_ages").$type<number[]>(),
+  isGuestBooking: boolean("is_guest_booking").default(false),
+  guestPassword: varchar("guest_password"), // Temporary password for account creation
+  createAccount: boolean("create_account").default(false), // User choice to create account
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -129,7 +134,7 @@ export const bookings = pgTable("bookings", {
 // Birthday parties table
 export const birthdayParties = pgTable("birthday_parties", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id),
+  userId: varchar("user_id").references(() => users.id), // Optional for guest bookings
   childName: varchar("child_name").notNull(),
   childAge: integer("child_age").notNull(),
   partyDate: date("party_date").notNull(),
@@ -146,6 +151,9 @@ export const birthdayParties = pgTable("birthday_parties", {
   parentName: varchar("parent_name").notNull(),
   parentPhone: varchar("parent_phone").notNull(),
   parentEmail: varchar("parent_email").notNull(),
+  isGuestBooking: boolean("is_guest_booking").default(false),
+  guestPassword: varchar("guest_password"), // Temporary password for account creation
+  createAccount: boolean("create_account").default(false), // User choice to create account
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -41,7 +41,16 @@ export interface IStorage {
   // User operations (IMPORTANT: mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   getUserById(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  createCustomerAccount(userData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    password?: string;
+    isGuest?: boolean;
+  }): Promise<User>;
   updateUserAdminStatus(id: string, isAdmin: boolean): Promise<User>;
   updateUserRole(id: string, role: string): Promise<User>;
   updateUserPermissions(id: string, permissions: string[]): Promise<User>;
@@ -73,8 +82,13 @@ export interface IStorage {
   
   // Booking operations
   createBooking(bookingData: InsertBooking): Promise<Booking>;
+  createBookingWithAccount(bookingData: InsertBooking & {
+    createAccount: boolean;
+    guestPassword?: string;
+  }): Promise<{ booking: Booking; user?: User; isNewUser?: boolean }>;
   getBookingById(id: number): Promise<Booking | undefined>;
   getBookingsByUser(userId: string): Promise<Booking[]>;
+  getBookingsByEmail(email: string): Promise<Booking[]>;
   getBookingsByDate(date: string): Promise<Booking[]>;
   getBookingsByDateRange(startDate: string, endDate: string): Promise<Booking[]>;
   updateBookingStatus(id: number, status: string): Promise<Booking>;
@@ -153,6 +167,43 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({ lastLoginAt: new Date(), updatedAt: new Date() })
       .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createCustomerAccount(userData: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    password?: string;
+    isGuest?: boolean;
+  }): Promise<User> {
+    const userId = `customer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const newUser = {
+      id: userId,
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      phone: userData.phone,
+      role: "customer" as const,
+      isGuest: userData.isGuest || false,
+      passwordHash: userData.password ? await import('bcryptjs').then(bcrypt => bcrypt.hashSync(userData.password!, 10)) : null,
+      registrationSource: "booking",
+      permissions: [] as string[],
+      isActive: true,
+      isAdmin: false,
+    };
+
+    const [user] = await db
+      .insert(users)
+      .values(newUser)
       .returning();
     return user;
   }
@@ -348,6 +399,50 @@ export class DatabaseStorage implements IStorage {
       .from(bookings)
       .where(eq(bookings.userId, userId))
       .orderBy(desc(bookings.createdAt));
+  }
+
+  async getBookingsByEmail(email: string): Promise<Booking[]> {
+    return await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.parentEmail, email))
+      .orderBy(desc(bookings.createdAt));
+  }
+
+  async createBookingWithAccount(bookingData: InsertBooking & {
+    createAccount: boolean;
+    guestPassword?: string;
+  }): Promise<{ booking: Booking; user?: User; isNewUser?: boolean }> {
+    let user: User | undefined;
+    let isNewUser = false;
+
+    if (bookingData.createAccount && bookingData.parentEmail) {
+      // Check if user already exists
+      const existingUser = await this.getUserByEmail(bookingData.parentEmail);
+      
+      if (!existingUser) {
+        // Create new customer account
+        user = await this.createCustomerAccount({
+          email: bookingData.parentEmail,
+          firstName: bookingData.parentName.split(' ')[0] || '',
+          lastName: bookingData.parentName.split(' ').slice(1).join(' ') || '',
+          phone: bookingData.parentPhone,
+          password: bookingData.guestPassword,
+          isGuest: !bookingData.guestPassword, // If no password, it's a guest account
+        });
+        isNewUser = true;
+      } else {
+        user = existingUser;
+      }
+
+      // Associate booking with user
+      bookingData.userId = user.id;
+    }
+
+    // Create the booking
+    const booking = await this.createBooking(bookingData);
+
+    return { booking, user, isNewUser };
   }
 
   async getBookingsByDate(date: string): Promise<Booking[]> {

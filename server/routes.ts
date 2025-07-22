@@ -321,6 +321,165 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Customer authentication routes
+  app.post('/api/customer/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user || !user.passwordHash) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // Update last login
+      await storage.updateUserLastLogin(user.id);
+      
+      // Set user session
+      (req as any).session.userId = user.id;
+      (req as any).session.userRole = user.role;
+      
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          role: user.role,
+        }
+      });
+    } catch (error) {
+      console.error("Customer login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Customer registration endpoint
+  app.post('/api/customer/register', async (req, res) => {
+    try {
+      const { email, password, firstName, lastName, phone } = req.body;
+      
+      if (!email || !password || !firstName || !lastName || !phone) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ message: "Account with this email already exists" });
+      }
+      
+      // Create new customer account
+      const user = await storage.createCustomerAccount({
+        email,
+        firstName,
+        lastName,
+        phone,
+        password,
+        isGuest: false,
+      });
+      
+      // Set user session
+      (req as any).session.userId = user.id;
+      (req as any).session.userRole = user.role;
+      
+      res.status(201).json({
+        success: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          role: user.role,
+        }
+      });
+    } catch (error) {
+      console.error("Customer registration error:", error);
+      res.status(500).json({ message: "Registration failed" });
+    }
+  });
+
+  // Enhanced booking creation with account option
+  app.post('/api/bookings/with-account', async (req, res) => {
+    try {
+      const { createAccount, guestPassword, ...bookingData } = req.body;
+      
+      // Validate booking data
+      const validatedBookingData = insertBookingSchema.parse(bookingData);
+      
+      // Check availability before creating booking
+      const availability = await storage.getTimeSlotAvailability(
+        validatedBookingData.timeSlotId,
+        validatedBookingData.bookingDate
+      );
+      
+      if (!availability.available) {
+        return res.status(400).json({ 
+          message: "Selected time slot is not available" 
+        });
+      }
+      
+      if (availability.remaining < validatedBookingData.numberOfChildren) {
+        return res.status(400).json({ 
+          message: `Not enough capacity. Only ${availability.remaining} spots available` 
+        });
+      }
+      
+      // Create booking with optional account creation
+      const result = await storage.createBookingWithAccount({
+        ...validatedBookingData,
+        createAccount: createAccount || false,
+        guestPassword,
+      });
+      
+      // Send confirmation email and WhatsApp
+      try {
+        await sendBookingConfirmation(result.booking, await storage.getPackageById(result.booking.packageId!));
+        await sendWhatsAppNotification(result.booking, "booking_confirmation");
+      } catch (emailError) {
+        console.error("Failed to send confirmation:", emailError);
+      }
+      
+      res.status(201).json({
+        booking: result.booking,
+        user: result.user ? {
+          id: result.user.id,
+          email: result.user.email,
+          firstName: result.user.firstName,
+          lastName: result.user.lastName,
+        } : null,
+        isNewUser: result.isNewUser || false,
+      });
+    } catch (error) {
+      console.error("Error creating booking with account:", error);
+      res.status(500).json({ message: "Failed to create booking" });
+    }
+  });
+
+  // Get bookings by email for guest users
+  app.get('/api/bookings/by-email/:email', async (req, res) => {
+    try {
+      const { email } = req.params;
+      const bookings = await storage.getBookingsByEmail(email);
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error fetching bookings by email:", error);
+      res.status(500).json({ message: "Failed to fetch bookings" });
+    }
+  });
+
   // Protected routes
 
   // Create booking

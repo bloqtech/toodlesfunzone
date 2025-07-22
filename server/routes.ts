@@ -2,6 +2,7 @@ import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import fs from "fs";
 import path from "path";
+import multer from "multer";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
@@ -18,12 +19,39 @@ import { sendBookingConfirmation, sendBirthdayPartyConfirmation, sendEnquiryNoti
 import { sendWhatsAppNotification } from "./services/whatsapp";
 import { createPaymentOrder, verifyPayment } from "./services/payment";
 
+// Configure multer for file uploads
+const uploadDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: uploadDir,
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+  }),
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'));
+    }
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  }
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
   
-  // Serve video files statically
+  // Serve static files
   app.use('/attached_assets', express.static(path.resolve(process.cwd(), 'attached_assets')));
+  app.use('/uploads', express.static(uploadDir));
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -950,6 +978,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating enquiry status:", error);
       res.status(500).json({ message: "Failed to update enquiry status" });
+    }
+  });
+
+  // File upload endpoint for activities
+  app.post('/api/upload', isAuthenticated, adminAuth, upload.single('image'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+      
+      const fileUrl = `/uploads/${req.file.filename}`;
+      res.json({ url: fileUrl });
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      res.status(500).json({ message: "Failed to upload file" });
     }
   });
 

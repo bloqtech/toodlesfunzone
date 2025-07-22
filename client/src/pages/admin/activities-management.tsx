@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus, Edit, Trash2, Image, Save, X, Palette } from "lucide-react";
+import { Plus, Edit, Trash2, Image, Save, X, Palette, Upload, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Activity {
@@ -29,6 +29,7 @@ interface Activity {
 export default function ActivitiesManagement() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -124,6 +125,43 @@ export default function ActivitiesManagement() {
       safetyRating: 5,
       isActive: true
     });
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const data = await response.json();
+      setFormData(prev => ({ ...prev, image: data.url }));
+      
+      toast({
+        title: "Image Uploaded",
+        description: "Image has been uploaded successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Upload Failed", 
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleEdit = (activity: Activity) => {
@@ -225,14 +263,46 @@ export default function ActivitiesManagement() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="image" className="text-gray-700 dark:text-gray-300">Image URL</Label>
-                    <Input
-                      id="image"
-                      value={formData.image}
-                      onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                      placeholder="https://example.com/image.jpg"
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                    />
+                    <Label className="text-gray-700 dark:text-gray-300 flex items-center mb-2">
+                      <Image className="h-4 w-4 mr-2" />
+                      Activity Image
+                    </Label>
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <Input
+                          value={formData.image}
+                          onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                          placeholder="Image URL or upload file below"
+                          className="flex-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => document.getElementById('file-upload-add')?.click()}
+                          disabled={uploading}
+                          className="px-3"
+                        >
+                          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                      <input
+                        id="file-upload-add"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                      {formData.image && (
+                        <div className="relative">
+                          <img
+                            src={formData.image}
+                            alt="Preview"
+                            className="w-full h-32 object-cover rounded border"
+                          />
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-500">Upload an image file or enter a URL above</p>
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
@@ -414,14 +484,46 @@ export default function ActivitiesManagement() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="edit-image" className="text-gray-700 dark:text-gray-300">Image URL</Label>
-                  <Input
-                    id="edit-image"
-                    value={formData.image}
-                    onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                    placeholder="https://example.com/image.jpg"
-                    className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                  />
+                  <Label className="text-gray-700 dark:text-gray-300 flex items-center mb-2">
+                    <Image className="h-4 w-4 mr-2" />
+                    Activity Image
+                  </Label>
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <Input
+                        value={formData.image}
+                        onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                        placeholder="Image URL or upload file below"
+                        className="flex-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('file-upload-edit')?.click()}
+                        disabled={uploading}
+                        className="px-3"
+                      >
+                        {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    <input
+                      id="file-upload-edit"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    {formData.image && (
+                      <div className="relative">
+                        <img
+                          src={formData.image}
+                          alt="Preview"
+                          className="w-full h-32 object-cover rounded border"
+                        />
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500">Upload an image file or enter a URL above</p>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">

@@ -37,7 +37,6 @@ export function Footer() {
             <h3 className="text-lg font-display text-toodles-accent mb-4">About Toodles</h3>
             <ul className="space-y-2">
               <li><Link href="/activities"><span className="text-gray-300 hover:text-toodles-accent transition-colors cursor-pointer">Activities</span></Link></li>
-              <li><Link href="/"><span className="text-gray-300 hover:text-toodles-accent transition-colors cursor-pointer">Our Story</span></Link></li>
               <li><Link href="/packages"><span className="text-gray-300 hover:text-toodles-accent transition-colors cursor-pointer">Packages</span></Link></li>
               <li><Link href="/birthday"><span className="text-gray-300 hover:text-toodles-accent transition-colors cursor-pointer">Birthday Parties</span></Link></li>
               <li><Link href="/gallery"><span className="text-gray-300 hover:text-toodles-accent transition-colors cursor-pointer">Gallery</span></Link></li>

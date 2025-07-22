@@ -7,7 +7,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { BookingModal } from "@/components/booking/booking-modal";
 import { BirthdayForm } from "@/components/booking/birthday-form";
-import { Testimonials } from "@/components/common/testimonials";
+
 import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
 import { FallbackVideoPlayer } from "@/components/common/fallback-video-player";
 import { 
@@ -27,10 +27,6 @@ export default function Landing() {
 
   const { data: packages } = useQuery({
     queryKey: ["/api/packages"],
-  });
-
-  const { data: reviews } = useQuery({
-    queryKey: ["/api/reviews"],
   });
 
   const { data: activities = [] } = useQuery({
@@ -277,67 +273,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <Testimonials reviews={reviews} />
 
-      {/* Our Story Section */}
-      <section className="py-20 bg-gradient-to-br from-toodles-secondary to-toodles-success">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="relative">
-              <div className="bg-white rounded-3xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                <img 
-                  src="https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" 
-                  alt="Toodles Funzone Interior" 
-                  className="rounded-2xl shadow-lg w-full h-auto"
-                />
-              </div>
-            </div>
-            
-            <div className="text-white">
-              <h2 className="text-4xl md:text-5xl font-display mb-6">
-                Our <span className="text-toodles-accent">Story</span>
-              </h2>
-              <p className="text-xl font-accent mb-8">
-                Where imagination meets endless fun and every child's smile matters
-              </p>
-              <p className="text-lg mb-6 leading-relaxed">
-                Toodles Funzone is a one-of-a-kind concept, elevating indoor play to unparalleled heights. We invite you into a realm where traditional play meets boundless imagination.
-              </p>
-              <p className="text-lg mb-8 leading-relaxed">
-                Our funzone seamlessly blends safety, creativity, and joy to create an interactive and unforgettable experience for children of all ages. Here, play takes on new dimensions, nurturing development and learning skills while captivating young minds with wonder and discovery.
-              </p>
-              
-              <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className="text-center">
-                  <div className="text-3xl font-display text-toodles-accent">500+</div>
-                  <div className="text-sm">Happy Families</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-display text-toodles-accent">2-8</div>
-                  <div className="text-sm">Age Groups</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-display text-toodles-accent">10+</div>
-                  <div className="text-sm">Play Zones</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-display text-toodles-accent">100%</div>
-                  <div className="text-sm">Safety First</div>
-                </div>
-              </div>
-              
-              <Button 
-                size="lg" 
-                className="bg-toodles-accent hover:bg-yellow-400 text-toodles-text font-accent font-bold text-lg"
-              >
-                <Heart className="mr-2 h-5 w-5" />
-                Meet Our Team
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <Footer />
       <FloatingWhatsApp />

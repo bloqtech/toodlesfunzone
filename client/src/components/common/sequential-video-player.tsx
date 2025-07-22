@@ -211,8 +211,7 @@ export function SequentialVideoPlayer({
       
       {/* Video information overlay */}
       <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-2 rounded-lg">
-        <div className="text-sm font-accent">Toodles Funzone</div>
-        <div className="text-xs opacity-75">Video {currentVideoIndex + 1} of {videoAssets.length}</div>
+        <div className="text-sm font-accent">This video was shot at Toodles</div>
       </div>
       
       {/* Video progress indicator */}

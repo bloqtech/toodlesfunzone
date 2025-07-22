@@ -29,7 +29,7 @@ export function FallbackVideoPlayer({
   advanceInterval = 8
 }: FallbackVideoPlayerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [hasError, setHasError] = useState(false);
 
   const currentVideo = videoAssets[currentIndex];
@@ -109,6 +109,7 @@ export function FallbackVideoPlayer({
       <video
         key={currentVideo.id}
         className="w-full h-full object-cover"
+        autoPlay
         muted
         playsInline
         loop={false}
@@ -163,8 +164,7 @@ export function FallbackVideoPlayer({
 
       {/* Video info */}
       <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-2 rounded-lg">
-        <div className="text-sm font-accent">Toodles Funzone</div>
-        <div className="text-xs opacity-75">Video {currentIndex + 1} of {videoAssets.length}</div>
+        <div className="text-sm font-accent">This video was shot at Toodles</div>
       </div>
 
       {/* Progress indicator */}

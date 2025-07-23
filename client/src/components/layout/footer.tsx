@@ -78,10 +78,15 @@ export function Footer() {
           </div>
         </div>
         
-        <div className="border-t border-gray-600 mt-8 pt-8 text-center">
+        <div className="border-t border-gray-600 mt-8 pt-8 text-center relative">
           <p className="text-gray-300">
             Copyright © 2025 Toodles Funzone. All Rights Reserved.
           </p>
+          {/* Discreet Admin Access */}
+          <Link href="/admin/login">
+            <div className="absolute bottom-2 right-4 w-2 h-2 bg-gray-600 rounded-full hover:bg-toodles-primary transition-colors duration-300 cursor-pointer opacity-50 hover:opacity-100" 
+                 title="Admin Access" />
+          </Link>
         </div>
       </div>
     </footer>

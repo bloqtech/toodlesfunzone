@@ -43,7 +43,9 @@ export function getGoogleAuthUrl(): string {
   ];
 
   console.log('OAuth2Client redirect URI:', REDIRECT_URI);
-  console.log('OAuth2Client configured with Client ID:', CLIENT_ID ? 'Present' : 'Missing');
+  console.log('OAuth2Client configured with Client ID:', CLIENT_ID);
+  console.log('Raw CLIENT_ID from env:', process.env.GOOGLE_CLIENT_ID?.substring(0, 50) + '...');
+  console.log('Extracted CLIENT_ID:', CLIENT_ID);
 
   return oauth2Client.generateAuthUrl({
     access_type: 'offline',

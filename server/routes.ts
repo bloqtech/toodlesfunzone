@@ -398,6 +398,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Redirecting to Google OAuth with redirect URI:", redirectUri);
       console.log("Using Client ID:", clientId);
       console.log("Raw Client ID from env:", process.env.GOOGLE_CLIENT_ID?.substring(0, 50) + '...');
+      console.log("Generated OAuth URL:", authUrl);
+      console.log("IMPORTANT: Add to Google Cloud Console:");
+      console.log("JavaScript Origins: https://" + currentHost);
+      console.log("Redirect URIs: " + redirectUri);
       res.redirect(authUrl);
     } catch (error) {
       console.error("Error initiating Google auth:", error);

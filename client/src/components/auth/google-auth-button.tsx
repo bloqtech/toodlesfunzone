@@ -102,6 +102,51 @@ export function GoogleAuthButton({
               <p>✓ Email and WhatsApp confirmations</p>
               <p>✓ No registration required</p>
             </div>
+            
+            {/* Development bypass - only show in development */}
+            {window.location.hostname.includes('replit.dev') && (
+              <details className="mt-4">
+                <summary className="text-xs text-gray-500 cursor-pointer font-accent">
+                  Development Options
+                </summary>
+                <div className="mt-2 space-y-2">
+                  <Button
+                    onClick={() => {
+                      // Quick dev login
+                      fetch('/api/auth/dev-login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                          email: 'dev@toodles.com',
+                          firstName: 'Dev',
+                          lastName: 'User'
+                        })
+                      }).then(res => res.json()).then(data => {
+                        if (data.success) {
+                          toast({
+                            title: "Development Login",
+                            description: "Logged in as development user",
+                          });
+                          window.location.reload();
+                        }
+                      }).catch(err => {
+                        toast({
+                          title: "Error",
+                          description: "Development login failed",
+                          variant: "destructive"
+                        });
+                      });
+                    }}
+                    variant="secondary"
+                    size="sm"
+                    className="w-full text-xs"
+                  >
+                    Dev Login (Skip OAuth)
+                  </Button>
+                </div>
+              </details>
+            )}
           </>
         )}
 

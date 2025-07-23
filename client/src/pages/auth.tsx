@@ -50,6 +50,12 @@ export default function AuthPage() {
   };
 
   const handleGuestContinue = () => {
+    // Set a temporary guest session indicator
+    localStorage.setItem('toodles_guest_mode', 'true');
+    toast({
+      title: "Guest Mode",
+      description: "You can now browse and book as a guest.",
+    });
     setLocation('/');
   };
 

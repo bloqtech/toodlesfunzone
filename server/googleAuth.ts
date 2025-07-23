@@ -3,7 +3,17 @@ import { OAuth2Client } from 'google-auth-library';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback';
+
+// Use current domain from REPLIT_DOMAINS or fallback to localhost
+function getRedirectUri(): string {
+  if (process.env.REPLIT_DOMAINS) {
+    const domain = process.env.REPLIT_DOMAINS.split(',')[0];
+    return `https://${domain}/api/auth/google/callback`;
+  }
+  return process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback';
+}
+
+const REDIRECT_URI = getRedirectUri();
 
 export const oauth2Client = new OAuth2Client(
   CLIENT_ID,

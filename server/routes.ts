@@ -337,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Google OAuth authentication routes
-  app.get('/api/auth/google', (req, res) => {
+  app.get('/api/auth/google', async (req, res) => {
     try {
       if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
         return res.status(503).json({ 
@@ -345,37 +345,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const { getGoogleAuthUrl } = require('./googleAuth');
-      const authUrl = getGoogleAuthUrl();
+      // Simple Google OAuth URL generation without external module
+      const clientId = process.env.GOOGLE_CLIENT_ID;
+      const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+      const scope = 'email profile';
+      const state = Math.random().toString(36).substring(7);
+      
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${encodeURIComponent(clientId)}&` +
+        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+        `scope=${encodeURIComponent(scope)}&` +
+        `response_type=code&` +
+        `state=${state}`;
+      
       res.redirect(authUrl);
     } catch (error) {
       console.error("Error initiating Google auth:", error);
-      res.status(500).json({ message: "Google OAuth credentials not configured" });
+      res.status(500).json({ message: "Failed to initiate Google OAuth" });
     }
   });
 
   app.get('/api/auth/google/callback', async (req, res) => {
     try {
-      const { code } = req.query;
+      const { code, error } = req.query;
+      
+      if (error) {
+        console.error("Google OAuth error:", error);
+        return res.redirect('/?auth=error');
+      }
       
       if (!code) {
-        return res.status(400).json({ message: "Authorization code is required" });
+        return res.redirect('/?auth=error&reason=no_code');
       }
 
-      const { getGoogleUserInfo } = await import('./googleAuth');
-      const googleUser = await getGoogleUserInfo(code as string);
+      // Exchange code for access token
+      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: process.env.GOOGLE_CLIENT_ID!,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+          code: code as string,
+          grant_type: 'authorization_code',
+          redirect_uri: `${req.protocol}://${req.get('host')}/api/auth/google/callback`,
+        }),
+      });
+
+      const tokenData = await tokenResponse.json();
+      
+      if (!tokenData.access_token) {
+        console.error("Failed to get access token:", tokenData);
+        return res.redirect('/?auth=error&reason=token_error');
+      }
+
+      // Get user info from Google
+      const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: {
+          Authorization: `Bearer ${tokenData.access_token}`,
+        },
+      });
+
+      const googleUser = await userResponse.json();
+      
+      if (!googleUser.email) {
+        console.error("Failed to get user email from Google");
+        return res.redirect('/?auth=error&reason=no_email');
+      }
       
       // Check if user exists or create new user
-      let user = await storage.getUserByEmail(googleUser.email!);
+      let user = await storage.getUserByEmail(googleUser.email);
       
       if (!user) {
         // Create new user from Google account
         user = await storage.upsertUser({
           id: `google_${googleUser.id}`,
-          email: googleUser.email!,
-          firstName: googleUser.firstName || '',
-          lastName: googleUser.lastName || '',
-          profileImageUrl: googleUser.profileImageUrl,
+          email: googleUser.email,
+          firstName: googleUser.given_name || '',
+          lastName: googleUser.family_name || '',
+          profileImageUrl: googleUser.picture,
           role: 'customer',
           registrationSource: 'google_oauth',
           isGuest: false,
@@ -385,9 +434,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user = await storage.upsertUser({
           id: user.id,
           email: user.email!,
-          firstName: googleUser.firstName || user.firstName,
-          lastName: googleUser.lastName || user.lastName,
-          profileImageUrl: googleUser.profileImageUrl || user.profileImageUrl,
+          firstName: googleUser.given_name || user.firstName,
+          lastName: googleUser.family_name || user.lastName,
+          profileImageUrl: googleUser.picture || user.profileImageUrl,
           lastLoginAt: new Date(),
         });
       }
@@ -401,7 +450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.redirect('/?auth=success');
     } catch (error) {
       console.error("Google auth callback error:", error);
-      res.redirect('/?auth=error');
+      res.redirect('/?auth=error&reason=server_error');
     }
   });
 

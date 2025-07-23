@@ -63,7 +63,7 @@ export function Footer() {
             <div className="space-y-3">
               <div className="flex items-center">
                 <div className="text-toodles-primary mr-3">📍</div>
-                <span className="text-gray-300">Opposite Vishnu Leela Veg, Kodathi, Off Sarjapur Road, Bangalore</span>
+                <span className="text-gray-300">Sarjapur Main Rd, Bengaluru, Karnataka</span>
               </div>
               <div className="flex items-center">
                 <div className="text-toodles-primary mr-3">📞</div>

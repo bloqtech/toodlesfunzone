@@ -23,7 +23,7 @@ export default function Contact() {
     {
       icon: MapPin,
       title: "Visit Us",
-      details: ["Opposite Vishnu Leela Veg", "Kodathi, Off Sarjapur Road", "Bangalore"],
+      details: ["Sarjapur Main Rd, Bengaluru", "Opposite Vishnu Leela Veg", "Kodathi, Karnataka"],
       color: "from-toodles-primary to-pink-400"
     },
     {
@@ -175,14 +175,14 @@ export default function Contact() {
               {/* Google Maps Embed */}
               <div className="relative h-96 lg:h-[500px]">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.8267888888895!2d77.7037!3d12.9141!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae13b7a5555555%3A0x1234567890abcdef!2sKodathi%2C%20Sarjapur%20Road%2C%20Bangalore%2C%20Karnataka%2C%20India!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.8267888888895!2d77.70366!3d12.91407!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae13b7a5555555%3A0x1234567890abcdef!2sSarjapur%20Main%20Rd%2C%20Bengaluru%2C%20Karnataka!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="Toodles Funzone Location"
+                  title="Toodles Funzone - Sarjapur Main Rd, Bengaluru"
                   className="rounded-lg"
                 />
               </div>
@@ -195,7 +195,8 @@ export default function Contact() {
                       <MapPin className="h-6 w-6" />
                     </div>
                     <h3 className="font-display text-toodles-text mb-2">Address</h3>
-                    <p className="text-gray-600 text-sm">Opposite Vishnu Leela Veg, Kodathi, Off Sarjapur Road, Bangalore</p>
+                    <p className="text-gray-600 text-sm">Sarjapur Main Rd, Bengaluru, Karnataka</p>
+                    <p className="text-gray-500 text-xs">Opposite Vishnu Leela Veg, Kodathi</p>
                   </div>
                   
                   <div className="text-center">
@@ -221,7 +222,7 @@ export default function Contact() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
                   <Button 
                     className="bg-toodles-primary hover:bg-red-600 text-white font-accent font-bold"
-                    onClick={() => window.open('https://maps.google.com/maps?q=Kodathi,+Sarjapur+Road,+Bangalore', '_blank')}
+                    onClick={() => window.open('https://maps.app.goo.gl/xGe8dzTs8CdUdwej6', '_blank')}
                   >
                     <Navigation className="mr-2 h-4 w-4" />
                     Get Directions

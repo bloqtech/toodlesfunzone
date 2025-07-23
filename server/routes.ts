@@ -529,53 +529,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Development auth bypass route
-  app.post('/api/auth/dev-login', async (req, res) => {
-    try {
-      if (process.env.NODE_ENV !== 'development') {
-        return res.status(403).json({ message: "Development login only available in dev mode" });
-      }
-      
-      const { email, firstName, lastName } = req.body;
-      
-      if (!email) {
-        return res.status(400).json({ message: "Email is required" });
-      }
-      
-      // Create or get development user
-      let user = await storage.getUser(email);
-      if (!user) {
-        const newUser = {
-          id: email,
-          email: email,
-          firstName: firstName || 'Dev',
-          lastName: lastName || 'User',
-          role: 'customer' as const,
-          isAdmin: false,
-          phone: '',
-          profileImageUrl: ''
-        };
-        user = await storage.createUser(newUser);
-      }
-      
-      // Set session
-      (req as any).session.userId = user.id;
-      
-      res.json({
-        success: true,
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role
-        }
-      });
-    } catch (error) {
-      console.error("Development login error:", error);
-      res.status(500).json({ message: "Login failed" });
-    }
-  });
+
 
   // Legacy Replit Auth route redirects (for backwards compatibility)  
   app.get('/api/login', (req, res) => {

@@ -106,8 +106,11 @@ export function GoogleAuthButton({
           </>
         )}
 
-        <div className="text-center text-xs text-gray-400 mt-4">
-          By continuing, you agree to our Terms of Service and Privacy Policy
+        <div className="text-center text-xs text-gray-400 mt-4 space-y-2">
+          <p>By continuing, you agree to our Terms of Service and Privacy Policy</p>
+          <div className="bg-amber-50 border border-amber-200 rounded p-2 text-amber-700">
+            <strong>Setup Note:</strong> If Google login fails, see GOOGLE_OAUTH_SETUP.md
+          </div>
         </div>
       </CardContent>
     </Card>

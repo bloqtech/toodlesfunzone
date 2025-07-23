@@ -118,6 +118,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin logout route
+  app.post('/api/admin/logout', async (req: any, res) => {
+    try {
+      // Clear admin session
+      if ((req as any).session) {
+        (req as any).session.destroy((err: any) => {
+          if (err) {
+            console.error("Session destroy error:", err);
+            return res.status(500).json({ message: "Logout failed" });
+          }
+          res.clearCookie('connect.sid'); // Clear session cookie
+          res.json({ success: true, message: "Logged out successfully" });
+        });
+      } else {
+        res.json({ success: true, message: "Already logged out" });
+      }
+    } catch (error) {
+      console.error("Admin logout error:", error);
+      res.status(500).json({ message: "Logout failed" });
+    }
+  });
+
   // Auth routes
   app.get('/api/auth/user', async (req: any, res) => {
     try {

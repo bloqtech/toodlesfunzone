@@ -96,7 +96,27 @@ export function Header() {
                 <Button 
                   variant="outline" 
                   className="hidden md:inline-flex"
-                  onClick={() => window.location.href = '/api/logout'}
+                  onClick={async () => {
+                    if (user?.isAdmin) {
+                      // Admin logout
+                      try {
+                        const response = await fetch('/api/admin/logout', {
+                          method: 'POST',
+                          credentials: 'include'
+                        });
+                        if (response.ok) {
+                          window.location.href = '/';
+                        } else {
+                          console.error('Admin logout failed');
+                        }
+                      } catch (error) {
+                        console.error('Error during admin logout:', error);
+                      }
+                    } else {
+                      // Regular user logout
+                      window.location.href = '/api/logout';
+                    }
+                  }}
                 >
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
@@ -179,7 +199,27 @@ export function Header() {
                         <Button 
                           variant="outline" 
                           className="w-full"
-                          onClick={() => window.location.href = '/api/logout'}
+                          onClick={async () => {
+                            if (user?.isAdmin) {
+                              // Admin logout
+                              try {
+                                const response = await fetch('/api/admin/logout', {
+                                  method: 'POST',
+                                  credentials: 'include'
+                                });
+                                if (response.ok) {
+                                  window.location.href = '/';
+                                } else {
+                                  console.error('Admin logout failed');
+                                }
+                              } catch (error) {
+                                console.error('Error during admin logout:', error);
+                              }
+                            } else {
+                              // Regular user logout
+                              window.location.href = '/api/logout';
+                            }
+                          }}
                         >
                           <LogOut className="h-4 w-4 mr-2" />
                           Logout

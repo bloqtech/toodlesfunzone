@@ -1,7 +1,21 @@
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
 
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+// Extract Client ID from URL format if needed
+function extractClientId(rawClientId: string | undefined): string | undefined {
+  if (!rawClientId) return undefined;
+  
+  // If it starts with https://, extract the client ID from the URL
+  if (rawClientId.startsWith('https://')) {
+    // Extract the client ID from URLs like: https://858512081639-tm1sb5831jgoqamke43gf38fumqp.apps.googleusercontent.com
+    const match = rawClientId.match(/https:\/\/([^\/]+)/);
+    return match ? match[1] : rawClientId;
+  }
+  
+  return rawClientId;
+}
+
+const CLIENT_ID = extractClientId(process.env.GOOGLE_CLIENT_ID);
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
 // Use current domain from REPLIT_DOMAINS or fallback to localhost

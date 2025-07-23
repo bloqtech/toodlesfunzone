@@ -366,23 +366,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.redirect('/?auth=error&reason=oauth_config');
       }
       
-      // Check if we're in development mode and redirect URI mismatch
+      // For development, use the current domain; for production, use configured URI
       const isDevelopment = process.env.NODE_ENV === 'development';
-      const configuredRedirectUri = process.env.GOOGLE_REDIRECT_URI;
       const currentHost = req.get('host');
-      
-      if (isDevelopment && configuredRedirectUri && !configuredRedirectUri.includes(currentHost)) {
-        console.warn("Redirect URI mismatch in development mode:", {
-          configured: configuredRedirectUri,
-          current: `${req.protocol}://${currentHost}/api/auth/google/callback`
-        });
-        return res.redirect('/?auth=error&reason=redirect_uri_mismatch');
-      }
       
       // Simple Google OAuth URL generation without external module
       const clientId = process.env.GOOGLE_CLIENT_ID;
-      // Use the configured redirect URI or fallback to dynamic
-      const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/google/callback`;
+      // In development, always use current domain; in production, use configured URI
+      const redirectUri = isDevelopment 
+        ? `${req.protocol}://${currentHost}/api/auth/google/callback`
+        : process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${currentHost}/api/auth/google/callback`;
       const scope = 'email profile';
       const state = Math.random().toString(36).substring(7);
       
@@ -425,7 +418,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           client_secret: process.env.GOOGLE_CLIENT_SECRET!,
           code: code as string,
           grant_type: 'authorization_code',
-          redirect_uri: process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/google/callback`,
+          redirect_uri: process.env.NODE_ENV === 'development' 
+            ? `${req.protocol}://${req.get('host')}/api/auth/google/callback`
+            : process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/google/callback`,
         }),
       });
 

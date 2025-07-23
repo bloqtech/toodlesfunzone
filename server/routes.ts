@@ -370,8 +370,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isDevelopment = process.env.NODE_ENV === 'development';
       const currentHost = req.get('host');
       
-      // Simple Google OAuth URL generation without external module
-      const clientId = process.env.GOOGLE_CLIENT_ID;
+      // Extract Client ID from URL format if needed (fix for incorrect secret format)
+      function extractClientId(rawClientId: string | undefined): string | undefined {
+        if (!rawClientId) return undefined;
+        if (rawClientId.startsWith('https://')) {
+          const match = rawClientId.match(/https:\/\/([^\/]+)/);
+          return match ? match[1] : rawClientId;
+        }
+        return rawClientId;
+      }
+
+      const clientId = extractClientId(process.env.GOOGLE_CLIENT_ID);
       // In development, use HTTPS for Replit domains; in production, use configured URI
       const redirectUri = isDevelopment 
         ? `https://${currentHost}/api/auth/google/callback`
@@ -380,13 +389,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const state = Math.random().toString(36).substring(7);
       
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${encodeURIComponent(clientId)}&` +
+        `client_id=${encodeURIComponent(clientId!)}&` +
         `redirect_uri=${encodeURIComponent(redirectUri)}&` +
         `scope=${encodeURIComponent(scope)}&` +
         `response_type=code&` +
         `state=${state}`;
       
       console.log("Redirecting to Google OAuth with redirect URI:", redirectUri);
+      console.log("Using Client ID:", clientId);
+      console.log("Raw Client ID from env:", process.env.GOOGLE_CLIENT_ID?.substring(0, 50) + '...');
       res.redirect(authUrl);
     } catch (error) {
       console.error("Error initiating Google auth:", error);
@@ -414,7 +425,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          client_id: process.env.GOOGLE_CLIENT_ID!,
+          client_id: (() => {
+            const rawId = process.env.GOOGLE_CLIENT_ID;
+            return rawId?.startsWith('https://') ? rawId.match(/https:\/\/([^\/]+)/)?.[1] || rawId : rawId;
+          })()!,
           client_secret: process.env.GOOGLE_CLIENT_SECRET!,
           code: code as string,
           grant_type: 'authorization_code',

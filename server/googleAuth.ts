@@ -31,10 +31,7 @@ export async function getGoogleUserInfo(code: string) {
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
-    const oauth2 = google.oauth2({
-      auth: oauth2Client,
-      version: 'v2'
-    });
+    const oauth2 = google.oauth2('v2');
 
     const { data } = await oauth2.userinfo.get();
     

@@ -516,6 +516,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedBookingData = insertBookingSchema.parse(bookingData);
       
       // Check availability before creating booking
+      if (!validatedBookingData.timeSlotId) {
+        return res.status(400).json({ message: "Time slot ID is required" });
+      }
+      
       const availability = await storage.getTimeSlotAvailability(
         validatedBookingData.timeSlotId,
         validatedBookingData.bookingDate
@@ -527,7 +531,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      if (availability.remaining < validatedBookingData.numberOfChildren) {
+      const numChildren = validatedBookingData.numberOfChildren || 1;
+      if (availability.remaining < numChildren) {
         return res.status(400).json({ 
           message: `Not enough capacity. Only ${availability.remaining} spots available` 
         });
@@ -542,8 +547,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Send confirmation email and WhatsApp
       try {
-        await sendBookingConfirmation(result.booking, await storage.getPackageById(result.booking.packageId!));
-        await sendWhatsAppNotification(result.booking, "booking_confirmation");
+        if (result.booking.packageId) {
+          const packageData = await storage.getPackageById(result.booking.packageId);
+          if (packageData) {
+            await sendBookingConfirmation(result.booking, packageData);
+          }
+        }
+        await sendWhatsAppNotification({
+          bookingId: result.booking.id.toString(),
+          customerName: result.booking.customerName || '',
+          customerPhone: result.booking.customerPhone || '',
+          packageName: '', // Will be populated by the notification service
+          date: result.booking.bookingDate?.toISOString() || '',
+          timeSlot: '', // Will be populated by the notification service
+          numberOfChildren: result.booking.numberOfChildren || 1,
+          totalAmount: result.booking.totalAmount || '0',
+          status: result.booking.status || 'pending'
+        }, "booking_confirmation");
       } catch (emailError) {
         console.error("Failed to send confirmation:", emailError);
       }
@@ -588,6 +608,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Check availability before creating booking
+      if (!validatedData.timeSlotId) {
+        return res.status(400).json({ message: "Time slot ID is required" });
+      }
+      
       const availability = await storage.getTimeSlotAvailability(validatedData.timeSlotId, validatedData.bookingDate);
       if (!availability.available) {
         return res.status(400).json({ 
@@ -606,27 +630,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const booking = await storage.createBooking(validatedData);
       
       // Send email notification
-      await sendBookingConfirmation(booking);
+      if (booking.packageId) {
+        const packageData = await storage.getPackageById(booking.packageId);
+        if (packageData) {
+          await sendBookingConfirmation(booking, packageData);
+        }
+      }
       
       // Send WhatsApp notifications to both customer and Toodles
       try {
         const { sendBookingConfirmationToCustomer, sendBookingNotificationToToodles } = await import('./whatsapp');
         
-        // Get package and time slot details for notification
-        const packageDetails = await storage.getPackageById(booking.packageId);
-        const timeSlot = await storage.getTimeSlotById(booking.timeSlotId);
+        // Get package details for notification
+        const packageDetails = booking.packageId ? await storage.getPackageById(booking.packageId) : null;
         
-        if (packageDetails && timeSlot) {
+        if (packageDetails) {
           const notificationData = {
             bookingId: booking.id.toString(),
-            customerName: booking.parentName,
-            customerPhone: booking.parentPhone,
+            customerName: booking.customerName || '',
+            customerPhone: booking.customerPhone || '',
             packageName: packageDetails.name,
-            date: booking.bookingDate,
-            timeSlot: `${timeSlot.startTime} - ${timeSlot.endTime}`,
-            numberOfChildren: booking.numberOfChildren,
-            totalAmount: booking.totalAmount,
-            status: booking.status
+            date: booking.bookingDate?.toISOString() || '',
+            timeSlot: '', // Will be populated by notification service
+            numberOfChildren: booking.numberOfChildren || 1,
+            totalAmount: booking.totalAmount || '0',
+            status: booking.status || 'pending'
           };
 
           // Send notifications to both customer and Toodles simultaneously

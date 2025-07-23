@@ -340,9 +340,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/google', async (req, res) => {
     try {
       if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-        return res.status(503).json({ 
-          message: "Google OAuth not configured. Please provide GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables." 
-        });
+        console.warn("Google OAuth credentials missing");
+        return res.redirect('/?auth=error&reason=oauth_config');
       }
       
       // Simple Google OAuth URL generation without external module
@@ -358,10 +357,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `response_type=code&` +
         `state=${state}`;
       
+      console.log("Redirecting to Google OAuth with redirect URI:", redirectUri);
       res.redirect(authUrl);
     } catch (error) {
       console.error("Error initiating Google auth:", error);
-      res.status(500).json({ message: "Failed to initiate Google OAuth" });
+      res.redirect('/?auth=error&reason=server_error');
     }
   });
 

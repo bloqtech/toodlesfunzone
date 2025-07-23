@@ -24,9 +24,16 @@ export default function AuthPage() {
       // Redirect to booking or dashboard
       setLocation('/');
     } else if (authResult === 'error') {
+      const reason = urlParams.get('reason');
+      let errorMessage = "There was an error signing in with Google.";
+      
+      if (reason === 'oauth_config') {
+        errorMessage = "Google OAuth is temporarily unavailable. Please use guest mode or try again later.";
+      }
+      
       toast({
-        title: "Authentication Failed",
-        description: "There was an error signing in with Google. Please try again.",
+        title: "Authentication Temporarily Unavailable",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -77,6 +84,15 @@ export default function AuthPage() {
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Notice about OAuth setup */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+              <p className="text-sm text-amber-800 font-accent">
+                <strong>Notice:</strong> Google sign-in is currently being configured. 
+                <br />
+                Please continue as a guest to access all booking features.
+              </p>
+            </div>
+
             <GoogleAuthButton
               onAuthSuccess={handleAuthSuccess}
               onGuestContinue={handleGuestContinue}

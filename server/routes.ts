@@ -429,10 +429,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          client_id: (() => {
-            const rawId = process.env.GOOGLE_CLIENT_ID;
-            return rawId?.startsWith('https://') ? rawId.match(/https:\/\/([^\/]+)/)?.[1] || rawId : rawId;
-          })()!,
+          client_id: extractClientId(process.env.GOOGLE_CLIENT_ID)!,
           client_secret: process.env.GOOGLE_CLIENT_SECRET!,
           code: code as string,
           grant_type: 'authorization_code',
@@ -443,6 +440,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const tokenData = await tokenResponse.json();
+      
+      console.log("Token exchange response:", tokenData);
+      console.log("Using Client ID for token exchange:", extractClientId(process.env.GOOGLE_CLIENT_ID));
+      console.log("Token response status:", tokenResponse.status);
       
       if (!tokenData.access_token) {
         console.error("Failed to get access token:", tokenData);

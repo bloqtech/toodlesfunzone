@@ -6,8 +6,8 @@ export default function AdminLoginPage() {
 
   const handleLoginSuccess = (user: any) => {
     console.log("Admin login successful:", user);
-    // Redirect to admin dashboard or reload the page
-    window.location.reload();
+    // Redirect to admin dashboard
+    setLocation("/admin/dashboard");
   };
 
   return <AdminLogin onLoginSuccess={handleLoginSuccess} />;

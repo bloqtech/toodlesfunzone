@@ -529,9 +529,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Legacy Replit Auth route redirects (for backwards compatibility)
+  // Legacy Replit Auth route redirects (for backwards compatibility)  
   app.get('/api/login', (req, res) => {
-    res.redirect('/auth');
+    res.redirect('/api/auth/google');
   });
 
   app.get('/api/logout', (req, res) => {

@@ -10,6 +10,7 @@ import { useAnalytics } from "./hooks/use-analytics";
 import { usePerformanceTracking } from "./hooks/use-performance";
 import MascotScrollAnimation from "@/components/ui/mascot-scroll-animation";
 import FloatingMascot from "@/components/ui/floating-mascot";
+import InteractiveMascot from "@/components/ui/interactive-mascot";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -90,7 +91,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
-        <FloatingMascot />
+        <InteractiveMascot />
       </TooltipProvider>
     </QueryClientProvider>
   );

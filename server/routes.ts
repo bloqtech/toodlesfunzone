@@ -372,9 +372,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Simple Google OAuth URL generation without external module
       const clientId = process.env.GOOGLE_CLIENT_ID;
-      // In development, always use current domain; in production, use configured URI
+      // In development, use HTTPS for Replit domains; in production, use configured URI
       const redirectUri = isDevelopment 
-        ? `${req.protocol}://${currentHost}/api/auth/google/callback`
+        ? `https://${currentHost}/api/auth/google/callback`
         : process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${currentHost}/api/auth/google/callback`;
       const scope = 'email profile';
       const state = Math.random().toString(36).substring(7);
@@ -419,7 +419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           code: code as string,
           grant_type: 'authorization_code',
           redirect_uri: process.env.NODE_ENV === 'development' 
-            ? `${req.protocol}://${req.get('host')}/api/auth/google/callback`
+            ? `https://${req.get('host')}/api/auth/google/callback`
             : process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/google/callback`,
         }),
       });

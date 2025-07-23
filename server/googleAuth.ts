@@ -28,6 +28,9 @@ export function getGoogleAuthUrl(): string {
     'https://www.googleapis.com/auth/userinfo.profile'
   ];
 
+  console.log('OAuth2Client redirect URI:', REDIRECT_URI);
+  console.log('OAuth2Client configured with Client ID:', CLIENT_ID ? 'Present' : 'Missing');
+
   return oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: scopes,

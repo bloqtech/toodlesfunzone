@@ -29,6 +29,8 @@ export default function AuthPage() {
       
       if (reason === 'oauth_config') {
         errorMessage = "Google OAuth is temporarily unavailable. Please use guest mode or try again later.";
+      } else if (reason === 'redirect_uri_mismatch') {
+        errorMessage = "Google OAuth configuration mismatch. In development mode, the redirect URI needs to match the current domain.";
       }
       
       toast({

@@ -123,22 +123,12 @@ export function Header() {
                 </Button>
               </>
             ) : (
-              <div className="flex items-center space-x-2">
-                <Button 
-                  className="bg-toodles-primary hover:bg-red-600 text-white font-accent font-medium"
-                  onClick={() => window.location.href = '/api/login'}
-                >
-                  Login
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="font-accent font-medium"
-                  onClick={() => window.location.href = '/admin/login'}
-                >
-                  <Shield className="h-4 w-4 mr-2" />
-                  Admin
-                </Button>
-              </div>
+              <Button 
+                className="bg-toodles-primary hover:bg-red-600 text-white font-accent font-medium"
+                onClick={() => window.location.href = '/api/login'}
+              >
+                Login
+              </Button>
             )}
             
             {/* Mobile menu button */}
@@ -236,22 +226,12 @@ export function Header() {
                         </Button>
                       </>
                     ) : (
-                      <div className="space-y-2">
-                        <Button 
-                          className="w-full bg-toodles-primary hover:bg-red-600 text-white font-accent font-medium"
-                          onClick={() => window.location.href = '/api/login'}
-                        >
-                          Login
-                        </Button>
-                        <Button 
-                          variant="outline"
-                          className="w-full font-accent font-medium"
-                          onClick={() => window.location.href = '/admin/login'}
-                        >
-                          <Shield className="h-4 w-4 mr-2" />
-                          Admin Login
-                        </Button>
-                      </div>
+                      <Button 
+                        className="w-full bg-toodles-primary hover:bg-red-600 text-white font-accent font-medium"
+                        onClick={() => window.location.href = '/api/login'}
+                      >
+                        Login
+                      </Button>
                     )}
                   </div>
                 </nav>

@@ -30,6 +30,7 @@ import AdminOperatingHours from "@/pages/admin/operating-hours";
 import AdminAddOns from "@/pages/admin/addons-management";
 import AdminLoginPage from "@/pages/admin-login";
 import AuthPage from "@/pages/auth";
+import { AdminAccessDot } from "@/components/admin/admin-access-dot";
 
 function Router() {
   // Track page views when routes change
@@ -89,7 +90,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
-
+        <AdminAccessDot />
       </TooltipProvider>
     </QueryClientProvider>
   );

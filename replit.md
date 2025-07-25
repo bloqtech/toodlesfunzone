@@ -50,7 +50,7 @@ Preferred communication style: Simple, everyday language.
 - **Advanced User Management**: Full profile editing, role assignment, permission management
 - **Session Management**: PostgreSQL storage with role persistence and customer sessions
 - **Permission System**: Hierarchical permissions with role-based defaults and custom overrides
-- **Admin Portal**: Dedicated admin login route (/admin/login) for local administrator access
+- **Admin Portal**: Dedicated admin login route (/admin/login) for local administrator access with discreet access dot (bottom-right corner)
 - **Customer Portal**: Customer login/registration routes (/api/customer/login, /api/customer/register)
 - **Booking History**: Customers can view booking history by email (guest) or account (registered users)
 

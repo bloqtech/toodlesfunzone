@@ -10,6 +10,7 @@ import {
   blogPosts,
   enquiries,
   operatingHours,
+  activities,
   type User,
   type UpsertUser,
   type Package,
@@ -22,6 +23,7 @@ import {
   type BlogPost,
   type Enquiry,
   type OperatingHours,
+  type Activity,
   type InsertPackage,
   type InsertTimeSlot,
   type InsertBooking,
@@ -32,6 +34,7 @@ import {
   type InsertBlogPost,
   type InsertEnquiry,
   type InsertOperatingHours,
+  type InsertActivity,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, asc, sql, count } from "drizzle-orm";
@@ -148,6 +151,13 @@ export interface IStorage {
   getOperatingHours(): Promise<OperatingHours[]>;
   updateOperatingHours(hoursData: { [key: number]: { openTime: string; closeTime: string; isOpen: boolean } }): Promise<OperatingHours[]>;
   getOperatingHoursByDay(dayOfWeek: number): Promise<OperatingHours | undefined>;
+  
+  // Activity operations
+  getActivities(): Promise<Activity[]>;
+  getActivityById(id: number): Promise<Activity | undefined>;
+  createActivity(activityData: InsertActivity): Promise<Activity>;
+  updateActivity(id: number, activityData: Partial<InsertActivity>): Promise<Activity>;
+  deleteActivity(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -821,6 +831,34 @@ export class DatabaseStorage implements IStorage {
       .from(operatingHours)
       .where(eq(operatingHours.dayOfWeek, dayOfWeek));
     return hours;
+  }
+
+  // Activity operations
+  async getActivities(): Promise<Activity[]> {
+    return await db.select().from(activities).orderBy(asc(activities.displayOrder), asc(activities.id));
+  }
+
+  async getActivityById(id: number): Promise<Activity | undefined> {
+    const [activity] = await db.select().from(activities).where(eq(activities.id, id));
+    return activity;
+  }
+
+  async createActivity(activityData: InsertActivity): Promise<Activity> {
+    const [activity] = await db.insert(activities).values(activityData).returning();
+    return activity;
+  }
+
+  async updateActivity(id: number, activityData: Partial<InsertActivity>): Promise<Activity> {
+    const [activity] = await db
+      .update(activities)
+      .set({ ...activityData, updatedAt: new Date() })
+      .where(eq(activities.id, id))
+      .returning();
+    return activity;
+  }
+
+  async deleteActivity(id: number): Promise<void> {
+    await db.delete(activities).where(eq(activities.id, id));
   }
 }
 

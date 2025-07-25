@@ -15,7 +15,7 @@ import { Plus, Edit, Trash2, Image, Save, X, Palette, Upload, Loader2 } from "lu
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Activity {
-  id: string;
+  id: number;
   title: string;
   description: string;
   image: string;
@@ -47,7 +47,16 @@ export default function ActivitiesManagement() {
 
   const addActivityMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const response = await apiRequest('POST', '/api/admin/activities', data);
+      const dbData = {
+        title: data.title,
+        description: data.description,
+        image: data.image,
+        gradient: data.gradient,
+        icon: data.icon,
+        ageGroup: data.ageGroup,
+        isActive: data.isActive
+      };
+      const response = await apiRequest('POST', '/api/admin/activities', dbData);
       return response.json();
     },
     onSuccess: () => {
@@ -69,8 +78,17 @@ export default function ActivitiesManagement() {
   });
 
   const updateActivityMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: typeof formData }) => {
-      const response = await apiRequest('PUT', `/api/admin/activities/${id}`, data);
+    mutationFn: async ({ id, data }: { id: number; data: typeof formData }) => {
+      const dbData = {
+        title: data.title,
+        description: data.description,
+        image: data.image,
+        gradient: data.gradient,
+        icon: data.icon,
+        ageGroup: data.ageGroup,
+        isActive: data.isActive
+      };
+      const response = await apiRequest('PUT', `/api/admin/activities/${id}`, dbData);
       return response.json();
     },
     onSuccess: () => {
@@ -92,7 +110,7 @@ export default function ActivitiesManagement() {
   });
 
   const deleteActivityMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: number) => {
       const response = await apiRequest('DELETE', `/api/admin/activities/${id}`);
       return response.json();
     },

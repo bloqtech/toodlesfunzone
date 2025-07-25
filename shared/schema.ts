@@ -241,6 +241,21 @@ export const addOns = pgTable("add_ons", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Activities table
+export const activities = pgTable("activities", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  image: varchar("image"),
+  gradient: varchar("gradient").default("from-toodles-primary to-pink-400"),
+  icon: varchar("icon").default("🎪"),
+  ageGroup: varchar("age_group"),
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   bookings: many(bookings),
@@ -316,6 +331,7 @@ export const insertBlogPostSchema = createInsertSchema(blogPosts);
 export const insertEnquirySchema = createInsertSchema(enquiries);
 export const insertOperatingHoursSchema = createInsertSchema(operatingHours);
 export const insertAddOnSchema = createInsertSchema(addOns);
+export const insertActivitySchema = createInsertSchema(activities);
 
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
@@ -342,6 +358,8 @@ export type InsertEnquiry = z.infer<typeof insertEnquirySchema>;
 export type InsertOperatingHours = z.infer<typeof insertOperatingHoursSchema>;
 export type AddOn = typeof addOns.$inferSelect;
 export type InsertAddOn = z.infer<typeof insertAddOnSchema>;
+export type Activity = typeof activities.$inferSelect;
+export type InsertActivity = z.infer<typeof insertActivitySchema>;
 
 // Define permission constants
 export const PERMISSIONS = {

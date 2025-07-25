@@ -241,16 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get active activities for homepage
   app.get('/api/activities', async (req, res) => {
     try {
-      const activities = [
-        { id: '1', title: 'Soft Play Zone', description: 'Safe foam blocks, tunnels, and climbing structures for toddlers', image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-toodles-primary to-pink-400', icon: '🏰', ageGroup: '2-5 years', safetyRating: 5, isActive: true },
-        { id: '2', title: 'Adventure Zone', description: 'Slides, climbing walls, and obstacle courses for active kids', image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-toodles-secondary to-blue-400', icon: '🏃', ageGroup: '5-12 years', safetyRating: 4, isActive: true },
-        { id: '3', title: 'Ball Pit Paradise', description: 'Thousands of colorful balls for endless diving fun', image: 'https://images.unsplash.com/photo-1570554886111-e80fcca6a029?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-toodles-accent to-orange-400', icon: '⚽', ageGroup: '3-10 years', safetyRating: 5, isActive: true },
-        { id: '4', title: 'Bouncy Castle', description: 'Safe trampolines and bounce houses for jumping joy', image: 'https://pixabay.com/get/gb1920997e34194c0a6df14b76cedbb086800e74192608c7fd1daceead1ae4d0f878e01b8e77d5c945f2d265b58138617bdc5a2b48ba2c3fd0f50dbafe43661d1_1280.jpg', gradient: 'from-toodles-success to-green-400', icon: '🏰', ageGroup: '4-12 years', safetyRating: 4, isActive: true },
-        { id: '5', title: 'Sensory Play', description: 'Textures, sounds, and interactive elements for development', image: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-purple-400 to-pink-500', icon: '🎨', ageGroup: '2-6 years', safetyRating: 5, isActive: true },
-        { id: '6', title: 'Creative Corner', description: 'Arts, crafts, and imaginative play activities', image: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-indigo-400 to-purple-500', icon: '✨', ageGroup: '3-12 years', safetyRating: 5, isActive: true },
-        { id: '7', title: 'Mini Rides', description: 'Safe ride-on toys and mini train adventures', image: 'https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-teal-400 to-cyan-500', icon: '🚂', ageGroup: '2-8 years', safetyRating: 4, isActive: true },
-        { id: '8', title: 'Toddler Zone', description: 'Special area designed for our youngest visitors (2-4 years)', image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-red-400 to-pink-500', icon: '👶', ageGroup: '2-4 years', safetyRating: 5, isActive: true }
-      ];
+      const activities = await storage.getActivities();
       // Only return active activities
       const activeActivities = activities.filter(activity => activity.isActive);
       res.json(activeActivities);
@@ -1398,17 +1389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Activities Management
   app.get('/api/admin/activities', isAuthenticated, adminAuth, async (req, res) => {
     try {
-      // Mock data for now - should be replaced with database calls
-      const activities = [
-        { id: '1', title: 'Soft Play Zone', description: 'Safe foam blocks, tunnels, and climbing structures for toddlers', image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-toodles-primary to-pink-400', icon: '🏰', ageGroup: '2-5 years', isActive: true },
-        { id: '2', title: 'Adventure Zone', description: 'Slides, climbing walls, and obstacle courses for active kids', image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-toodles-secondary to-blue-400', icon: '🏃', ageGroup: '5-12 years', isActive: true },
-        { id: '3', title: 'Ball Pit Paradise', description: 'Thousands of colorful balls for endless diving fun', image: 'https://images.unsplash.com/photo-1570554886111-e80fcca6a029?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-toodles-accent to-orange-400', icon: '⚽', ageGroup: '3-10 years', isActive: true },
-        { id: '4', title: 'Bouncy Castle', description: 'Safe trampolines and bounce houses for jumping joy', image: 'https://pixabay.com/get/gb1920997e34194c0a6df14b76cedbb086800e74192608c7fd1daceead1ae4d0f878e01b8e77d5c945f2d265b58138617bdc5a2b48ba2c3fd0f50dbafe43661d1_1280.jpg', gradient: 'from-toodles-success to-green-400', icon: '🏰', ageGroup: '4-12 years', isActive: true },
-        { id: '5', title: 'Sensory Play', description: 'Textures, sounds, and interactive elements for development', image: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-purple-400 to-pink-500', icon: '🎨', ageGroup: '2-6 years', isActive: true },
-        { id: '6', title: 'Creative Corner', description: 'Arts, crafts, and imaginative play activities', image: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-indigo-400 to-purple-500', icon: '✨', ageGroup: '3-12 years', isActive: true },
-        { id: '7', title: 'Mini Rides', description: 'Safe ride-on toys and mini train adventures', image: 'https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-teal-400 to-cyan-500', icon: '🚂', ageGroup: '2-8 years', isActive: true },
-        { id: '8', title: 'Toddler Zone', description: 'Special area designed for our youngest visitors (2-4 years)', image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&h=200', gradient: 'from-red-400 to-pink-500', icon: '👶', ageGroup: '2-4 years', isActive: true }
-      ];
+      const activities = await storage.getActivities();
       res.json(activities);
     } catch (error) {
       console.error("Error fetching activities:", error);
@@ -1418,7 +1399,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/activities', isAuthenticated, adminAuth, async (req, res) => {
     try {
-      const activity = { id: Date.now().toString(), ...req.body };
+      const activityData = req.body;
+      const activity = await storage.createActivity(activityData);
       res.json(activity);
     } catch (error) {
       console.error("Error creating activity:", error);
@@ -1428,7 +1410,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/admin/activities/:id', isAuthenticated, adminAuth, async (req, res) => {
     try {
-      const activity = { id: req.params.id, ...req.body };
+      const id = parseInt(req.params.id);
+      const activityData = req.body;
+      const activity = await storage.updateActivity(id, activityData);
       res.json(activity);
     } catch (error) {
       console.error("Error updating activity:", error);
@@ -1438,6 +1422,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/admin/activities/:id', isAuthenticated, adminAuth, async (req, res) => {
     try {
+      const id = parseInt(req.params.id);
+      await storage.deleteActivity(id);
       res.json({ message: "Activity deleted successfully" });
     } catch (error) {
       console.error("Error deleting activity:", error);

@@ -477,21 +477,20 @@ export default function BirthdayManagement() {
                       </Badge>
                     </div>
                     
-                    {pkg.features.length > 0 && (
-                      <div className="mt-3">
-                        <p className="text-xs text-gray-500 mb-1">Features:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {pkg.features.slice(0, 2).map((feature, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {feature}
-                            </Badge>
-                          ))}
-                          {pkg.features.length > 2 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{pkg.features.length - 2} more
-                            </Badge>
-                          )}
-                        </div>
+                    {pkg.features && pkg.features.length > 0 && (
+                      <div className="mt-3 space-y-1">
+                        {pkg.features.slice(0, 3).map((feature, index) => (
+                          <div key={index} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                            <span className="text-base">🎁</span>
+                            <span className="text-xs">{feature}</span>
+                          </div>
+                        ))}
+                        {pkg.features.length > 3 && (
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span className="text-base">✨</span>
+                            <span className="text-xs">+{pkg.features.length - 3} more features</span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </CardContent>

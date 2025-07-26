@@ -217,29 +217,30 @@ export default function BirthdayManagement() {
                   Add Birthday Package
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto bg-white dark:bg-gray-800 border shadow-xl">
                 <DialogHeader>
-                  <DialogTitle>Add New Birthday Package</DialogTitle>
+                  <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">Add New Birthday Package</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name">Package Name</Label>
+                <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">Package Name</Label>
                       <Input
                         id="name"
                         value={formData.name}
                         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                         required
                         placeholder="e.g., Princess Party Deluxe"
+                        className="w-full"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="decorationTheme">Decoration Theme</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="decorationTheme" className="text-sm font-medium text-gray-700 dark:text-gray-300">Decoration Theme</Label>
                       <Select 
                         value={formData.decorationTheme} 
                         onValueChange={(value) => setFormData(prev => ({ ...prev, decorationTheme: value }))}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select theme" />
                         </SelectTrigger>
                         <SelectContent>
@@ -251,20 +252,21 @@ export default function BirthdayManagement() {
                     </div>
                   </div>
                   
-                  <div>
-                    <Label htmlFor="description">Description</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                       required
                       placeholder="Detailed description of the birthday package"
+                      className="w-full min-h-[100px]"
                     />
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="price">Price (₹)</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="price" className="text-sm font-medium text-gray-700 dark:text-gray-300">Price (₹)</Label>
                       <Input
                         id="price"
                         type="number"
@@ -272,10 +274,11 @@ export default function BirthdayManagement() {
                         onChange={(e) => setFormData(prev => ({ ...prev, price: parseInt(e.target.value) }))}
                         required
                         min="0"
+                        className="w-full"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="duration">Duration (hours)</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="duration" className="text-sm font-medium text-gray-700 dark:text-gray-300">Duration (hours)</Label>
                       <Input
                         id="duration"
                         type="number"
@@ -284,13 +287,14 @@ export default function BirthdayManagement() {
                         required
                         min="1"
                         max="8"
+                        className="w-full"
                       />
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="maxGuests">Maximum Guests</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="maxGuests" className="text-sm font-medium text-gray-700 dark:text-gray-300">Maximum Guests</Label>
                       <Input
                         id="maxGuests"
                         type="number"
@@ -299,40 +303,43 @@ export default function BirthdayManagement() {
                         required
                         min="1"
                         max="50"
+                        className="w-full"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="ageGroup">Age Group</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="ageGroup" className="text-sm font-medium text-gray-700 dark:text-gray-300">Age Group</Label>
                       <Input
                         id="ageGroup"
                         value={formData.ageGroup}
                         onChange={(e) => setFormData(prev => ({ ...prev, ageGroup: e.target.value }))}
                         placeholder="e.g., 5-12 years"
+                        className="w-full"
                       />
                     </div>
                   </div>
                   
-                  <div>
-                    <Label htmlFor="image">Package Image URL</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="image" className="text-sm font-medium text-gray-700 dark:text-gray-300">Package Image URL</Label>
                     <Input
                       id="image"
                       value={formData.image}
                       onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
                       placeholder="https://example.com/birthday-package.jpg"
+                      className="w-full"
                     />
                   </div>
                   
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label>Package Features</Label>
-                      <Button type="button" size="sm" onClick={addFeature}>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Package Features</Label>
+                      <Button type="button" size="sm" onClick={addFeature} className="bg-toodles-primary hover:bg-toodles-primary/80">
                         <Plus className="h-3 w-3 mr-1" />
                         Add Feature
                       </Button>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {formData.features.map((feature, index) => (
-                        <div key={index} className="flex items-center space-x-2">
+                        <div key={index} className="flex items-center gap-3">
                           <Input
                             value={feature}
                             onChange={(e) => updateFeature(index, e.target.value)}
@@ -345,6 +352,7 @@ export default function BirthdayManagement() {
                               size="sm" 
                               variant="outline"
                               onClick={() => removeFeature(index)}
+                              className="shrink-0"
                             >
                               <Trash2 className="h-3 w-3" />
                             </Button>
@@ -354,34 +362,36 @@ export default function BirthdayManagement() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex items-center space-x-3">
                       <input
                         type="checkbox"
                         id="isActive"
                         checked={formData.isActive}
                         onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                        className="h-4 w-4 text-toodles-primary"
                       />
-                      <Label htmlFor="isActive">Active (visible to customers)</Label>
+                      <Label htmlFor="isActive" className="text-sm font-medium text-gray-700 dark:text-gray-300">Active (visible to customers)</Label>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-3">
                       <input
                         type="checkbox"
                         id="isPopular"
                         checked={formData.isPopular}
                         onChange={(e) => setFormData(prev => ({ ...prev, isPopular: e.target.checked }))}
+                        className="h-4 w-4 text-toodles-primary"
                       />
-                      <Label htmlFor="isPopular">Mark as Popular</Label>
+                      <Label htmlFor="isPopular" className="text-sm font-medium text-gray-700 dark:text-gray-300">Mark as Popular</Label>
                     </div>
                   </div>
                   
-                  <div className="flex justify-end space-x-2">
-                    <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
+                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)} className="min-w-[80px]">
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={addPackageMutation.isPending}>
+                    <Button type="submit" disabled={addPackageMutation.isPending} className="bg-toodles-primary hover:bg-toodles-primary/80 min-w-[120px]">
                       <Save className="h-4 w-4 mr-2" />
-                      Add Package
+                      {addPackageMutation.isPending ? 'Saving...' : 'Add Package'}
                     </Button>
                   </div>
                 </form>
@@ -492,11 +502,11 @@ export default function BirthdayManagement() {
 
           {/* Edit Dialog */}
           <Dialog open={!!editingPackage} onOpenChange={() => setEditingPackage(null)}>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto bg-white dark:bg-gray-800 border shadow-xl">
               <DialogHeader>
-                <DialogTitle>Edit Birthday Package</DialogTitle>
+                <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">Edit Birthday Package</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-6 pt-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-name">Package Name</Label>

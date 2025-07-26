@@ -425,33 +425,37 @@ export default function ActivitiesManagement() {
                         {activity.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </div>
-                    {/* Display description and features */}
+                    {/* Display features in consistent bullet point format */}
                     {(() => {
                       const lines = activity.description.split('\n').filter(line => line.trim());
-                      const features = lines.filter(line => line.includes('🧗') || line.includes('🐛') || line.includes('🧱') || line.includes('🏖️') || line.includes('🏀') || line.includes('🎉') || line.match(/^[🎯🎪🏃🧸🏊🚀🎨🎮🎭🎨🎯].+/));
-                      const description = lines.filter(line => !line.match(/^[🎯🎪🏃🧸🏊🚀🎨🎮🎭🎨🎯🧗🐛🧱🏖️🏀🎉]/));
                       
-                      return (
-                        <div className="mb-3 space-y-2">
-                          {/* Show description text */}
-                          {description.length > 0 && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {description.join(' ')}
-                            </p>
-                          )}
-                          
-                          {/* Show features as bullet points */}
-                          {features.length > 0 && (
-                            <div className="space-y-1">
-                              {features.map((feature, index) => (
-                                <div key={index} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                  <span>{feature.trim()}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
+                      // Check if description already has emoji features
+                      const hasEmojiFeatures = lines.some(line => line.match(/^[🎯🎪🏃🧸🏊🚀🎨🎮🎭🎨🎯🧗🐛🧱🏖️🏀🎉]/));
+                      
+                      if (hasEmojiFeatures) {
+                        // Show existing emoji features
+                        const features = lines.filter(line => line.match(/^[🎯🎪🏃🧸🏊🚀🎨🎮🎭🎨🎯🧗🐛🧱🏖️🏀🎉]/));
+                        return (
+                          <div className="mb-3 space-y-1">
+                            {features.map((feature, index) => (
+                              <div key={index} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                <span>{feature.trim()}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      } else {
+                        // Convert plain text to bullet points with consistent emoji
+                        return (
+                          <div className="mb-3 space-y-1">
+                            {lines.map((line, index) => (
+                              <div key={index} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                <span>🎯 {line.trim()}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
                     })()}
                     
                     <div className="flex justify-between text-xs text-gray-500">

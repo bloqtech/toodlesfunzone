@@ -425,18 +425,21 @@ export default function ActivitiesManagement() {
                         {activity.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{activity.description}</p>
-                    
-                    {activity.features && activity.features.length > 0 && (
-                      <div className="mb-3 space-y-1">
-                        {activity.features.map((feature, index) => (
-                          <div key={index} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                            <span className="text-base">🎯</span>
-                            <span>{feature}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    {/* Parse features from description */}
+                    {(() => {
+                      const lines = activity.description.split('\n').filter(line => line.trim());
+                      const features = lines.filter(line => line.includes('🧗') || line.includes('🐛') || line.includes('🧱') || line.includes('🏖️') || line.includes('🏀') || line.includes('🎉') || line.match(/^[🎯🎪🏃🧸🏊🚀🎨🎮🎭🎨🎯].+/));
+                      
+                      return (
+                        <div className="mb-3 space-y-1">
+                          {features.map((feature, index) => (
+                            <div key={index} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                              <span>{feature.trim()}</span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                     
                     <div className="flex justify-between text-xs text-gray-500">
                       <span>Age: {activity.ageGroup}</span>

@@ -1571,11 +1571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Birthday Package Management
   app.get('/api/admin/birthday-packages', isAuthenticated, adminAuth, async (req, res) => {
     try {
-      // Mock data for now
-      const packages = [
-        { id: '1', name: 'Princess Party Deluxe', description: 'Magical princess themed party', price: 2500, duration: 3, maxGuests: 15, features: ['Princess decorations', 'Crown for birthday child', 'Photo props'], decorationTheme: 'Princess & Fairy Tale', isActive: true, isPopular: true, ageGroup: '3-8 years', image: '' },
-        { id: '2', name: 'Superhero Adventure', description: 'Action-packed superhero celebration', price: 3000, duration: 3, maxGuests: 20, features: ['Superhero decorations', 'Capes for all kids', 'Action games'], decorationTheme: 'Superhero Adventure', isActive: true, isPopular: false, ageGroup: '5-12 years', image: '' }
-      ];
+      const packages = await storage.getBirthdayPackages();
       res.json(packages);
     } catch (error) {
       console.error("Error fetching birthday packages:", error);
@@ -1585,8 +1581,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/birthday-packages', isAuthenticated, adminAuth, async (req, res) => {
     try {
-      const package_ = { id: Date.now().toString(), ...req.body };
-      res.json(package_);
+      const packageData = req.body;
+      const pkg = await storage.createBirthdayPackage(packageData);
+      res.json(pkg);
     } catch (error) {
       console.error("Error creating birthday package:", error);
       res.status(500).json({ message: "Failed to create birthday package" });
@@ -1595,8 +1592,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/admin/birthday-packages/:id', isAuthenticated, adminAuth, async (req, res) => {
     try {
-      const package_ = { id: req.params.id, ...req.body };
-      res.json(package_);
+      const id = parseInt(req.params.id);
+      const packageData = req.body;
+      const pkg = await storage.updateBirthdayPackage(id, packageData);
+      res.json(pkg);
     } catch (error) {
       console.error("Error updating birthday package:", error);
       res.status(500).json({ message: "Failed to update birthday package" });
@@ -1605,6 +1604,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/admin/birthday-packages/:id', isAuthenticated, adminAuth, async (req, res) => {
     try {
+      const id = parseInt(req.params.id);
+      await storage.deleteBirthdayPackage(id);
       res.json({ message: "Birthday package deleted successfully" });
     } catch (error) {
       console.error("Error deleting birthday package:", error);

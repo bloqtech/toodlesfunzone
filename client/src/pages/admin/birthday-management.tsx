@@ -15,7 +15,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Plus, Edit, Trash2, Save, Gift, Users, Clock, DollarSign } from "lucide-react";
 
 interface BirthdayPackage {
-  id: string;
+  id: number;
   name: string;
   description: string;
   price: number;
@@ -79,7 +79,7 @@ export default function BirthdayManagement() {
   });
 
   const updatePackageMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: typeof formData }) => {
+    mutationFn: async ({ id, data }: { id: number; data: typeof formData }) => {
       const response = await apiRequest('PUT', `/api/admin/birthday-packages/${id}`, {
         ...data,
         features: data.features.filter(f => f.trim() !== '')
@@ -105,7 +105,7 @@ export default function BirthdayManagement() {
   });
 
   const deletePackageMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: number) => {
       const response = await apiRequest('DELETE', `/api/admin/birthday-packages/${id}`);
       return response.json();
     },

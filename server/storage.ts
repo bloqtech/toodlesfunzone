@@ -35,6 +35,9 @@ import {
   type InsertEnquiry,
   type InsertOperatingHours,
   type InsertActivity,
+  birthdayPackages,
+  type BirthdayPackage,
+  type InsertBirthdayPackage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, asc, sql, count } from "drizzle-orm";
@@ -859,6 +862,34 @@ export class DatabaseStorage implements IStorage {
 
   async deleteActivity(id: number): Promise<void> {
     await db.delete(activities).where(eq(activities.id, id));
+  }
+
+  // Birthday Package operations
+  async getBirthdayPackages(): Promise<BirthdayPackage[]> {
+    return await db.select().from(birthdayPackages).orderBy(asc(birthdayPackages.displayOrder), asc(birthdayPackages.id));
+  }
+
+  async getBirthdayPackageById(id: number): Promise<BirthdayPackage | undefined> {
+    const [pkg] = await db.select().from(birthdayPackages).where(eq(birthdayPackages.id, id));
+    return pkg;
+  }
+
+  async createBirthdayPackage(packageData: InsertBirthdayPackage): Promise<BirthdayPackage> {
+    const [pkg] = await db.insert(birthdayPackages).values(packageData).returning();
+    return pkg;
+  }
+
+  async updateBirthdayPackage(id: number, packageData: Partial<InsertBirthdayPackage>): Promise<BirthdayPackage> {
+    const [pkg] = await db
+      .update(birthdayPackages)
+      .set({ ...packageData, updatedAt: new Date() })
+      .where(eq(birthdayPackages.id, id))
+      .returning();
+    return pkg;
+  }
+
+  async deleteBirthdayPackage(id: number): Promise<void> {
+    await db.delete(birthdayPackages).where(eq(birthdayPackages.id, id));
   }
 }
 

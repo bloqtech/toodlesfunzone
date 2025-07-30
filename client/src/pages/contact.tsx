@@ -8,9 +8,6 @@ import {
   Phone, 
   Clock, 
   MessageCircle,
-  Car,
-  Bus,
-  Train,
   Navigation,
   Instagram,
   Facebook,
@@ -41,26 +38,7 @@ export default function Contact() {
     }
   ];
 
-  const transportOptions = [
-    {
-      icon: Car,
-      title: "By Car",
-      description: "Free parking available for 50+ vehicles",
-      directions: "Take Main Road exit, turn left at Central Mall"
-    },
-    {
-      icon: Bus,
-      title: "By Bus",
-      description: "Multiple bus routes available",
-      directions: "Routes 15, 23, 45 stop directly outside"
-    },
-    {
-      icon: Train,
-      title: "By Metro",
-      description: "5-minute walk from Central Metro Station",
-      directions: "Exit 3 from Central Metro, walk towards Mall"
-    }
-  ];
+
 
   const faqs = [
     {
@@ -241,35 +219,7 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* How to Reach Us */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display text-toodles-text mb-4">
-              How to <span className="text-toodles-secondary">Reach Us</span>
-            </h2>
-            <p className="text-xl text-gray-600 font-accent">Choose your preferred mode of transport</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {transportOptions.map((option, index) => {
-              const IconComponent = option.icon;
-              return (
-                <Card key={index} className="text-center transform hover:scale-105 transition-all">
-                  <CardContent className="p-6">
-                    <div className="bg-toodles-primary text-white rounded-full p-4 w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                      <IconComponent className="h-8 w-8" />
-                    </div>
-                    <h3 className="text-xl font-display text-toodles-text mb-2">{option.title}</h3>
-                    <p className="text-gray-600 text-sm mb-4">{option.description}</p>
-                    <p className="text-gray-500 text-xs">{option.directions}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+
 
       {/* FAQ Section */}
       <section className="py-20 bg-toodles-background">

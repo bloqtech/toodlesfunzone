@@ -5,7 +5,7 @@ import { MessageCircle, X } from "lucide-react";
 export function FloatingWhatsApp() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const whatsappNumber = "+919876543210"; // Replace with actual WhatsApp number
+  const whatsappNumber = "+919901218980"; // Toodles Funzone WhatsApp number
   const defaultMessage = "Hi! I'm interested in booking a play session at Toodles Funzone. Can you please help me?";
 
   const handleWhatsAppClick = () => {

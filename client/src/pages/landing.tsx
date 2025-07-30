@@ -98,6 +98,13 @@ export default function Landing() {
                   size="lg" 
                   variant="outline" 
                   className="border-white text-white hover:bg-white hover:text-toodles-text font-accent font-bold text-lg hover:animate-bounce-gentle"
+                  onClick={() => {
+                    const phoneNumber = "+919901218980";
+                    const message = "Hi! I'd like to know more about Toodles Funzone and book a play session.";
+                    const encodedMessage = encodeURIComponent(message);
+                    const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
+                    window.open(whatsappUrl, '_blank');
+                  }}
                 >
                   <PlayCircle className="mr-2 h-5 w-5" />
                   Call Now 📞

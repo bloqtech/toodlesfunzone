@@ -9,6 +9,30 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Calendar, Star, Users, Shield, Clock } from "lucide-react";
 
+// Helper function to parse features from description
+const parseFeatures = (description: string): string[] => {
+  const lines = description.split('\n');
+  const features: string[] = [];
+  
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed.match(/^[•·▪▫-]\s+/)) {
+      // Remove bullet point and add to features
+      features.push(trimmed.replace(/^[•·▪▫-]\s+/, ''));
+    } else if (trimmed.match(/^[^\w\s][^\n]*$/)) {
+      // Lines starting with emoji or special chars
+      features.push(trimmed.substring(1).trim());
+    }
+  });
+  
+  // If no bullet points found, create generic features
+  if (features.length === 0) {
+    return ['Fun activities', 'Safe environment', 'Age appropriate', 'Supervised play'];
+  }
+  
+  return features.slice(0, 4); // Limit to 4 features for display
+};
+
 export default function Activities() {
   const [showBookingModal, setShowBookingModal] = useState(false);
 
@@ -16,72 +40,9 @@ export default function Activities() {
     queryKey: ["/api/packages"],
   });
 
-  const activities = [
-    {
-      title: "Soft Play Zone",
-      description: "Safe foam blocks, tunnels, and climbing structures designed specifically for toddlers aged 2-4 years. Our soft play area features colorful, washable foam pieces that encourage climbing, crawling, and imaginative play.",
-      image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      gradient: "from-toodles-primary to-pink-400",
-      features: ["Age-appropriate design", "Soft foam materials", "Easy to clean", "Supervised play area"],
-      ageGroup: "2-4 years"
-    },
-    {
-      title: "Adventure Zone",
-      description: "Exciting slides, climbing walls, and obstacle courses perfect for active children. This zone challenges kids physically while building confidence and coordination skills in a safe environment.",
-      image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      gradient: "from-toodles-secondary to-blue-400",
-      features: ["Multiple slides", "Climbing walls", "Obstacle courses", "Safety mats"],
-      ageGroup: "4-8 years"
-    },
-    {
-      title: "Ball Pit Paradise",
-      description: "Dive into thousands of colorful, sanitized balls in our spacious ball pit. This classic playground favorite provides sensory stimulation and endless fun for children of all ages.",
-      image: "https://images.unsplash.com/photo-1570554886111-e80fcca6a029?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      gradient: "from-toodles-accent to-orange-400",
-      features: ["10,000+ balls", "Regular sanitization", "Deep pit design", "Colorful environment"],
-      ageGroup: "2-8 years"
-    },
-    {
-      title: "Bouncy Castle",
-      description: "Safe trampolines and bounce houses that provide hours of jumping joy. Our bouncy equipment is regularly inspected and maintained to ensure maximum safety and fun.",
-      image: "https://images.unsplash.com/photo-1578768958451-1c3e0a0b3b70?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      gradient: "from-toodles-success to-green-400",
-      features: ["Safety nets", "Padded surfaces", "Weight limits enforced", "Supervised sessions"],
-      ageGroup: "3-8 years"
-    },
-    {
-      title: "Sensory Play Area",
-      description: "Interactive elements with various textures, sounds, and lights designed to stimulate children's senses and support their developmental growth through engaging play experiences.",
-      image: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      gradient: "from-purple-400 to-pink-500",
-      features: ["Tactile elements", "Sound interactions", "Light displays", "Developmental focus"],
-      ageGroup: "2-6 years"
-    },
-    {
-      title: "Creative Corner",
-      description: "Arts, crafts, and imaginative play activities that encourage creativity and self-expression. Our creative corner is stocked with safe, non-toxic materials for endless artistic fun.",
-      image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      gradient: "from-indigo-400 to-purple-500",
-      features: ["Art supplies", "Craft materials", "Guided activities", "Take-home projects"],
-      ageGroup: "3-8 years"
-    },
-    {
-      title: "Mini Rides",
-      description: "Safe ride-on toys and mini train adventures perfect for younger children. Our mini rides provide gentle movement and excitement without overwhelming smaller kids.",
-      image: "https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      gradient: "from-teal-400 to-cyan-500",
-      features: ["Electric rides", "Manual push toys", "Mini train circuit", "Speed controls"],
-      ageGroup: "2-5 years"
-    },
-    {
-      title: "Toddler Zone",
-      description: "A specially designed area exclusively for our youngest visitors aged 2-4 years. This secure zone features age-appropriate toys and activities in a contained, safe environment.",
-      image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      gradient: "from-red-400 to-pink-500",
-      features: ["Secure area", "Age-appropriate toys", "Soft surfaces", "Parent seating"],
-      ageGroup: "2-4 years"
-    }
-  ];
+  const { data: activities = [], isLoading: activitiesLoading } = useQuery({
+    queryKey: ["/api/activities"],
+  });
 
   const safetyFeatures = [
     {
@@ -159,47 +120,78 @@ export default function Activities() {
       {/* Activities Grid */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {activities.map((activity, index) => (
-              <Card key={index} className="overflow-hidden shadow-xl transform hover:scale-105 transition-all duration-300">
-                <div className="relative h-64">
-                  <img 
-                    src={activity.image} 
-                    alt={activity.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className={`absolute inset-0 bg-gradient-to-t ${activity.gradient} opacity-80`}></div>
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-2xl font-display">{activity.title}</h3>
-                      <div className="bg-white bg-opacity-20 px-2 py-1 rounded-full">
-                        <span className="text-sm font-accent">{activity.ageGroup}</span>
+          {activitiesLoading ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="overflow-hidden shadow-xl animate-pulse">
+                  <div className="h-64 bg-gray-200"></div>
+                  <CardContent className="p-6">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded mb-4"></div>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              {activities.map((activity: any, index: number) => {
+                const features = parseFeatures(activity.description);
+                const cleanDescription = activity.description.split('\n')[0] || activity.description;
+                
+                return (
+                  <Card key={activity.id} className="overflow-hidden shadow-xl transform hover:scale-105 transition-all duration-300">
+                    <div className="relative h-64">
+                      {activity.image ? (
+                        <img 
+                          src={activity.image} 
+                          alt={activity.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-6xl">{activity.icon || '🎪'}</span>
+                        </div>
+                      )}
+                      <div className={`absolute inset-0 bg-gradient-to-t ${activity.gradient || 'from-toodles-primary to-pink-400'} opacity-80`}></div>
+                      <div className="absolute bottom-4 left-4 right-4 text-white">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-2xl font-display">{activity.title}</h3>
+                          {activity.ageGroup && (
+                            <div className="bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                              <span className="text-sm font-accent">{activity.ageGroup}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <p className="text-gray-600 mb-4 leading-relaxed">
-                    {activity.description}
-                  </p>
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    {activity.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-center text-sm text-gray-500">
-                        <Shield className="h-3 w-3 text-toodles-success mr-1" />
-                        {feature}
+                    <CardContent className="p-6">
+                      <p className="text-gray-600 mb-4 leading-relaxed">
+                        {cleanDescription}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        {features.map((feature: string, idx: number) => (
+                          <div key={idx} className="flex items-center text-sm text-gray-500">
+                            <Shield className="h-3 w-3 text-toodles-success mr-1" />
+                            {feature}
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                  <Button 
-                    className="w-full bg-toodles-primary hover:bg-red-600 text-white font-accent"
-                    onClick={() => setShowBookingModal(true)}
-                  >
-                    Book This Activity
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      <Button 
+                        className="w-full bg-toodles-primary hover:bg-red-600 text-white font-accent"
+                        onClick={() => setShowBookingModal(true)}
+                      >
+                        Book This Activity
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 

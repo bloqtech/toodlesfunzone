@@ -24,99 +24,16 @@ export default function Gallery() {
     queryKey: ["/api/packages"],
   });
 
+  const { data: galleryImages = [], isLoading: galleryLoading } = useQuery({
+    queryKey: ["/api/gallery"],
+  });
+
   const categories = [
     { id: 'all', name: 'All Photos', icon: Camera },
     { id: 'play', name: 'Play Activities', icon: Play },
     { id: 'birthday', name: 'Birthday Parties', icon: Calendar },
     { id: 'kids', name: 'Happy Kids', icon: Smile },
     { id: 'facilities', name: 'Facilities', icon: Camera }
-  ];
-
-  const galleryImages = [
-    {
-      id: 1,
-      src: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      title: "Colorful Indoor Playground",
-      category: "play",
-      description: "Our vibrant play area with slides and climbing structures"
-    },
-    {
-      id: 2,
-      src: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      title: "Soft Play Zone",
-      category: "play",
-      description: "Safe foam blocks and tunnels for toddlers"
-    },
-    {
-      id: 3,
-      src: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      title: "Birthday Party Celebration",
-      category: "birthday",
-      description: "Magical birthday party with cake and decorations"
-    },
-    {
-      id: 4,
-      src: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      title: "Adventure Playground",
-      category: "play",
-      description: "Climbing walls and obstacle courses for active kids"
-    },
-    {
-      id: 5,
-      src: "https://images.unsplash.com/photo-1570554886111-e80fcca6a029?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      title: "Ball Pit Fun",
-      category: "play",
-      description: "Thousands of colorful balls for endless diving fun"
-    },
-    {
-      id: 6,
-      src: "https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      title: "Happy Children Playing",
-      category: "kids",
-      description: "Joyful moments of children enjoying our play zones"
-    },
-    {
-      id: 7,
-      src: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      title: "Sensory Play Area",
-      category: "play",
-      description: "Interactive sensory elements for development"
-    },
-    {
-      id: 8,
-      src: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      title: "Creative Arts Corner",
-      category: "play",
-      description: "Arts and crafts activities for creative expression"
-    },
-    {
-      id: 9,
-      src: "https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      title: "Mini Rides Zone",
-      category: "play",
-      description: "Safe ride-on toys and mini train adventures"
-    },
-    {
-      id: 10,
-      src: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      title: "Toddler Safe Zone",
-      category: "play",
-      description: "Specially designed area for youngest visitors"
-    },
-    {
-      id: 11,
-      src: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      title: "Parent Seating Area",
-      category: "facilities",
-      description: "Comfortable seating for parents to relax"
-    },
-    {
-      id: 12,
-      src: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600",
-      title: "Safety Equipment",
-      category: "facilities",
-      description: "Safety mats and protective barriers throughout"
-    }
   ];
 
   const filteredImages = selectedCategory === 'all' 
@@ -202,33 +119,47 @@ export default function Gallery() {
       {/* Gallery Grid */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredImages.map((image, index) => (
-              <Card 
-                key={image.id} 
-                className="overflow-hidden transform hover:scale-105 transition-all duration-300 cursor-pointer group"
-                onClick={() => setSelectedImage(image.src)}
-              >
-                <div className="relative">
-                  <img 
-                    src={image.src} 
-                    alt={image.title}
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
-                    <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {galleryLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(12)].map((_, i) => (
+                <Card key={i} className="animate-pulse overflow-hidden">
+                  <div className="h-48 bg-gray-200"></div>
+                  <CardContent className="p-4">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredImages.map((image: any) => (
+                <Card 
+                  key={image.id} 
+                  className="overflow-hidden transform hover:scale-105 transition-all duration-300 cursor-pointer group"
+                  onClick={() => setSelectedImage(image.imageUrl || image.src)}
+                >
+                  <div className="relative">
+                    <img 
+                      src={image.imageUrl || image.src || "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"} 
+                      alt={image.title}
+                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
+                      <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>
+                    <Badge className="absolute top-2 right-2 bg-toodles-primary text-white">
+                      {categories.find(c => c.id === image.category)?.name || 'All'}
+                    </Badge>
                   </div>
-                  <Badge className="absolute top-2 right-2 bg-toodles-primary text-white">
-                    {categories.find(c => c.id === image.category)?.name || 'All'}
-                  </Badge>
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-display text-toodles-text mb-2">{image.title}</h3>
-                  <p className="text-sm text-gray-600">{image.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-display text-toodles-text mb-2">{image.title}</h3>
+                    <p className="text-sm text-gray-600">{image.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
 import { BirthdayForm } from "@/components/booking/birthday-form";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { 
   Gift, 
@@ -21,63 +22,9 @@ import {
 export default function Birthday() {
   const [showBirthdayForm, setShowBirthdayForm] = useState(false);
 
-  const birthdayPackages = [
-    {
-      name: "Magic Starter",
-      price: 2999,
-      duration: 2,
-      guests: 10,
-      features: [
-        "2-hour party slot",
-        "Themed decorations",
-        "Birthday cake (1kg)",
-        "Party games & activities",
-        "Basic photography",
-        "Party favors for guests",
-        "Dedicated party host"
-      ],
-      color: "from-toodles-primary to-pink-400",
-      icon: Gift
-    },
-    {
-      name: "Deluxe Celebration",
-      price: 4999,
-      duration: 3,
-      guests: 15,
-      features: [
-        "3-hour party slot",
-        "Premium themed decorations",
-        "Birthday cake (2kg)",
-        "Magic show or entertainment",
-        "Professional photography",
-        "Party favors & goodie bags",
-        "Dedicated party coordinator",
-        "Light refreshments"
-      ],
-      color: "from-toodles-secondary to-teal-400",
-      icon: Star,
-      popular: true
-    },
-    {
-      name: "Ultimate Extravaganza",
-      price: 7999,
-      duration: 4,
-      guests: 20,
-      features: [
-        "4-hour party slot",
-        "Luxury themed decorations",
-        "Custom birthday cake (3kg)",
-        "Live entertainment show",
-        "Professional photographer",
-        "Premium party favors",
-        "Personal party manager",
-        "Full meal service",
-        "LifeBuoy decorations"
-      ],
-      color: "from-toodles-accent to-orange-400",
-      icon: Heart
-    }
-  ];
+  const { data: birthdayPackages = [], isLoading: packagesLoading } = useQuery({
+    queryKey: ["/api/birthday-packages"],
+  });
 
   const themes = [
     {
@@ -240,60 +187,90 @@ export default function Birthday() {
             <p className="text-xl text-gray-600 font-accent">Choose the perfect celebration for your little one</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {birthdayPackages.map((pkg, index) => {
-              const IconComponent = pkg.icon;
-              return (
-                <Card 
-                  key={index} 
-                  className={`transform hover:scale-105 transition-all shadow-xl rounded-3xl overflow-hidden relative ${
-                    pkg.popular ? 'border-4 border-toodles-secondary' : ''
-                  }`}
-                >
-                  {pkg.popular && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                      <Badge className="bg-toodles-secondary text-white font-accent font-bold text-sm px-4 py-2">
-                        Most Popular
-                      </Badge>
-                    </div>
-                  )}
-                  
-                  <div className={`h-2 bg-gradient-to-r ${pkg.color}`}></div>
-                  
+          {packagesLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i} className="animate-pulse shadow-xl rounded-3xl overflow-hidden">
+                  <div className="h-2 bg-gray-200"></div>
                   <CardContent className="p-8 text-center">
-                    <div className={`bg-gradient-to-r ${pkg.color} text-white rounded-full p-4 w-16 h-16 flex items-center justify-center mx-auto mb-4`}>
-                      <IconComponent className="h-8 w-8" />
+                    <div className="bg-gray-200 rounded-full w-16 h-16 mx-auto mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-8 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-6"></div>
+                    <div className="space-y-2 mb-8">
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                      <div className="h-3 bg-gray-200 rounded"></div>
                     </div>
-                    
-                    <h3 className="text-2xl font-display text-toodles-text mb-4">{pkg.name}</h3>
-                    
-                    <div className="mb-6">
-                      <div className="text-4xl font-display text-toodles-primary mb-2">₹{pkg.price}</div>
-                      <div className="text-sm text-gray-500">
-                        {pkg.duration} hours • Up to {pkg.guests} guests
-                      </div>
-                    </div>
-                    
-                    <ul className="text-left space-y-3 mb-8">
-                      {pkg.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-center">
-                          <CheckCircle className="h-4 w-4 text-toodles-success mr-3 flex-shrink-0" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    
-                    <Button 
-                      className="w-full bg-toodles-primary hover:bg-red-600 text-white font-accent font-bold"
-                      onClick={() => setShowBirthdayForm(true)}
-                    >
-                      Book This Package
-                    </Button>
+                    <div className="h-10 bg-gray-200 rounded"></div>
                   </CardContent>
                 </Card>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {birthdayPackages.map((pkg: any, index: number) => {
+                // Map icon names to components
+                const getIconComponent = (iconName: string) => {
+                  const iconMap: any = { Gift, Star, Heart, Users, Camera, Music, Cake };
+                  return iconMap[iconName] || Gift;
+                };
+                
+                const IconComponent = getIconComponent(pkg.icon || 'Gift');
+                const gradient = pkg.gradient || 'from-toodles-primary to-pink-400';
+                
+                return (
+                  <Card 
+                    key={pkg.id} 
+                    className={`transform hover:scale-105 transition-all shadow-xl rounded-3xl overflow-hidden relative ${
+                      pkg.isPopular ? 'border-4 border-toodles-secondary' : ''
+                    }`}
+                  >
+                    {pkg.isPopular && (
+                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                        <Badge className="bg-toodles-secondary text-white font-accent font-bold text-sm px-4 py-2">
+                          Most Popular
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    <div className={`h-2 bg-gradient-to-r ${gradient}`}></div>
+                    
+                    <CardContent className="p-8 text-center">
+                      <div className={`bg-gradient-to-r ${gradient} text-white rounded-full p-4 w-16 h-16 flex items-center justify-center mx-auto mb-4`}>
+                        <IconComponent className="h-8 w-8" />
+                      </div>
+                      
+                      <h3 className="text-2xl font-display text-toodles-text mb-4">{pkg.name}</h3>
+                      
+                      <div className="mb-6">
+                        <div className="text-4xl font-display text-toodles-primary mb-2">₹{pkg.price}</div>
+                        <div className="text-sm text-gray-500">
+                          {pkg.duration} hours • Up to {pkg.maxGuests} guests
+                        </div>
+                      </div>
+                      
+                      <ul className="text-left space-y-3 mb-8">
+                        {pkg.features?.map((feature: string, idx: number) => (
+                          <li key={idx} className="flex items-center">
+                            <CheckCircle className="h-4 w-4 text-toodles-success mr-3 flex-shrink-0" />
+                            <span className="text-sm">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      <Button 
+                        className="w-full bg-toodles-primary hover:bg-red-600 text-white font-accent font-bold"
+                        onClick={() => setShowBirthdayForm(true)}
+                      >
+                        Book This Package
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 

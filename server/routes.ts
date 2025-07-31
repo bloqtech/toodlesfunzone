@@ -1525,6 +1525,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public: Gallery (for display on frontend)
+  app.get('/api/gallery', async (req, res) => {
+    try {
+      // Mock data for public gallery display
+      const galleryItems = [
+        { id: '1', title: 'Colorful Indoor Playground', description: 'Our vibrant play area with slides and climbing structures', src: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'play', imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' },
+        { id: '2', title: 'Soft Play Zone', description: 'Safe foam blocks and tunnels for toddlers', src: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'play', imageUrl: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' },
+        { id: '3', title: 'Birthday Party Celebration', description: 'Magical birthday party with cake and decorations', src: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'birthday', imageUrl: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' },
+        { id: '4', title: 'Adventure Playground', description: 'Climbing walls and obstacle courses for active kids', src: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'play', imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' },
+        { id: '5', title: 'Ball Pit Fun', description: 'Thousands of colorful balls for endless diving fun', src: 'https://images.unsplash.com/photo-1570554886111-e80fcca6a029?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'play', imageUrl: 'https://images.unsplash.com/photo-1570554886111-e80fcca6a029?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' },
+        { id: '6', title: 'Happy Children Playing', description: 'Joyful moments of children enjoying our play zones', src: 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'kids', imageUrl: 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' },
+        { id: '7', title: 'Sensory Play Area', description: 'Interactive sensory elements for development', src: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'play', imageUrl: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' },
+        { id: '8', title: 'Creative Arts Corner', description: 'Arts and crafts activities for creative expression', src: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'play', imageUrl: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' },
+        { id: '9', title: 'Mini Rides Zone', description: 'Safe ride-on toys and mini train adventures', src: 'https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'play', imageUrl: 'https://images.unsplash.com/photo-1580537659466-0a9bfa916a54?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' },
+        { id: '10', title: 'Toddler Safe Zone', description: 'Specially designed area for youngest visitors', src: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'play', imageUrl: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' },
+        { id: '11', title: 'Parent Seating Area', description: 'Comfortable seating for parents to relax', src: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'facilities', imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' },
+        { id: '12', title: 'Safety Equipment', description: 'Safety mats and protective barriers throughout', src: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'facilities', imageUrl: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' }
+      ];
+      res.json(galleryItems);
+    } catch (error) {
+      console.error("Error fetching gallery items:", error);
+      res.status(500).json({ message: "Failed to fetch gallery items" });
+    }
+  });
+
   app.get('/api/admin/gallery', isAuthenticated, adminAuth, async (req, res) => {
     try {
       // Mock data for now
@@ -1565,6 +1590,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting gallery item:", error);
       res.status(500).json({ message: "Failed to delete gallery item" });
+    }
+  });
+
+  // Public: Birthday Packages (for display on frontend)
+  app.get('/api/birthday-packages', async (req, res) => {
+    try {
+      let packages = await storage.getBirthdayPackages();
+      
+      // If no packages in database, return mock data for display
+      if (!packages || packages.length === 0) {
+        packages = [
+          {
+            id: 1,
+            name: 'Basic Birthday Bash',
+            description: 'Perfect starter package for your little one\'s special day',
+            price: 2999,
+            duration: 2,
+            maxGuests: 15,
+            features: ['2 hours of play zone access', 'Birthday decoration setup', 'Basic birthday cake', 'Party host assistance', 'Complimentary juice for all kids'],
+            decorationTheme: 'Colorful',
+            isActive: true,
+            isPopular: false,
+            ageGroup: '3-8 years',
+            image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
+            icon: 'Gift',
+            gradient: 'from-toodles-primary to-pink-400',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            displayOrder: 1
+          },
+          {
+            id: 2,
+            name: 'Premium Party Package',
+            description: 'The complete birthday experience with all the bells and whistles',
+            price: 4999,
+            duration: 3,
+            maxGuests: 25,
+            features: ['3 hours of exclusive play zone access', 'Premium themed decoration', 'Custom birthday cake with photo', 'Dedicated party coordinator', 'Complimentary snacks & drinks', 'Party favors for all kids', 'Professional photography session'],
+            decorationTheme: 'Premium Theme',
+            isActive: true,
+            isPopular: true,
+            ageGroup: '4-12 years',
+            image: 'https://images.unsplash.com/photo-1464207687429-7505649dae38?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
+            icon: 'Star',
+            gradient: 'from-toodles-secondary to-purple-400',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            displayOrder: 2
+          },
+          {
+            id: 3,
+            name: 'Ultimate Celebration',
+            description: 'The most lavish birthday party experience for your princess or prince',
+            price: 7999,
+            duration: 4,
+            maxGuests: 40,
+            features: ['4 hours of private venue access', 'Luxury themed decoration with balloons', 'Multi-tier custom cake with candles', 'Professional entertainment & games', 'Full catering with meal options', 'Return gifts for every child', 'Video recording of the entire event', 'Special birthday throne for the birthday child'],
+            decorationTheme: 'Luxury Theme',
+            isActive: true,
+            isPopular: false,
+            ageGroup: '5-15 years',
+            image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600',
+            icon: 'Heart',
+            gradient: 'from-toodles-success to-emerald-400',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            displayOrder: 3
+          }
+        ] as any;
+      }
+      
+      res.json(packages);
+    } catch (error) {
+      console.error("Error fetching birthday packages:", error);
+      res.status(500).json({ message: "Failed to fetch birthday packages" });
     }
   });
 

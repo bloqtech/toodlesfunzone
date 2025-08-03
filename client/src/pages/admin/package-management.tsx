@@ -233,10 +233,12 @@ export function PackageManagement() {
             </DialogHeader>
             <form onSubmit={handleCreateSale} className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="packageId" className="text-sm font-medium">Package Type</Label>
-                <Select value={selectedPackageId} onValueChange={setSelectedPackageId} required>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select package" />
+                <Label htmlFor="packageId" className="text-sm font-medium">
+                  Package Type <span className="text-red-500">*</span>
+                </Label>
+                <Select value={selectedPackageId} onValueChange={setSelectedPackageId}>
+                  <SelectTrigger className={`w-full ${!selectedPackageId ? 'border-red-300' : ''}`}>
+                    <SelectValue placeholder="Select a package type" />
                   </SelectTrigger>
                   <SelectContent>
                     {packages.map((pkg) => (
@@ -246,6 +248,9 @@ export function PackageManagement() {
                     ))}
                   </SelectContent>
                 </Select>
+                {!selectedPackageId && (
+                  <p className="text-xs text-red-500">Please select a package type</p>
+                )}
               </div>
               
               <div className="space-y-2">

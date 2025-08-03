@@ -440,7 +440,16 @@ export const insertAddOnSchema = createInsertSchema(addOns);
 export const insertActivitySchema = createInsertSchema(activities);
 export const insertBirthdayPackageSchema = createInsertSchema(birthdayPackages);
 export const insertOtpVerificationSchema = createInsertSchema(otpVerification);
-export const insertPackageSaleSchema = createInsertSchema(packageSales);
+export const insertPackageSaleSchema = createInsertSchema(packageSales).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  validFrom: true,
+  validTill: true,
+  remainingHours: true,
+  status: true,
+  paymentStatus: true,
+});
 export const insertPackageUsageSchema = createInsertSchema(packageUsage);
 
 // Types

@@ -203,18 +203,18 @@ export function PackageManagement() {
               Sell Package
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Sell Hour Package</DialogTitle>
               <DialogDescription>
                 Record a new package sale with customer details
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleCreateSale} className="space-y-4">
-              <div>
-                <Label htmlFor="packageId">Package</Label>
+            <form onSubmit={handleCreateSale} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="packageId" className="text-sm font-medium">Package Type</Label>
                 <Select name="packageId" required>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select package" />
                   </SelectTrigger>
                   <SelectContent>
@@ -227,37 +227,37 @@ export function PackageManagement() {
                 </Select>
               </div>
               
-              <div>
-                <Label htmlFor="customerName">Customer Name</Label>
-                <Input name="customerName" required />
+              <div className="space-y-2">
+                <Label htmlFor="customerName" className="text-sm font-medium">Customer Name</Label>
+                <Input name="customerName" placeholder="Enter customer's full name" required />
               </div>
               
-              <div>
-                <Label htmlFor="customerPhone">Phone Number</Label>
-                <Input name="customerPhone" type="tel" required />
+              <div className="space-y-2">
+                <Label htmlFor="customerPhone" className="text-sm font-medium">Phone Number</Label>
+                <Input name="customerPhone" type="tel" placeholder="+91 9876543210" required />
               </div>
               
-              <div>
-                <Label htmlFor="customerEmail">Email (Optional)</Label>
-                <Input name="customerEmail" type="email" />
+              <div className="space-y-2">
+                <Label htmlFor="customerEmail" className="text-sm font-medium">Email (Optional)</Label>
+                <Input name="customerEmail" type="email" placeholder="customer@example.com" />
               </div>
               
-              <div>
-                <Label htmlFor="totalAmount">Amount Paid</Label>
-                <Input name="totalAmount" type="number" step="0.01" required />
+              <div className="space-y-2">
+                <Label htmlFor="totalAmount" className="text-sm font-medium">Amount Paid (₹)</Label>
+                <Input name="totalAmount" type="number" step="0.01" placeholder="0.00" required />
               </div>
               
-              <div>
-                <Label htmlFor="notes">Notes (Optional)</Label>
-                <Textarea name="notes" rows={2} />
+              <div className="space-y-2">
+                <Label htmlFor="notes" className="text-sm font-medium">Notes (Optional)</Label>
+                <Textarea name="notes" rows={2} placeholder="Any additional notes about the sale..." />
               </div>
               
               <Button 
                 type="submit" 
-                className="w-full"
+                className="w-full bg-toodles-primary hover:bg-toodles-primary/90 text-white"
                 disabled={createSaleMutation.isPending}
               >
-                {createSaleMutation.isPending ? "Creating..." : "Create Package Sale"}
+                {createSaleMutation.isPending ? "Creating Sale..." : "Create Package Sale"}
               </Button>
             </form>
           </DialogContent>
@@ -316,7 +316,7 @@ export function PackageManagement() {
 
       {/* Usage Recording Dialog */}
       <Dialog open={usageDialogOpen} onOpenChange={setUsageDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Record Package Usage</DialogTitle>
             <DialogDescription>
@@ -324,49 +324,51 @@ export function PackageManagement() {
             </DialogDescription>
           </DialogHeader>
           {selectedPackageSale && (
-            <form onSubmit={handleRecordUsage} className="space-y-4">
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-sm font-medium">Package Details</p>
-                <p className="text-sm text-gray-600">
+            <form onSubmit={handleRecordUsage} className="space-y-4 mt-4">
+              <div className="bg-blue-50 p-4 rounded-lg border">
+                <p className="text-sm font-medium text-blue-900">Package Details</p>
+                <p className="text-sm text-blue-700 mt-1">
                   Customer: {selectedPackageSale.customerName}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-blue-700">
                   Remaining: {selectedPackageSale.remainingHours} hours
                 </p>
               </div>
               
-              <div>
-                <Label htmlFor="hoursUsed">Hours to Use</Label>
+              <div className="space-y-2">
+                <Label htmlFor="hoursUsed" className="text-sm font-medium">Hours to Use</Label>
                 <Input 
                   name="hoursUsed" 
                   type="number" 
                   min="1" 
                   max={selectedPackageSale.remainingHours}
+                  placeholder="1"
                   required 
                 />
+                <p className="text-xs text-gray-500">Max: {selectedPackageSale.remainingHours} hours</p>
               </div>
               
-              <div>
-                <Label htmlFor="numberOfChildren">Number of Children</Label>
-                <Input name="numberOfChildren" type="number" min="1" defaultValue="1" required />
+              <div className="space-y-2">
+                <Label htmlFor="numberOfChildren" className="text-sm font-medium">Number of Children</Label>
+                <Input name="numberOfChildren" type="number" min="1" defaultValue="1" placeholder="1" required />
               </div>
               
-              <div>
-                <Label htmlFor="childrenNames">Children Names (comma separated)</Label>
-                <Input name="childrenNames" placeholder="Child 1, Child 2" />
+              <div className="space-y-2">
+                <Label htmlFor="childrenNames" className="text-sm font-medium">Children Names (comma separated)</Label>
+                <Input name="childrenNames" placeholder="Child 1, Child 2, Child 3" />
               </div>
               
-              <div>
-                <Label htmlFor="supervisorNotes">Supervisor Notes</Label>
-                <Textarea name="supervisorNotes" rows={2} />
+              <div className="space-y-2">
+                <Label htmlFor="supervisorNotes" className="text-sm font-medium">Supervisor Notes</Label>
+                <Textarea name="supervisorNotes" rows={2} placeholder="Any observations or special notes..." />
               </div>
               
               <Button 
                 type="submit" 
-                className="w-full"
+                className="w-full bg-toodles-primary hover:bg-toodles-primary/90 text-white"
                 disabled={recordUsageMutation.isPending}
               >
-                {recordUsageMutation.isPending ? "Recording..." : "Record Usage"}
+                {recordUsageMutation.isPending ? "Recording Usage..." : "Record Usage"}
               </Button>
             </form>
           )}

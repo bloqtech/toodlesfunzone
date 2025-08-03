@@ -357,10 +357,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.redirect('/?auth=error&reason=oauth_config');
       }
       
-      // For development, use the current domain; for production, use configured URI
-      const isDevelopment = process.env.NODE_ENV === 'development';
-      const currentHost = req.get('host');
-      
       // Extract Client ID from URL format if needed (fix for incorrect secret format)
       function extractClientId(rawClientId: string | undefined): string | undefined {
         if (!rawClientId) return undefined;
@@ -372,10 +368,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const clientId = extractClientId(process.env.GOOGLE_CLIENT_ID);
-      // In development, use HTTPS for Replit domains; in production, use configured URI
-      const redirectUri = isDevelopment 
-        ? `https://${currentHost}/api/auth/google/callback`
-        : process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${currentHost}/api/auth/google/callback`;
+      const currentHost = req.get('host');
+      
+      // Always use HTTPS for Replit domains
+      const redirectUri = `https://${currentHost}/api/auth/google/callback`;
       const scope = 'email profile';
       const state = Math.random().toString(36).substring(7);
       
@@ -386,13 +382,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `response_type=code&` +
         `state=${state}`;
       
-      console.log("Redirecting to Google OAuth with redirect URI:", redirectUri);
-      console.log("Using Client ID:", clientId);
-      console.log("Raw Client ID from env:", process.env.GOOGLE_CLIENT_ID?.substring(0, 50) + '...');
-      console.log("Generated OAuth URL:", authUrl);
-      console.log("IMPORTANT: Add to Google Cloud Console:");
-      console.log("JavaScript Origins: https://" + currentHost);
-      console.log("Redirect URIs: " + redirectUri);
+      console.log("=== GOOGLE OAUTH CONFIGURATION ===");
+      console.log("Current Domain:", currentHost);
+      console.log("Redirect URI:", redirectUri);
+      console.log("Client ID:", clientId);
+      console.log("=== REQUIRED GOOGLE CLOUD CONSOLE SETUP ===");
+      console.log("1. Go to: https://console.cloud.google.com/apis/credentials");
+      console.log("2. Edit your OAuth 2.0 Client");
+      console.log("3. Add JavaScript Origins: https://" + currentHost);
+      console.log("4. Add Redirect URIs: " + redirectUri);
+      console.log("================================");
       res.redirect(authUrl);
     } catch (error) {
       console.error("Error initiating Google auth:", error);
@@ -424,9 +423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           client_secret: process.env.GOOGLE_CLIENT_SECRET!,
           code: code as string,
           grant_type: 'authorization_code',
-          redirect_uri: process.env.NODE_ENV === 'development' 
-            ? `https://${req.get('host')}/api/auth/google/callback`
-            : process.env.GOOGLE_REDIRECT_URI || `${req.protocol}://${req.get('host')}/api/auth/google/callback`,
+          redirect_uri: `https://${req.get('host')}/api/auth/google/callback`,
         }),
       });
 

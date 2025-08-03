@@ -453,6 +453,9 @@ export const insertPackageSaleSchema = createInsertSchema(packageSales).omit({
 export const insertPackageUsageSchema = createInsertSchema(packageUsage).omit({
   id: true,
   createdAt: true,
+}).extend({
+  checkedInAt: z.string().optional().transform(val => val ? new Date(val) : undefined),
+  checkedOutAt: z.string().optional().nullable().transform(val => val ? new Date(val) : null),
 });
 
 // Types

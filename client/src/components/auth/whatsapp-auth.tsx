@@ -47,10 +47,19 @@ export function WhatsAppAuth({ onSuccess, mode = "login", title, description }: 
 
       if (data.success) {
         setStep("otp");
-        toast({
-          title: "OTP Sent!",
-          description: "Please check your WhatsApp for the verification code",
-        });
+        // Show dev OTP in development mode
+        if (data.devOtp) {
+          toast({
+            title: "OTP Sent! (Dev Mode)",
+            description: `Your OTP is: ${data.devOtp}`,
+            duration: 10000, // Show longer in dev mode
+          });
+        } else {
+          toast({
+            title: "OTP Sent!",
+            description: "Please check your WhatsApp for the verification code",
+          });
+        }
       } else {
         throw new Error(data.message || "Failed to send OTP");
       }

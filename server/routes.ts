@@ -169,9 +169,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           phone: normalizedPhone 
         });
       } else {
-        res.status(500).json({ 
-          message: "Failed to send OTP. Please try again." 
-        });
+        // In development mode, allow OTP without WhatsApp credentials
+        const isDevelopment = process.env.NODE_ENV === 'development';
+        if (isDevelopment) {
+          console.log(`[DEV MODE] OTP for ${normalizedPhone}: ${otp}`);
+          res.json({ 
+            success: true, 
+            message: "OTP sent successfully (Development Mode - Check console)",
+            phone: normalizedPhone,
+            devOtp: otp // Include OTP in development mode
+          });
+        } else {
+          res.status(500).json({ 
+            message: "Failed to send OTP. Please try again." 
+          });
+        }
       }
     } catch (error) {
       console.error("Send OTP error:", error);

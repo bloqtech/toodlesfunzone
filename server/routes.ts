@@ -368,7 +368,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const clientId = extractClientId(process.env.GOOGLE_CLIENT_ID);
-      const currentHost = req.get('host');
+      
+      // Get the correct host - prioritize Replit domain over localhost
+      let currentHost = req.get('host');
+      if (currentHost === 'localhost:5000' && process.env.REPLIT_DOMAINS) {
+        currentHost = process.env.REPLIT_DOMAINS;
+      }
       
       // Always use HTTPS for Replit domains
       const redirectUri = `https://${currentHost}/api/auth/google/callback`;
@@ -423,7 +428,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           client_secret: process.env.GOOGLE_CLIENT_SECRET!,
           code: code as string,
           grant_type: 'authorization_code',
-          redirect_uri: `https://${req.get('host')}/api/auth/google/callback`,
+          redirect_uri: (() => {
+            let host = req.get('host');
+            if (host === 'localhost:5000' && process.env.REPLIT_DOMAINS) {
+              host = process.env.REPLIT_DOMAINS;
+            }
+            return `https://${host}/api/auth/google/callback`;
+          })(),
         }),
       });
 

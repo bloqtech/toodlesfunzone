@@ -448,6 +448,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!tokenData.access_token) {
         console.error("Failed to get access token. Full response:", tokenData);
+        if (tokenData.error === 'invalid_grant') {
+          return res.redirect('/?auth=error&reason=expired_code');
+        }
         return res.redirect('/?auth=error&reason=token_error');
       }
 

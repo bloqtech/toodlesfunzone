@@ -925,7 +925,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await sendBookingConfirmation(result.booking);
           }
         }
-        await sendWhatsAppNotification({
+        const bookingNotificationData = {
           bookingId: result.booking.id.toString(),
           customerName: result.booking.parentName || '',
           customerPhone: result.booking.parentPhone || '',
@@ -935,7 +935,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           numberOfChildren: result.booking.numberOfChildren || 1,
           totalAmount: parseFloat(result.booking.totalAmount || '0'),
           status: result.booking.status || 'pending'
-        }, "booking_confirmation");
+        };
+        await sendWhatsAppNotification(result.booking.parentPhone || '', "Booking confirmed! Details: " + JSON.stringify(bookingNotificationData));
       } catch (emailError) {
         console.error("Failed to send confirmation:", emailError);
       }
@@ -1005,7 +1006,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (booking.packageId) {
         const packageData = await storage.getPackageById(booking.packageId);
         if (packageData) {
-          await sendBookingConfirmation(booking, packageData);
+          await sendBookingConfirmation(booking);
         }
       }
       
@@ -1019,13 +1020,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (packageDetails) {
           const notificationData = {
             bookingId: booking.id.toString(),
-            customerName: booking.customerName || '',
-            customerPhone: booking.customerPhone || '',
+            customerName: booking.parentName || '',
+            customerPhone: booking.parentPhone || '',
             packageName: packageDetails.name,
-            date: booking.bookingDate?.toISOString() || '',
+            date: booking.bookingDate || '',
             timeSlot: '', // Will be populated by notification service
             numberOfChildren: booking.numberOfChildren || 1,
-            totalAmount: booking.totalAmount || '0',
+            totalAmount: parseFloat(booking.totalAmount || '0'),
             status: booking.status || 'pending'
           };
 
@@ -1107,7 +1108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           childAge: party.childAge,
           date: party.partyDate,
           timeSlot: party.timeSlotId?.toString() || '',
-          guestCount: party.guestCount || 0,
+          guestCount: party.numberOfGuests || 0,
           theme: party.theme || '',
           totalAmount: parseFloat(party.totalAmount || '0'),
           partyId: party.id.toString()
@@ -1292,7 +1293,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/packages', isAuthenticated, adminAuth, async (req, res) => {
     try {
       const validatedData = insertPackageSchema.parse(req.body);
-      const package_ = await storage.createPackage(validatedData);
+      const package_ = await storage.createPackage({
+        ...validatedData,
+        isActive: validatedData.isActive ?? true
+      });
       res.json(package_);
     } catch (error) {
       console.error("Error creating package:", error);

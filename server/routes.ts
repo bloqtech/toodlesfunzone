@@ -440,12 +440,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const tokenData = await tokenResponse.json();
       
-      console.log("Token exchange response:", tokenData);
-      console.log("Using Client ID for token exchange:", extractClientId(process.env.GOOGLE_CLIENT_ID));
+      console.log("=== TOKEN EXCHANGE DEBUG ===");
       console.log("Token response status:", tokenResponse.status);
+      console.log("Token response data:", JSON.stringify(tokenData, null, 2));
+      console.log("Using Client ID for token exchange:", extractClientId(process.env.GOOGLE_CLIENT_ID));
+      console.log("===========================");
       
       if (!tokenData.access_token) {
-        console.error("Failed to get access token:", tokenData);
+        console.error("Failed to get access token. Full response:", tokenData);
         return res.redirect('/?auth=error&reason=token_error');
       }
 
@@ -473,19 +475,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: googleUser.email,
           firstName: googleUser.given_name || '',
           lastName: googleUser.family_name || '',
-          profileImageUrl: googleUser.picture,
+          profileImageUrl: googleUser.picture || undefined,
           role: 'customer',
           registrationSource: 'google_oauth',
           isGuest: false,
+          lastLoginAt: new Date(),
         });
       } else {
         // Update existing user's Google info
         user = await storage.upsertUser({
           id: user.id,
-          email: user.email!,
-          firstName: googleUser.given_name || user.firstName,
-          lastName: googleUser.family_name || user.lastName,
-          profileImageUrl: googleUser.picture || user.profileImageUrl,
+          email: user.email || googleUser.email,
+          firstName: googleUser.given_name || user.firstName || '',
+          lastName: googleUser.family_name || user.lastName || '',
+          profileImageUrl: googleUser.picture || user.profileImageUrl || undefined,
+          role: user.role || 'customer',
+          registrationSource: user.registrationSource || 'google_oauth',
+          isGuest: user.isGuest || false,
           lastLoginAt: new Date(),
         });
       }

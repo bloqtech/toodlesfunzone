@@ -450,7 +450,10 @@ export const insertPackageSaleSchema = createInsertSchema(packageSales).omit({
   status: true,
   paymentStatus: true,
 });
-export const insertPackageUsageSchema = createInsertSchema(packageUsage);
+export const insertPackageUsageSchema = createInsertSchema(packageUsage).omit({
+  id: true,
+  createdAt: true,
+});
 
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;

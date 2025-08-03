@@ -130,13 +130,24 @@ export function PackageManagement() {
       return;
     }
     
+    const usageDate = formData.get('usageDate') as string;
+    const startTime = formData.get('startTime') as string;
+    const endTime = formData.get('endTime') as string;
+    
+    // Create check-in timestamp
+    const checkedInAt = new Date(`${usageDate}T${startTime}:00`).toISOString();
+    const checkedOutAt = endTime ? new Date(`${usageDate}T${endTime}:00`).toISOString() : null;
+    
     const usageData = {
       packageSaleId: selectedPackageSale?.id,
       hoursUsed: parseInt(usageHours),
+      usageDate: usageDate,
       numberOfChildren: parseInt(formData.get('numberOfChildren') as string),
       attendingChildrenNames: (formData.get('childrenNames') as string).split(',').map(name => name.trim()).filter(Boolean),
       supervisorNotes: formData.get('supervisorNotes') as string,
-      checkedInBy: 'raspik2025', // Use the actual admin user ID
+      checkedInBy: 'raspik2025',
+      checkedInAt: checkedInAt,
+      checkedOutAt: checkedOutAt,
     };
 
     recordUsageMutation.mutate(usageData);
@@ -379,7 +390,36 @@ export function PackageManagement() {
                   onChange={(e) => setUsageHours(e.target.value)}
                   required 
                 />
-                <p className="text-xs text-gray-500">Max: {selectedPackageSale.remainingHours} hours</p>
+                <p className="text-xs text-gray-500">Max: {selectedPackageSale.remainingHours} hours remaining</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="usageDate" className="text-sm font-medium">Usage Date</Label>
+                <Input 
+                  name="usageDate" 
+                  type="date" 
+                  defaultValue={new Date().toISOString().split('T')[0]}
+                  required 
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="startTime" className="text-sm font-medium">Start Time</Label>
+                <Input 
+                  name="startTime" 
+                  type="time" 
+                  defaultValue={new Date().toTimeString().slice(0, 5)}
+                  required 
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="endTime" className="text-sm font-medium">End Time (Optional)</Label>
+                <Input 
+                  name="endTime" 
+                  type="time" 
+                />
+                <p className="text-xs text-gray-500">Leave empty if session is ongoing</p>
               </div>
               
               <div className="space-y-2">

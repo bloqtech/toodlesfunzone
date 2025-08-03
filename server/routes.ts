@@ -581,7 +581,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const usageData = {
         ...validatedData,
         usageDate: validatedData.usageDate || today,
-        checkedInAt: new Date(),
+        checkedInAt: validatedData.checkedInAt ? new Date(validatedData.checkedInAt) : new Date(),
+        checkedOutAt: validatedData.checkedOutAt ? new Date(validatedData.checkedOutAt) : null,
       };
       
       const packageUsage = await storage.createPackageUsage(usageData);

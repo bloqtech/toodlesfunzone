@@ -17,6 +17,8 @@ export function PackageManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedPackageSale, setSelectedPackageSale] = useState<PackageSale | null>(null);
   const [usageDialogOpen, setUsageDialogOpen] = useState(false);
+  const [selectedPackageId, setSelectedPackageId] = useState<string>("");
+  const [usageHours, setUsageHours] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -38,15 +40,14 @@ export function PackageManagement() {
   // Create package sale mutation
   const createSaleMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest('/api/package-sales', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest('POST', '/api/package-sales', data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/package-sales'] });
       queryClient.invalidateQueries({ queryKey: ['/api/package-sales/active'] });
       setIsDialogOpen(false);
+      setSelectedPackageId("");
       toast({
         title: "Package Sale Created",
         description: "Hour package has been sold successfully",
@@ -64,16 +65,15 @@ export function PackageManagement() {
   // Record usage mutation
   const recordUsageMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest('/api/package-usage', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest('POST', '/api/package-usage', data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/package-sales'] });
       queryClient.invalidateQueries({ queryKey: ['/api/package-sales/active'] });
       setUsageDialogOpen(false);
       setSelectedPackageSale(null);
+      setUsageHours("");
       toast({
         title: "Usage Recorded",
         description: "Package hours have been deducted successfully",
@@ -92,17 +92,26 @@ export function PackageManagement() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
-    const selectedPackage = packages.find(p => p.id === parseInt(formData.get('packageId') as string));
+    if (!selectedPackageId) {
+      toast({
+        title: "Error",
+        description: "Please select a package",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const selectedPackage = packages.find(p => p.id === parseInt(selectedPackageId));
     
     const saleData = {
-      packageId: parseInt(formData.get('packageId') as string),
-      totalHours: selectedPackage?.duration || parseInt(formData.get('totalHours') as string),
+      packageId: parseInt(selectedPackageId),
+      totalHours: selectedPackage?.duration || 0,
       customerName: formData.get('customerName') as string,
       customerPhone: formData.get('customerPhone') as string,
       customerEmail: formData.get('customerEmail') as string,
       totalAmount: formData.get('totalAmount') as string,
       notes: formData.get('notes') as string,
-      soldBy: 'admin', // This should be the current admin user ID
+      soldBy: 'admin',
     };
 
     createSaleMutation.mutate(saleData);
@@ -112,13 +121,22 @@ export function PackageManagement() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
+    if (!usageHours || parseInt(usageHours) <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter valid hours to use",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const usageData = {
       packageSaleId: selectedPackageSale?.id,
-      hoursUsed: parseInt(formData.get('hoursUsed') as string),
+      hoursUsed: parseInt(usageHours),
       numberOfChildren: parseInt(formData.get('numberOfChildren') as string),
       attendingChildrenNames: (formData.get('childrenNames') as string).split(',').map(name => name.trim()).filter(Boolean),
       supervisorNotes: formData.get('supervisorNotes') as string,
-      checkedInBy: 'admin', // This should be the current admin user ID
+      checkedInBy: 'admin',
     };
 
     recordUsageMutation.mutate(usageData);
@@ -196,7 +214,10 @@ export function PackageManagement() {
 
       {/* Action Buttons */}
       <div className="flex gap-4 mb-6">
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) setSelectedPackageId("");
+        }}>
           <DialogTrigger asChild>
             <Button className="bg-toodles-primary hover:bg-toodles-primary/90">
               <Plus className="h-4 w-4 mr-2" />
@@ -213,7 +234,7 @@ export function PackageManagement() {
             <form onSubmit={handleCreateSale} className="space-y-4 mt-4">
               <div className="space-y-2">
                 <Label htmlFor="packageId" className="text-sm font-medium">Package Type</Label>
-                <Select name="packageId" required>
+                <Select value={selectedPackageId} onValueChange={setSelectedPackageId} required>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select package" />
                   </SelectTrigger>
@@ -315,7 +336,13 @@ export function PackageManagement() {
       </Card>
 
       {/* Usage Recording Dialog */}
-      <Dialog open={usageDialogOpen} onOpenChange={setUsageDialogOpen}>
+      <Dialog open={usageDialogOpen} onOpenChange={(open) => {
+        setUsageDialogOpen(open);
+        if (!open) {
+          setSelectedPackageSale(null);
+          setUsageHours("");
+        }
+      }}>
         <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">
           <DialogHeader>
             <DialogTitle className="text-gray-900 dark:text-gray-100">Record Package Usage</DialogTitle>
@@ -343,6 +370,8 @@ export function PackageManagement() {
                   min="1" 
                   max={selectedPackageSale.remainingHours}
                   placeholder="1"
+                  value={usageHours}
+                  onChange={(e) => setUsageHours(e.target.value)}
                   required 
                 />
                 <p className="text-xs text-gray-500">Max: {selectedPackageSale.remainingHours} hours</p>

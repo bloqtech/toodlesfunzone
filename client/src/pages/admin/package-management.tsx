@@ -203,10 +203,10 @@ export function PackageManagement() {
               Sell Package
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">
             <DialogHeader>
-              <DialogTitle>Sell Hour Package</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-gray-900 dark:text-gray-100">Sell Hour Package</DialogTitle>
+              <DialogDescription className="text-gray-600 dark:text-gray-400">
                 Record a new package sale with customer details
               </DialogDescription>
             </DialogHeader>
@@ -316,10 +316,10 @@ export function PackageManagement() {
 
       {/* Usage Recording Dialog */}
       <Dialog open={usageDialogOpen} onOpenChange={setUsageDialogOpen}>
-        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">
           <DialogHeader>
-            <DialogTitle>Record Package Usage</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-900 dark:text-gray-100">Record Package Usage</DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               Record hours used for {selectedPackageSale?.customerName}
             </DialogDescription>
           </DialogHeader>

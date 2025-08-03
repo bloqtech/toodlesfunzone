@@ -641,21 +641,39 @@
 
 /* Dialog and Modal Visibility Fixes */
 [data-state="open"][data-radix-dialog-overlay] {
-  background-color: rgba(0, 0, 0, 0.7) !important;
-  backdrop-filter: blur(2px);
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: blur(3px);
+  z-index: 9998 !important;
+}
+
+/* Ensure all dialog components are solid */
+.dialog-content,
+[role="dialog"] {
+  background: rgb(255, 255, 255) !important;
+  opacity: 1 !important;
+}
+
+.dark .dialog-content,
+.dark [role="dialog"] {
+  background: rgb(17, 24, 39) !important;
+  opacity: 1 !important;
 }
 
 [data-radix-dialog-content] {
-  background: white !important;
+  background: rgb(255, 255, 255) !important;
   color: hsl(240, 10%, 15%) !important;
   border: 1px solid hsl(320, 80%, 88%) !important;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  opacity: 1 !important;
+  z-index: 9999 !important;
 }
 
 .dark [data-radix-dialog-content] {
-  background: hsl(240, 50%, 10%) !important;
+  background: rgb(17, 24, 39) !important;
   color: hsl(0, 0%, 95%) !important;
   border: 1px solid hsl(240, 30%, 20%) !important;
+  opacity: 1 !important;
+  z-index: 9999 !important;
 }
 
 /* Tab content visibility */

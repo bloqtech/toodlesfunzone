@@ -12,7 +12,9 @@ import {
   insertTimeSlotSchema,
   insertHolidayCalendarSchema,
   insertDiscountVoucherSchema,
-  insertReviewSchema
+  insertReviewSchema,
+  insertPackageSaleSchema,
+  insertPackageUsageSchema
 } from "@shared/schema";
 import { sendBookingConfirmation, sendBirthdayPartyConfirmation, sendEnquiryNotification } from "./services/email";
 import { sendWhatsAppNotification } from "./services/whatsapp";
@@ -464,6 +466,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching voucher:", error);
       res.status(500).json({ message: "Failed to fetch voucher" });
+    }
+  });
+
+  // Package Sales Management API Routes
+  
+  // Create a new package sale
+  app.post('/api/package-sales', async (req, res) => {
+    try {
+      const validatedData = insertPackageSaleSchema.parse(req.body);
+      
+      // Calculate validity period based on package type
+      const validFrom = new Date();
+      const validTill = new Date();
+      
+      // Set validity period - default 3 months for hour packages
+      validTill.setMonth(validTill.getMonth() + 3);
+      
+      const saleData = {
+        ...validatedData,
+        validFrom: validFrom.toISOString().split('T')[0],
+        validTill: validTill.toISOString().split('T')[0],
+        remainingHours: validatedData.totalHours,
+        status: 'active',
+        paymentStatus: 'completed', // Assume payment is completed when creating sale
+      };
+      
+      const packageSale = await storage.createPackageSale(saleData);
+      
+      // Send confirmation notification
+      if (packageSale.customerPhone) {
+        await sendWhatsAppNotification(
+          packageSale.customerPhone,
+          `Package purchased successfully! You have ${packageSale.totalHours} hours valid until ${packageSale.validTill}. Package ID: ${packageSale.id}`
+        );
+      }
+      
+      res.json(packageSale);
+    } catch (error) {
+      console.error("Error creating package sale:", error);
+      res.status(500).json({ message: "Failed to create package sale" });
+    }
+  });
+
+  // Get all package sales (admin only)
+  app.get('/api/package-sales', async (req, res) => {
+    try {
+      const packageSales = await storage.getAllPackageSales();
+      res.json(packageSales);
+    } catch (error) {
+      console.error("Error fetching package sales:", error);
+      res.status(500).json({ message: "Failed to fetch package sales" });
+    }
+  });
+
+  // Get package sales by phone number
+  app.get('/api/package-sales/phone/:phone', async (req, res) => {
+    try {
+      const { phone } = req.params;
+      const packageSales = await storage.getPackageSalesByPhone(phone);
+      res.json(packageSales);
+    } catch (error) {
+      console.error("Error fetching package sales by phone:", error);
+      res.status(500).json({ message: "Failed to fetch package sales" });
+    }
+  });
+
+  // Get active package sales
+  app.get('/api/package-sales/active', async (req, res) => {
+    try {
+      const activePackages = await storage.getActivePackageSales();
+      res.json(activePackages);
+    } catch (error) {
+      console.error("Error fetching active package sales:", error);
+      res.status(500).json({ message: "Failed to fetch active packages" });
+    }
+  });
+
+  // Get package sale by ID
+  app.get('/api/package-sales/:id', async (req, res) => {
+    try {
+      const packageSale = await storage.getPackageSaleById(parseInt(req.params.id));
+      if (!packageSale) {
+        return res.status(404).json({ message: "Package sale not found" });
+      }
+      res.json(packageSale);
+    } catch (error) {
+      console.error("Error fetching package sale:", error);
+      res.status(500).json({ message: "Failed to fetch package sale" });
+    }
+  });
+
+  // Record package usage (check-in)
+  app.post('/api/package-usage', async (req, res) => {
+    try {
+      const validatedData = insertPackageUsageSchema.parse(req.body);
+      
+      // Check if package sale exists and has enough hours
+      const packageSale = await storage.getPackageSaleById(validatedData.packageSaleId);
+      if (!packageSale) {
+        return res.status(404).json({ message: "Package not found" });
+      }
+      
+      if (packageSale.remainingHours < validatedData.hoursUsed) {
+        return res.status(400).json({ message: "Insufficient hours remaining" });
+      }
+      
+      // Check if package is still valid
+      const today = new Date().toISOString().split('T')[0];
+      if (today > packageSale.validTill) {
+        return res.status(400).json({ message: "Package has expired" });
+      }
+      
+      const usageData = {
+        ...validatedData,
+        usageDate: validatedData.usageDate || today,
+        checkedInAt: new Date(),
+      };
+      
+      const packageUsage = await storage.createPackageUsage(usageData);
+      
+      // Send notification about usage
+      if (packageSale.customerPhone) {
+        const remainingHours = packageSale.remainingHours - validatedData.hoursUsed;
+        await sendWhatsAppNotification(
+          packageSale.customerPhone,
+          `Check-in successful! Used ${validatedData.hoursUsed} hours. Remaining: ${remainingHours} hours. Valid until ${packageSale.validTill}`
+        );
+      }
+      
+      res.json(packageUsage);
+    } catch (error) {
+      console.error("Error recording package usage:", error);
+      res.status(500).json({ message: "Failed to record package usage" });
+    }
+  });
+
+  // Check-out and record actual hours spent
+  app.patch('/api/package-usage/:id/checkout', async (req, res) => {
+    try {
+      const { actualHoursSpent } = req.body;
+      const usageId = parseInt(req.params.id);
+      
+      if (!actualHoursSpent || actualHoursSpent <= 0) {
+        return res.status(400).json({ message: "Valid actual hours spent required" });
+      }
+      
+      const packageUsage = await storage.updatePackageUsageCheckout(
+        usageId,
+        new Date(),
+        actualHoursSpent
+      );
+      
+      res.json(packageUsage);
+    } catch (error) {
+      console.error("Error updating package usage checkout:", error);
+      res.status(500).json({ message: "Failed to update checkout" });
+    }
+  });
+
+  // Get usage history for a package sale
+  app.get('/api/package-sales/:id/usage', async (req, res) => {
+    try {
+      const packageSaleId = parseInt(req.params.id);
+      const usageHistory = await storage.getPackageUsageByPackageSale(packageSaleId);
+      res.json(usageHistory);
+    } catch (error) {
+      console.error("Error fetching usage history:", error);
+      res.status(500).json({ message: "Failed to fetch usage history" });
+    }
+  });
+
+  // Get usage analytics
+  app.get('/api/package-analytics/:packageSaleId?', async (req, res) => {
+    try {
+      const packageSaleId = req.params.packageSaleId ? parseInt(req.params.packageSaleId) : undefined;
+      const analytics = await storage.getUsageAnalytics(packageSaleId);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching usage analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
     }
   });
 

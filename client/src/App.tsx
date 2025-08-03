@@ -28,6 +28,7 @@ import AdminBirthday from "@/pages/admin/birthday-management";
 import AdminCapacity from "@/pages/admin/capacity-management";
 import AdminOperatingHours from "@/pages/admin/operating-hours";
 import AdminAddOns from "@/pages/admin/addons-management";
+import { PackageManagement } from "@/pages/admin/package-management";
 import AdminLoginPage from "@/pages/admin-login";
 import AuthPage from "@/pages/auth";
 import { LoginPage } from "@/pages/login";
@@ -65,6 +66,7 @@ function Router() {
       <Route path="/admin/capacity" component={AdminCapacity} />
       <Route path="/admin/operating-hours" component={AdminOperatingHours} />
       <Route path="/admin/add-ons" component={AdminAddOns} />
+      <Route path="/admin/package-management" component={PackageManagement} />
       <Route path="/admin/enquiries" component={() => <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center"><div className="text-center"><h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Enquiry Management</h1><p className="text-gray-600 dark:text-gray-400">Coming soon! Contact forms are being collected.</p></div></div>} />
       
       {/* Test routes */}

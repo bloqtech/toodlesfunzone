@@ -120,6 +120,7 @@ export default function AdminDashboard() {
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "User Management", href: "/admin/users", icon: Users },
     { name: "Package Management", href: "/admin/packages", icon: Package },
+    { name: "Hour Package Sales", href: "/admin/package-management", icon: Clock },
     { name: "Activities Management", href: "/admin/activities", icon: PlayCircle },
     { name: "Add-ons Management", href: "/admin/addons", icon: Package },
     { name: "Gallery Management", href: "/admin/gallery", icon: Image },

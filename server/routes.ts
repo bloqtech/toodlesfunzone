@@ -349,22 +349,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to extract Client ID from URL format if needed
+  const extractClientId = (rawClientId: string | undefined): string | undefined => {
+    if (!rawClientId) return undefined;
+    if (rawClientId.startsWith('https://')) {
+      const match = rawClientId.match(/https:\/\/([^\/]+)/);
+      return match ? match[1] : rawClientId;
+    }
+    return rawClientId;
+  };
+
   // Google OAuth authentication routes
   app.get('/api/auth/google', async (req, res) => {
     try {
       if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
         console.warn("Google OAuth credentials missing");
         return res.redirect('/?auth=error&reason=oauth_config');
-      }
-      
-      // Extract Client ID from URL format if needed (fix for incorrect secret format)
-      function extractClientId(rawClientId: string | undefined): string | undefined {
-        if (!rawClientId) return undefined;
-        if (rawClientId.startsWith('https://')) {
-          const match = rawClientId.match(/https:\/\/([^\/]+)/);
-          return match ? match[1] : rawClientId;
-        }
-        return rawClientId;
       }
 
       const clientId = extractClientId(process.env.GOOGLE_CLIENT_ID);

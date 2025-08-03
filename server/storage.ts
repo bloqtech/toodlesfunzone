@@ -12,6 +12,8 @@ import {
   operatingHours,
   activities,
   otpVerification,
+  packageSales,
+  packageUsage,
   type User,
   type UpsertUser,
   type Package,
@@ -26,6 +28,8 @@ import {
   type OperatingHours,
   type Activity,
   type OtpVerification,
+  type PackageSale,
+  type PackageUsage,
   type InsertPackage,
   type InsertTimeSlot,
   type InsertBooking,
@@ -38,6 +42,8 @@ import {
   type InsertOperatingHours,
   type InsertActivity,
   type InsertOtpVerification,
+  type InsertPackageSale,
+  type InsertPackageUsage,
   birthdayPackages,
   type BirthdayPackage,
   type InsertBirthdayPackage,
@@ -170,6 +176,23 @@ export interface IStorage {
   createActivity(activityData: InsertActivity): Promise<Activity>;
   updateActivity(id: number, activityData: Partial<InsertActivity>): Promise<Activity>;
   deleteActivity(id: number): Promise<void>;
+  
+  // Package sales operations
+  createPackageSale(saleData: InsertPackageSale): Promise<PackageSale>;
+  getPackageSaleById(id: number): Promise<PackageSale | undefined>;
+  getPackageSalesByUser(userId: string): Promise<PackageSale[]>;
+  getPackageSalesByPhone(phone: string): Promise<PackageSale[]>;
+  getAllPackageSales(): Promise<PackageSale[]>;
+  getActivePackageSales(): Promise<PackageSale[]>;
+  updatePackageSaleRemainingHours(id: number, remainingHours: number): Promise<PackageSale>;
+  updatePackageSaleStatus(id: number, status: string): Promise<PackageSale>;
+  
+  // Package usage operations
+  createPackageUsage(usageData: InsertPackageUsage): Promise<PackageUsage>;
+  getPackageUsageById(id: number): Promise<PackageUsage | undefined>;
+  getPackageUsageByPackageSale(packageSaleId: number): Promise<PackageUsage[]>;
+  updatePackageUsageCheckout(id: number, checkedOutAt: Date, actualHoursSpent: number): Promise<PackageUsage>;
+  getUsageAnalytics(packageSaleId?: number): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -954,6 +977,116 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(otpVerification)
       .where(lte(otpVerification.expiresAt, new Date()));
+  }
+
+  // Package sales operations
+  async createPackageSale(saleData: InsertPackageSale): Promise<PackageSale> {
+    const [sale] = await db.insert(packageSales).values(saleData).returning();
+    return sale;
+  }
+
+  async getPackageSaleById(id: number): Promise<PackageSale | undefined> {
+    const [sale] = await db.select().from(packageSales).where(eq(packageSales.id, id));
+    return sale;
+  }
+
+  async getPackageSalesByUser(userId: string): Promise<PackageSale[]> {
+    return await db.select().from(packageSales).where(eq(packageSales.userId, userId));
+  }
+
+  async getPackageSalesByPhone(phone: string): Promise<PackageSale[]> {
+    return await db.select().from(packageSales).where(eq(packageSales.customerPhone, phone));
+  }
+
+  async getAllPackageSales(): Promise<PackageSale[]> {
+    return await db.select().from(packageSales).orderBy(desc(packageSales.createdAt));
+  }
+
+  async getActivePackageSales(): Promise<PackageSale[]> {
+    const today = new Date().toISOString().split('T')[0];
+    return await db
+      .select()
+      .from(packageSales)
+      .where(
+        and(
+          eq(packageSales.status, 'active'),
+          gte(packageSales.validTill, today),
+          sql`${packageSales.remainingHours} > 0`
+        )
+      )
+      .orderBy(desc(packageSales.createdAt));
+  }
+
+  async updatePackageSaleRemainingHours(id: number, remainingHours: number): Promise<PackageSale> {
+    const [sale] = await db
+      .update(packageSales)
+      .set({ 
+        remainingHours,
+        status: remainingHours <= 0 ? 'used_up' : 'active',
+        updatedAt: new Date()
+      })
+      .where(eq(packageSales.id, id))
+      .returning();
+    return sale;
+  }
+
+  async updatePackageSaleStatus(id: number, status: string): Promise<PackageSale> {
+    const [sale] = await db
+      .update(packageSales)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(packageSales.id, id))
+      .returning();
+    return sale;
+  }
+
+  // Package usage operations
+  async createPackageUsage(usageData: InsertPackageUsage): Promise<PackageUsage> {
+    const [usage] = await db.insert(packageUsage).values(usageData).returning();
+    
+    // Update remaining hours in package sale
+    const sale = await this.getPackageSaleById(usageData.packageSaleId);
+    if (sale) {
+      const newRemainingHours = sale.remainingHours - usageData.hoursUsed;
+      await this.updatePackageSaleRemainingHours(usageData.packageSaleId, newRemainingHours);
+    }
+    
+    return usage;
+  }
+
+  async getPackageUsageById(id: number): Promise<PackageUsage | undefined> {
+    const [usage] = await db.select().from(packageUsage).where(eq(packageUsage.id, id));
+    return usage;
+  }
+
+  async getPackageUsageByPackageSale(packageSaleId: number): Promise<PackageUsage[]> {
+    return await db
+      .select()
+      .from(packageUsage)
+      .where(eq(packageUsage.packageSaleId, packageSaleId))
+      .orderBy(desc(packageUsage.createdAt));
+  }
+
+  async updatePackageUsageCheckout(id: number, checkedOutAt: Date, actualHoursSpent: number): Promise<PackageUsage> {
+    const [usage] = await db
+      .update(packageUsage)
+      .set({ checkedOutAt, actualHoursSpent })
+      .where(eq(packageUsage.id, id))
+      .returning();
+    return usage;
+  }
+
+  async getUsageAnalytics(packageSaleId?: number): Promise<any> {
+    const baseQuery = db.select({
+      totalUsage: count(),
+      totalHoursUsed: sql<number>`SUM(${packageUsage.hoursUsed})`,
+      avgHoursPerVisit: sql<number>`AVG(${packageUsage.hoursUsed})`,
+    }).from(packageUsage);
+
+    if (packageSaleId) {
+      return await baseQuery.where(eq(packageUsage.packageSaleId, packageSaleId));
+    }
+
+    return await baseQuery;
   }
 }
 

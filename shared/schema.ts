@@ -286,16 +286,92 @@ export const birthdayPackages = pgTable("birthday_packages", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Package Sales table - tracks sold hour-based packages
+export const packageSales = pgTable("package_sales", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id),
+  packageId: integer("package_id").references(() => packages.id).notNull(),
+  totalHours: integer("total_hours").notNull(), // Total hours purchased
+  remainingHours: integer("remaining_hours").notNull(), // Hours left to use
+  validFrom: date("valid_from").notNull(),
+  validTill: date("valid_till").notNull(),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  paymentId: varchar("payment_id"),
+  paymentStatus: varchar("payment_status").default("pending"),
+  status: varchar("status").default("active"), // active, expired, used_up, cancelled
+  customerName: varchar("customer_name").notNull(),
+  customerPhone: varchar("customer_phone").notNull(),
+  customerEmail: varchar("customer_email"),
+  notes: text("notes"),
+  soldBy: varchar("sold_by").references(() => users.id), // Which admin sold it
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Package Usage table - tracks individual hour usage from sold packages
+export const packageUsage = pgTable("package_usage", {
+  id: serial("id").primaryKey(),
+  packageSaleId: integer("package_sale_id").references(() => packageSales.id).notNull(),
+  hoursUsed: integer("hours_used").notNull(),
+  usageDate: date("usage_date").notNull(),
+  timeSlotId: integer("time_slot_id").references(() => timeSlots.id),
+  numberOfChildren: integer("number_of_children").default(1),
+  attendingChildrenNames: jsonb("attending_children_names").$type<string[]>(),
+  supervisorNotes: text("supervisor_notes"),
+  checkedInBy: varchar("checked_in_by").references(() => users.id), // Staff who checked them in
+  checkedInAt: timestamp("checked_in_at").defaultNow(),
+  checkedOutAt: timestamp("checked_out_at"),
+  actualHoursSpent: decimal("actual_hours_spent", { precision: 3, scale: 2 }), // Actual time spent (could be less than booked)
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   bookings: many(bookings),
   birthdayParties: many(birthdayParties),
   reviews: many(reviews),
   blogPosts: many(blogPosts),
+  packageSales: many(packageSales),
+  soldPackages: many(packageSales, { relationName: "soldBy" }),
+  checkedInUsage: many(packageUsage, { relationName: "checkedInBy" }),
 }));
 
 export const packagesRelations = relations(packages, ({ many }) => ({
   bookings: many(bookings),
+  packageSales: many(packageSales),
+}));
+
+export const packageSalesRelations = relations(packageSales, ({ one, many }) => ({
+  user: one(users, {
+    fields: [packageSales.userId],
+    references: [users.id],
+  }),
+  package: one(packages, {
+    fields: [packageSales.packageId],
+    references: [packages.id],
+  }),
+  soldByUser: one(users, {
+    fields: [packageSales.soldBy],
+    references: [users.id],
+    relationName: "soldBy",
+  }),
+  packageUsage: many(packageUsage),
+}));
+
+export const packageUsageRelations = relations(packageUsage, ({ one }) => ({
+  packageSale: one(packageSales, {
+    fields: [packageUsage.packageSaleId],
+    references: [packageSales.id],
+  }),
+  timeSlot: one(timeSlots, {
+    fields: [packageUsage.timeSlotId],
+    references: [timeSlots.id],
+  }),
+  checkedInByUser: one(users, {
+    fields: [packageUsage.checkedInBy],
+    references: [users.id],
+    relationName: "checkedInBy",
+  }),
 }));
 
 export const timeSlotsRelations = relations(timeSlots, ({ many }) => ({
@@ -364,6 +440,8 @@ export const insertAddOnSchema = createInsertSchema(addOns);
 export const insertActivitySchema = createInsertSchema(activities);
 export const insertBirthdayPackageSchema = createInsertSchema(birthdayPackages);
 export const insertOtpVerificationSchema = createInsertSchema(otpVerification);
+export const insertPackageSaleSchema = createInsertSchema(packageSales);
+export const insertPackageUsageSchema = createInsertSchema(packageUsage);
 
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
@@ -396,6 +474,10 @@ export type BirthdayPackage = typeof birthdayPackages.$inferSelect;
 export type InsertBirthdayPackage = z.infer<typeof insertBirthdayPackageSchema>;
 export type OtpVerification = typeof otpVerification.$inferSelect;
 export type InsertOtpVerification = z.infer<typeof insertOtpVerificationSchema>;
+export type PackageSale = typeof packageSales.$inferSelect;
+export type InsertPackageSale = z.infer<typeof insertPackageSaleSchema>;
+export type PackageUsage = typeof packageUsage.$inferSelect;
+export type InsertPackageUsage = z.infer<typeof insertPackageUsageSchema>;
 
 // Define permission constants
 export const PERMISSIONS = {

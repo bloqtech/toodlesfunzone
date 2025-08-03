@@ -406,14 +406,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/auth/google/callback', async (req, res) => {
     try {
+      console.log("=== OAUTH CALLBACK RECEIVED ===");
+      console.log("Query params:", JSON.stringify(req.query, null, 2));
+      console.log("Headers:", JSON.stringify(req.headers, null, 2));
+      console.log("===============================");
+      
       const { code, error } = req.query;
       
       if (error) {
         console.error("Google OAuth error:", error);
-        return res.redirect('/?auth=error');
+        return res.redirect('/?auth=error&reason=oauth_error');
       }
       
       if (!code) {
+        console.error("No authorization code received");
         return res.redirect('/?auth=error&reason=no_code');
       }
 

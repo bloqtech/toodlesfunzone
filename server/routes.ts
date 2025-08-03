@@ -439,7 +439,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (host === 'localhost:5000' && process.env.REPLIT_DOMAINS) {
               host = process.env.REPLIT_DOMAINS;
             }
-            return `https://${host}/api/auth/google/callback`;
+            const redirectUri = `https://${host}/api/auth/google/callback`;
+            console.log("Token exchange using redirect URI:", redirectUri);
+            return redirectUri;
           })(),
         }),
       });
@@ -447,9 +449,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tokenData = await tokenResponse.json();
       
       console.log("=== TOKEN EXCHANGE DEBUG ===");
+      console.log("Authorization code received:", code);
+      console.log("Authorization code length:", (code as string).length);
       console.log("Token response status:", tokenResponse.status);
       console.log("Token response data:", JSON.stringify(tokenData, null, 2));
       console.log("Using Client ID for token exchange:", extractClientId(process.env.GOOGLE_CLIENT_ID));
+      console.log("Using Client Secret (first 10 chars):", extractClientId(process.env.GOOGLE_CLIENT_SECRET)?.substring(0, 10) + "...");
       console.log("===========================");
       
       if (!tokenData.access_token) {

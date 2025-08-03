@@ -11,6 +11,7 @@ import {
   enquiries,
   operatingHours,
   activities,
+  otpVerification,
   type User,
   type UpsertUser,
   type Package,
@@ -24,6 +25,7 @@ import {
   type Enquiry,
   type OperatingHours,
   type Activity,
+  type OtpVerification,
   type InsertPackage,
   type InsertTimeSlot,
   type InsertBooking,
@@ -35,6 +37,7 @@ import {
   type InsertEnquiry,
   type InsertOperatingHours,
   type InsertActivity,
+  type InsertOtpVerification,
   birthdayPackages,
   type BirthdayPackage,
   type InsertBirthdayPackage,
@@ -48,6 +51,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByPhone(phone: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   createCustomerAccount(userData: {
     email: string;
@@ -66,6 +70,11 @@ export interface IStorage {
   deleteUser(id: string): Promise<void>;
   getUsersByRole(role: string): Promise<User[]>;
   hasPermission(userId: string, permission: string): Promise<boolean>;
+
+  // WhatsApp OTP operations
+  createOTP(phone: string, otp: string): Promise<OtpVerification>;
+  verifyOTP(phone: string, otp: string): Promise<boolean>;
+  cleanupExpiredOTPs(): Promise<void>;
 
   // Package management operations
   createPackage(packageData: Omit<Package, 'id' | 'createdAt' | 'updatedAt'>): Promise<Package>;
@@ -186,6 +195,11 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserByPhone(phone: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.phone, phone));
     return user;
   }
 
@@ -890,6 +904,56 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBirthdayPackage(id: number): Promise<void> {
     await db.delete(birthdayPackages).where(eq(birthdayPackages.id, id));
+  }
+
+  // WhatsApp OTP operations
+  async createOTP(phone: string, otp: string): Promise<OtpVerification> {
+    // First cleanup expired OTPs
+    await this.cleanupExpiredOTPs();
+    
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+    
+    const [otpRecord] = await db.insert(otpVerification).values({
+      phone,
+      otp,
+      expiresAt,
+      isUsed: false,
+      attempts: 0
+    }).returning();
+    
+    return otpRecord;
+  }
+
+  async verifyOTP(phone: string, otp: string): Promise<boolean> {
+    const [otpRecord] = await db
+      .select()
+      .from(otpVerification)
+      .where(
+        and(
+          eq(otpVerification.phone, phone),
+          eq(otpVerification.otp, otp),
+          eq(otpVerification.isUsed, false),
+          gte(otpVerification.expiresAt, new Date())
+        )
+      );
+
+    if (!otpRecord) {
+      return false;
+    }
+
+    // Mark OTP as used
+    await db
+      .update(otpVerification)
+      .set({ isUsed: true })
+      .where(eq(otpVerification.id, otpRecord.id));
+
+    return true;
+  }
+
+  async cleanupExpiredOTPs(): Promise<void> {
+    await db
+      .delete(otpVerification)
+      .where(lte(otpVerification.expiresAt, new Date()));
   }
 }
 

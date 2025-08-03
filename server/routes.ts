@@ -17,6 +17,7 @@ import {
 import { sendBookingConfirmation, sendBirthdayPartyConfirmation, sendEnquiryNotification } from "./services/email";
 import { sendWhatsAppNotification } from "./services/whatsapp";
 import { createPaymentOrder, verifyPayment } from "./services/payment";
+import { generateOTP, sendOTPWhatsApp } from "./whatsapp";
 import bcrypt from "bcryptjs";
 import session from "express-session";
 
@@ -46,7 +47,7 @@ const upload = multer({
   }
 });
 
-// Simple authentication middleware for Google OAuth
+// Authentication middleware for WhatsApp OTP
 const isAuthenticated = (req: any, res: any, next: any) => {
   const userId = req.session?.userId;
   if (!userId) {
@@ -137,6 +138,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Admin logout error:", error);
       res.status(500).json({ message: "Logout failed" });
+    }
+  });
+
+  // WhatsApp OTP Authentication Routes
+  app.post('/api/auth/send-otp', async (req, res) => {
+    try {
+      const { phone } = req.body;
+      
+      if (!phone) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+
+      // Normalize phone number (ensure it starts with +91 for Indian numbers)
+      const normalizedPhone = phone.startsWith('+91') ? phone : `+91${phone.replace(/[^0-9]/g, '')}`;
+      
+      // Generate OTP
+      const otp = generateOTP();
+      
+      // Store OTP in database
+      await storage.createOTP(normalizedPhone, otp);
+      
+      // Send OTP via WhatsApp
+      const sent = await sendOTPWhatsApp(normalizedPhone, otp);
+      
+      if (sent) {
+        res.json({ 
+          success: true, 
+          message: "OTP sent successfully",
+          phone: normalizedPhone 
+        });
+      } else {
+        res.status(500).json({ 
+          message: "Failed to send OTP. Please try again." 
+        });
+      }
+    } catch (error) {
+      console.error("Send OTP error:", error);
+      res.status(500).json({ message: "Failed to send OTP" });
+    }
+  });
+
+  app.post('/api/auth/verify-otp', async (req, res) => {
+    try {
+      const { phone, otp, firstName, lastName } = req.body;
+      
+      if (!phone || !otp) {
+        return res.status(400).json({ message: "Phone number and OTP are required" });
+      }
+
+      // Normalize phone number
+      const normalizedPhone = phone.startsWith('+91') ? phone : `+91${phone.replace(/[^0-9]/g, '')}`;
+      
+      // Verify OTP
+      const isValidOTP = await storage.verifyOTP(normalizedPhone, otp);
+      
+      if (!isValidOTP) {
+        return res.status(400).json({ message: "Invalid or expired OTP" });
+      }
+
+      // Check if user exists
+      let user = await storage.getUserByPhone(normalizedPhone);
+      
+      if (!user) {
+        // Create new user account
+        const userId = `customer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        const newUser = {
+          id: userId,
+          phone: normalizedPhone,
+          firstName: firstName || '',
+          lastName: lastName || '',
+          role: "customer" as const,
+          isGuest: false,
+          registrationSource: "whatsapp_otp",
+          permissions: [] as string[],
+          isActive: true,
+          isAdmin: false,
+        };
+
+        user = await storage.upsertUser(newUser);
+      }
+
+      // Update last login
+      await storage.updateUserLastLogin(user.id);
+      
+      // Set user session
+      (req as any).session.userId = user.id;
+      (req as any).session.isAdmin = user.isAdmin;
+      
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          phone: user.phone,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          isAdmin: user.isAdmin,
+          permissions: user.permissions
+        }
+      });
+      
+    } catch (error) {
+      console.error("Verify OTP error:", error);
+      res.status(500).json({ message: "Failed to verify OTP" });
     }
   });
 

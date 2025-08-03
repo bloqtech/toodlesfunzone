@@ -36,11 +36,11 @@ export const userRoles = pgEnum("user_role", ["customer", "staff", "manager", "a
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
+  email: varchar("email"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  phone: varchar("phone"),
+  phone: varchar("phone").unique().notNull(), // Make phone required and unique for WhatsApp auth
   address: text("address"),
   dateOfBirth: date("date_of_birth"),
   role: userRoles("role").default("customer").notNull(),
@@ -50,9 +50,20 @@ export const users = pgTable("users", {
   lastLoginAt: timestamp("last_login_at"),
   passwordHash: varchar("password_hash"), // For local admin and customer accounts
   isGuest: boolean("is_guest").default(false), // Track guest accounts
-  registrationSource: varchar("registration_source").default("booking"), // Track how user registered
+  registrationSource: varchar("registration_source").default("whatsapp_otp"), // Default to WhatsApp
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// OTP verification table for WhatsApp authentication
+export const otpVerification = pgTable("otp_verification", {
+  id: serial("id").primaryKey(),
+  phone: varchar("phone").notNull(),
+  otp: varchar("otp").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").default(false),
+  attempts: integer("attempts").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Booking status enum
@@ -352,6 +363,7 @@ export const insertOperatingHoursSchema = createInsertSchema(operatingHours);
 export const insertAddOnSchema = createInsertSchema(addOns);
 export const insertActivitySchema = createInsertSchema(activities);
 export const insertBirthdayPackageSchema = createInsertSchema(birthdayPackages);
+export const insertOtpVerificationSchema = createInsertSchema(otpVerification);
 
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
@@ -382,6 +394,8 @@ export type Activity = typeof activities.$inferSelect;
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type BirthdayPackage = typeof birthdayPackages.$inferSelect;
 export type InsertBirthdayPackage = z.infer<typeof insertBirthdayPackageSchema>;
+export type OtpVerification = typeof otpVerification.$inferSelect;
+export type InsertOtpVerification = z.infer<typeof insertOtpVerificationSchema>;
 
 // Define permission constants
 export const PERMISSIONS = {

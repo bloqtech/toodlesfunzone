@@ -18,6 +18,24 @@ interface BookingNotificationData {
   status: string;
 }
 
+// Generate 6-digit OTP
+export function generateOTP(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Send OTP via WhatsApp
+export async function sendOTPWhatsApp(phone: string, otp: string): Promise<boolean> {
+  const message = `🔐 *Toodles Funzone - OTP Verification*
+
+Your login OTP is: *${otp}*
+
+This OTP is valid for 5 minutes. Please do not share this with anyone.
+
+Thank you for choosing Toodles Funzone! 🎉`;
+
+  return await sendWhatsAppMessage(phone, message);
+}
+
 export async function sendWhatsAppMessage(to: string, message: string, templateName?: string, templateParams?: any[]) {
   if (!WHATSAPP_ACCESS_TOKEN || !WHATSAPP_PHONE_NUMBER_ID) {
     console.warn('WhatsApp credentials not configured');

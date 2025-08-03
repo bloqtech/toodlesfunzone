@@ -55,10 +55,10 @@ export function Header() {
                 <div className="hidden md:flex items-center space-x-2">
                   <User className="h-4 w-4 text-toodles-primary" />
                   <span className="text-sm font-medium text-toodles-text">
-                    {user?.firstName || 'User'}
+                    {(user as any)?.firstName || 'User'}
                   </span>
                 </div>
-                {user?.isAdmin && (
+                {(user as any)?.isAdmin && (
                   <Link href="/admin/dashboard">
                     <Button variant="default" className="hidden md:inline-flex bg-toodles-primary hover:bg-toodles-primary/90 text-white">
                       <Shield className="h-4 w-4 mr-2" />
@@ -67,7 +67,7 @@ export function Header() {
                   </Link>
                 )}
                 {/* Admin Access Button for non-admin users */}
-                {!user?.isAdmin && (
+                {!(user as any)?.isAdmin && (
                   <Button 
                     variant="secondary" 
                     size="sm"
@@ -97,7 +97,7 @@ export function Header() {
                   variant="outline" 
                   className="hidden md:inline-flex"
                   onClick={async () => {
-                    if (user?.isAdmin) {
+                    if ((user as any)?.isAdmin) {
                       // Admin logout
                       try {
                         const response = await fetch('/api/admin/logout', {
@@ -113,8 +113,8 @@ export function Header() {
                         console.error('Error during admin logout:', error);
                       }
                     } else {
-                      // Regular user logout
-                      window.location.href = '/api/logout';
+                      // Regular user logout - just refresh page to clear session
+                      window.location.href = '/';
                     }
                   }}
                 >
@@ -124,10 +124,10 @@ export function Header() {
               </>
             ) : (
               <Button 
-                className="bg-toodles-primary hover:bg-red-600 text-white font-accent font-medium"
-                onClick={() => window.location.href = '/api/login'}
+                className="bg-toodles-primary hover:bg-toodles-primary/90 text-white font-accent font-medium"
+                onClick={() => window.location.href = '/login'}
               >
-                Login
+                Login with WhatsApp
               </Button>
             )}
             
@@ -159,10 +159,10 @@ export function Header() {
                         <div className="flex items-center space-x-2 mb-4">
                           <User className="h-4 w-4 text-toodles-primary" />
                           <span className="text-sm font-medium text-toodles-text">
-                            {user?.firstName || 'User'}
+                            {(user as any)?.firstName || 'User'}
                           </span>
                         </div>
-                        {user?.isAdmin && (
+                        {(user as any)?.isAdmin && (
                           <Link href="/admin/dashboard">
                             <Button variant="default" className="w-full mb-2 bg-toodles-primary hover:bg-toodles-primary/90">
                               <Shield className="h-4 w-4 mr-2" />
@@ -171,7 +171,7 @@ export function Header() {
                           </Link>
                         )}
                         {/* Mobile Admin Access Button */}
-                        {!user?.isAdmin && (
+                        {!(user as any)?.isAdmin && (
                           <Button 
                             variant="secondary"
                             className="w-full mb-2 bg-toodles-accent hover:bg-toodles-accent/90 text-toodles-text"
@@ -200,7 +200,7 @@ export function Header() {
                           variant="outline" 
                           className="w-full"
                           onClick={async () => {
-                            if (user?.isAdmin) {
+                            if ((user as any)?.isAdmin) {
                               // Admin logout
                               try {
                                 const response = await fetch('/api/admin/logout', {
@@ -216,8 +216,8 @@ export function Header() {
                                 console.error('Error during admin logout:', error);
                               }
                             } else {
-                              // Regular user logout
-                              window.location.href = '/api/logout';
+                              // Regular user logout - just refresh page to clear session
+                              window.location.href = '/';
                             }
                           }}
                         >

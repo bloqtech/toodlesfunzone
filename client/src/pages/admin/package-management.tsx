@@ -111,7 +111,7 @@ export function PackageManagement() {
       customerEmail: formData.get('customerEmail') as string,
       totalAmount: formData.get('totalAmount') as string,
       notes: formData.get('notes') as string,
-      soldBy: 'admin',
+      soldBy: 'raspik2025', // Use the actual admin user ID
     };
 
     createSaleMutation.mutate(saleData);
@@ -136,7 +136,7 @@ export function PackageManagement() {
       numberOfChildren: parseInt(formData.get('numberOfChildren') as string),
       attendingChildrenNames: (formData.get('childrenNames') as string).split(',').map(name => name.trim()).filter(Boolean),
       supervisorNotes: formData.get('supervisorNotes') as string,
-      checkedInBy: 'admin',
+      checkedInBy: 'raspik2025', // Use the actual admin user ID
     };
 
     recordUsageMutation.mutate(usageData);

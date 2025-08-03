@@ -425,7 +425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         body: new URLSearchParams({
           client_id: extractClientId(process.env.GOOGLE_CLIENT_ID)!,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+          client_secret: extractClientId(process.env.GOOGLE_CLIENT_SECRET)!,
           code: code as string,
           grant_type: 'authorization_code',
           redirect_uri: (() => {
@@ -607,18 +607,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (result.booking.packageId) {
           const packageData = await storage.getPackageById(result.booking.packageId);
           if (packageData) {
-            await sendBookingConfirmation(result.booking, packageData);
+            await sendBookingConfirmation(result.booking);
           }
         }
         await sendWhatsAppNotification({
           bookingId: result.booking.id.toString(),
-          customerName: result.booking.customerName || '',
-          customerPhone: result.booking.customerPhone || '',
+          customerName: result.booking.parentName || '',
+          customerPhone: result.booking.parentPhone || '',
           packageName: '', // Will be populated by the notification service
-          date: result.booking.bookingDate?.toISOString() || '',
+          date: result.booking.bookingDate || '',
           timeSlot: '', // Will be populated by the notification service
           numberOfChildren: result.booking.numberOfChildren || 1,
-          totalAmount: result.booking.totalAmount || '0',
+          totalAmount: parseFloat(result.booking.totalAmount || '0'),
           status: result.booking.status || 'pending'
         }, "booking_confirmation");
       } catch (emailError) {
@@ -791,10 +791,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           childName: party.childName,
           childAge: party.childAge,
           date: party.partyDate,
-          timeSlot: party.timeSlot,
-          guestCount: party.guestCount,
-          theme: party.theme,
-          totalAmount: party.totalAmount,
+          timeSlot: party.timeSlotId?.toString() || '',
+          guestCount: party.guestCount || 0,
+          theme: party.theme || '',
+          totalAmount: parseFloat(party.totalAmount || '0'),
           partyId: party.id.toString()
         };
 

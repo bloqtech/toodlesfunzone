@@ -138,13 +138,13 @@ export function Header() {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-64">
+              <SheetContent side="right" className="w-64 bg-white border-l border-gray-200">
                 <nav className="flex flex-col space-y-4 mt-8">
                   {navigation.map((item) => (
                     <Link key={item.name} href={item.href}>
                       <span 
-                        className={`text-toodles-text hover:text-toodles-primary transition-colors font-medium font-accent cursor-pointer block py-2 ${
-                          isActive(item.href) ? 'text-toodles-primary' : ''
+                        className={`text-gray-900 hover:text-toodles-primary transition-colors font-medium font-accent cursor-pointer block py-2 px-2 rounded-md hover:bg-gray-50 ${
+                          isActive(item.href) ? 'text-toodles-primary bg-toodles-primary/10' : ''
                         }`}
                         onClick={() => setIsOpen(false)}
                       >
@@ -158,7 +158,7 @@ export function Header() {
                       <>
                         <div className="flex items-center space-x-2 mb-4">
                           <User className="h-4 w-4 text-toodles-primary" />
-                          <span className="text-sm font-medium text-toodles-text">
+                          <span className="text-sm font-medium text-gray-900">
                             {(user as any)?.firstName || 'User'}
                           </span>
                         </div>
@@ -227,10 +227,10 @@ export function Header() {
                       </>
                     ) : (
                       <Button 
-                        className="w-full bg-toodles-primary hover:bg-red-600 text-white font-accent font-medium"
-                        onClick={() => window.location.href = '/api/login'}
+                        className="w-full bg-toodles-primary hover:bg-toodles-primary/90 text-white font-accent font-medium"
+                        onClick={() => window.location.href = '/login'}
                       >
-                        Login
+                        Login with WhatsApp
                       </Button>
                     )}
                   </div>

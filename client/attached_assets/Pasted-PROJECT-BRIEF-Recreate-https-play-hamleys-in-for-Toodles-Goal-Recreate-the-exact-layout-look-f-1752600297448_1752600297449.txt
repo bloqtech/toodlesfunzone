@@ -1,0 +1,81 @@
+PROJECT BRIEF: Recreate https://play.hamleys.in for Toodles
+Goal: Recreate the exact layout, look, feel, and functionality of https://play.hamleys.in for our indoor kids play zone business — https://toodlesfunzone.com
+
+🎯 Scope of Work
+UI/UX Cloning
+
+Use the same layout, flow, and component structure as https://play.hamleys.in — including homepage design, booking section, navigation, contact, and experience pages.
+
+Must be fully responsive on mobile, tablet, and desktop.
+
+Customization for Toodles
+
+Replace Hamleys branding, colors, and imagery with Toodles theme — colorful, fun, and soft-play-focused (you can use https://toodlesfunzone.com/ for theme reference).
+
+Update copy/content/images as per Toodles offerings.
+
+Modify booking information to reflect Toodles services (slot-based, packages, events, etc.)
+
+Features to Implement (Same as Hamleys but for Toodles):
+
+Slot-based booking for 10 AM–8 PM, with 15 kids per slot.
+
+Packages (walk-ins, weekday/weekend pricing, events).
+
+Birthday event enquiry or booking section.
+
+Payment gateway (Razorpay or Paytm – developer can choose).
+
+Login/guest checkout.
+
+WhatsApp API + email/SMS notifications.
+
+Admin portal to:
+
+View/edit bookings
+
+Mark dates as holiday/private/sold out
+
+Create/manage discount vouchers
+
+View basic analytics (top customers, monthly bookings, etc.)
+
+Review section (integrated Google reviews).
+
+Blog section (coming soon placeholder is fine).
+
+Tech Stack
+
+Frontend: React (or as close to Hamleys site tech as possible)
+
+Backend: Node.js or any stack compatible with Replit hosting
+
+Database: Firebase or Supabase or PostgreSQL
+
+Admin Panel: Custom-built or use existing dashboard template
+
+🎨 Visual Reference
+Clone this for look and feel: https://play.hamleys.in
+
+Apply these for branding: https://toodlesfunzone.com
+
+Use placeholder content if not provided, but make it themed for kids' indoor soft play area.
+
+📌 Additional Notes
+Clean, scalable code.
+
+Commented code for easier updates.
+
+SEO-friendly where possible.
+
+Use modern UI elements (as seen on Hamleys site).
+
+💬 Deliverables
+Full website hosted on Replit (with working booking and admin functions)
+
+Link to GitHub or code repo
+
+Admin credentials + deployment instructions
+
+Basic documentation (1-pager) on managing bookings and site content
+

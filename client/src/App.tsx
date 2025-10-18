@@ -33,6 +33,7 @@ import AdminLoginPage from "@/pages/admin-login";
 import AuthPage from "@/pages/auth";
 import { LoginPage } from "@/pages/login";
 import { AdminAccessDot } from "@/components/admin/admin-access-dot";
+import { BrowserRouter } from "react-router-dom";
 
 function Router() {
   // Track page views when routes change
@@ -92,8 +93,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+          <Toaster />
+          <Router />
         <AdminAccessDot />
       </TooltipProvider>
     </QueryClientProvider>

@@ -1,18 +1,47 @@
 import { useState, useEffect } from 'react';
 import { trackEvent } from '@/lib/analytics';
+import axios from 'axios';
 
-const videoAssets = [
-  { id: 1, src: '/api/video/1_1753189659952.mp4' },
-  { id: 2, src: '/api/video/2_1753189659952.mp4' },
-  { id: 3, src: '/api/video/3_1753189659952.mp4' },
-  { id: 4, src: '/api/video/4_1753189659951.mp4' },
-  { id: 5, src: '/api/video/5_1753189659951.mp4' },
-  { id: 6, src: '/api/video/6_1753189659951.mp4' },
-  { id: 7, src: '/api/video/7_1753189659950.mp4' },
-  { id: 8, src: '/api/video/8_1753189659950.mp4' },
-  { id: 9, src: '/api/video/9_1753189659950.mp4' },
-  { id: 10, src: '/api/video/10_1753189659949.mp4' }
-];
+interface videoAsset{
+  id: number,
+  src: string
+};
+
+let videoAssets: videoAsset[]=[];
+
+(async()=>{
+  try {
+    // const {data} = await axios.get("http://localhost:5000/api/allVideos/urls");
+    const {data} = await axios.get("/api/allVideos/urls");
+    videoAssets = data;
+  } catch (error) {
+      videoAssets = [
+      { id: 1, src: '/api/video/1_1753189659952.mp4' },
+      { id: 2, src: '/api/video/2_1753189659952.mp4' },
+      { id: 3, src: '/api/video/3_1753189659952.mp4' },
+      { id: 4, src: '/api/video/4_1753189659951.mp4' },
+      { id: 5, src: '/api/video/5_1753189659951.mp4' },
+      { id: 6, src: '/api/video/6_1753189659951.mp4' },
+      { id: 7, src: '/api/video/7_1753189659950.mp4' },
+      { id: 8, src: '/api/video/8_1753189659950.mp4' },
+      { id: 9, src: '/api/video/9_1753189659950.mp4' },
+      { id: 10, src: '/api/video/10_1753189659949.mp4' }
+    ];
+  }
+})();
+
+// const videoAssets = [
+//   { id: 1, src: '/api/video/1_1753189659952.mp4' },
+//   { id: 2, src: '/api/video/2_1753189659952.mp4' },
+//   { id: 3, src: '/api/video/3_1753189659952.mp4' },
+//   { id: 4, src: '/api/video/4_1753189659951.mp4' },
+//   { id: 5, src: '/api/video/5_1753189659951.mp4' },
+//   { id: 6, src: '/api/video/6_1753189659951.mp4' },
+//   { id: 7, src: '/api/video/7_1753189659950.mp4' },
+//   { id: 8, src: '/api/video/8_1753189659950.mp4' },
+//   { id: 9, src: '/api/video/9_1753189659950.mp4' },
+//   { id: 10, src: '/api/video/10_1753189659949.mp4' }
+// ];
 
 interface RandomVideoPlayerProps {
   className?: string;

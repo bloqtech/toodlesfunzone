@@ -14,7 +14,8 @@ import {
   insertDiscountVoucherSchema,
   insertReviewSchema,
   insertPackageSaleSchema,
-  insertPackageUsageSchema
+  insertPackageUsageSchema,
+  videos
 } from "@shared/schema";
 import { sendBookingConfirmation, sendBirthdayPartyConfirmation, sendEnquiryNotification } from "./services/email";
 import { sendWhatsAppNotification } from "./services/whatsapp";
@@ -22,6 +23,8 @@ import { createPaymentOrder, verifyPayment } from "./services/payment";
 import { generateOTP, sendOTPWhatsApp } from "./whatsapp";
 import bcrypt from "bcryptjs";
 import session from "express-session";
+import { uploadOnCloudinary } from "./services/Cloudinary";
+import { db } from "./db";
 
 // Configure multer for file uploads
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -37,15 +40,16 @@ const upload = multer({
       cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
   }),
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'));
-    }
-  },
+  // // to only allow image file
+  // fileFilter: (req, file, cb) => {
+  //   if (file.mimetype.startsWith('image/')) {
+  //     cb(null, true);
+  //   } else {
+  //     cb(new Error('Only image files are allowed!'));
+  //   }
+  // },
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 50 * 1024 * 1024, // 5MB limit
   }
 });
 
@@ -2105,6 +2109,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Error serving video' });
     }
   });
+
+  // upload video on cloudinary
+  app.post('/api/video/upload',upload.fields([
+        {
+          name: "toodlesVideos",
+          maxCount: 1
+        }]),
+        async (req,res)=>{
+          const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+          // console.log(`files: ${files}`);
+          if(!files){
+            res.status(400).json({message: "No video file sent"})
+          }
+          console.log(files.toodlesVideos[0].path);
+          const videoFile = await uploadOnCloudinary(`${files.toodlesVideos[0].path}`)
+          if(!videoFile){
+            res.status(500).json({message: "upload on cloudinary failed!"});
+          }
+          const [videoOnDB] = await db.insert(videos).values({
+            name: videoFile?.original_filename,
+            path: videoFile?.url,
+            mimetype: videoFile?.type,
+            format: videoFile?.format,
+            size: videoFile?.bytes,
+          })
+          .returning();
+
+          res.status(200).json({
+            message: "File uploaded successfully",
+            filename: videoFile?.original_filename,
+            path: videoFile?.url,
+            mimetype : videoFile?.type,
+            size: videoFile?.bytes,
+            uploadedAt: videoOnDB.uploadedAt
+          })
+  });
+
+  // upload multiple videos
+  app.post('/api/video/multipleUpload',upload.fields([
+        {
+          name: "toodlesVideos",
+          maxCount: 2
+        }]),
+        async (req,res)=>{
+          const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+          console.log(`files: ${files}`);
+          // if(!files){
+          //   res.status(400).json({message: "No video file sent"})
+          // }
+          // console.log(files.toodlesVideos[0].path);
+          // const videoFile = await uploadOnCloudinary(`${files.toodlesVideos[0].path}`)
+          // if(!videoFile){
+          //   res.status(500).json({message: "upload on cloudinary failed!"});
+          // }
+          // const [videoOnDB] = await db.insert(videos).values({
+          //   name: videoFile?.original_filename,
+          //   path: videoFile?.url,
+          //   mimetype: videoFile?.type,
+          //   format: videoFile?.format,
+          //   size: videoFile?.bytes,
+          // })
+          // .returning();
+
+          // res.status(200).json({
+          //   message: "File uploaded successfully",
+          //   filename: videoFile?.original_filename,
+          //   path: videoFile?.url,
+          //   mimetype : videoFile?.type,
+          //   size: videoFile?.bytes,
+          //   uploadedAt: videoOnDB.uploadedAt
+          // })
+
+          res.status(200);
+  });
+
+  // get urls for videos on cloudinary
+  app.get("/api/allVideos/urls", async(req, res)=>{
+    try {
+      const allVideos = await db.select().from(videos);
+      let id=0;
+      const listOfVideos = allVideos.map(video=>{
+        id=id+1;
+        return {
+          "id": id,
+          "src": video.path,
+        }
+      })
+      return res.status(200).send(listOfVideos);
+    } catch (error) {
+      return res.status(500).send("Unable to load urls from database");
+    }
+  })
 
   const httpServer = createServer(app);
   return httpServer;

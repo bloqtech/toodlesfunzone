@@ -325,6 +325,18 @@ export const packageUsage = pgTable("package_usage", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// create video table schema
+export const videos = pgTable("videos",{
+  id: serial("id").primaryKey(),
+  name: text("fileName"),
+  path: text("path"),
+  mimetype: varchar("mimetype", {length: 255}),
+  format: varchar("format"),
+  size: integer("size"),
+  uploadedAt : timestamp("uploaded_at").defaultNow(),
+  updatedAt : timestamp("updated_at").defaultNow()
+})
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   bookings: many(bookings),
@@ -440,6 +452,8 @@ export const insertAddOnSchema = createInsertSchema(addOns);
 export const insertActivitySchema = createInsertSchema(activities);
 export const insertBirthdayPackageSchema = createInsertSchema(birthdayPackages);
 export const insertOtpVerificationSchema = createInsertSchema(otpVerification);
+export const insertVideoSchema = createInsertSchema(videos);
+// inserted video schema
 export const insertPackageSaleSchema = createInsertSchema(packageSales).omit({
   id: true,
   createdAt: true,
@@ -493,6 +507,8 @@ export type PackageSale = typeof packageSales.$inferSelect;
 export type InsertPackageSale = z.infer<typeof insertPackageSaleSchema>;
 export type PackageUsage = typeof packageUsage.$inferSelect;
 export type InsertPackageUsage = z.infer<typeof insertPackageUsageSchema>;
+// added type for insertVideoSchema
+export type InsertVideo = z.infer<typeof insertVideoSchema>;
 
 // Define permission constants
 export const PERMISSIONS = {

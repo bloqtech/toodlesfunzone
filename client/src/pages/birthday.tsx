@@ -7,6 +7,8 @@ import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
 import { BirthdayForm } from "@/components/booking/birthday-form";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Gallery from "./gallery";
 import { 
   Gift, 
   Users, 
@@ -21,10 +23,17 @@ import {
 
 export default function Birthday() {
   const [showBirthdayForm, setShowBirthdayForm] = useState(false);
+  // const [showGallery, setShowGallery] = useState(false);
 
   const { data: birthdayPackages = [], isLoading: packagesLoading } = useQuery({
     queryKey: ["/api/birthday-packages"],
   });
+
+  // move to galleryPage
+  const navigateToGallery = ()=>{
+    const navigate = useNavigate();
+    navigate("/gallery");
+  }
 
   const themes = [
     {
@@ -158,6 +167,7 @@ export default function Birthday() {
                   size="lg" 
                   variant="outline" 
                   className="border-white text-white hover:bg-white hover:text-toodles-text font-accent font-bold text-lg"
+                  // onClick= {navigateToGallery}
                 >
                   View Gallery
                 </Button>
@@ -415,6 +425,9 @@ export default function Birthday() {
       {showBirthdayForm && (
         <BirthdayForm onClose={() => setShowBirthdayForm(false)} />
       )}
+      {/* {showGallery && (
+        <Gallery/>
+      )} */}
     </div>
   );
 }

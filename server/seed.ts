@@ -1,6 +1,13 @@
-import { db } from './db';
-import { packages, timeSlots, users, holidayCalendar, discountVouchers } from '@shared/schema';
-import { eq } from 'drizzle-orm';
+import { db } from "./db";
+import {
+  packages,
+  timeSlots,
+  users,
+  holidayCalendar,
+  discountVouchers,
+} from "@shared/schema";
+import { eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 
 export async function seedDatabase() {
   console.log('Starting database seeding...');
@@ -128,24 +135,42 @@ async function seedTimeSlots() {
 }
 
 async function seedAdminUser() {
-  const adminData = {
-    id: 'admin_user_001',
-    email: 'admin@toodlesfunzone.com',
-    firstName: 'Admin',
-    lastName: 'User',
-    profileImageUrl: null,
-    phone: '+919876543210',
-    isAdmin: true
-  };
+  const adminId = "raspik2025";
 
-  const existing = await db.select().from(users).where(eq(users.email, adminData.email));
-  
-  if (existing.length === 0) {
-    await db.insert(users).values(adminData);
-    console.log('Created admin user');
-  } else {
-    console.log('Admin user already exists');
+  const [existing] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, adminId));
+
+  if (existing) {
+    console.log("Admin user already exists");
+    return;
   }
+
+  const passwordHash = await bcrypt.hash("admin123", 10);
+
+  await db.insert(users).values({
+    id: adminId,
+    email: "admin@toodlesfunzone.com",
+    firstName: "Raspik",
+    lastName: "Admin",
+    profileImageUrl: null,
+    phone: "+919876543210",
+    isAdmin: true,
+    role: "admin",
+    permissions: [
+      "manage_users",
+      "manage_packages",
+      "manage_bookings",
+      "manage_birthdays",
+      "view_analytics",
+      "manage_content",
+    ],
+    passwordHash,
+    registrationSource: "seed",
+  });
+
+  console.log("Created admin user (raspik2025)");
 }
 
 async function seedHolidayCalendar() {

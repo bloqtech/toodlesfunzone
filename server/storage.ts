@@ -96,6 +96,7 @@ export interface IStorage {
   // Time slot operations
   getTimeSlots(): Promise<TimeSlot[]>;
   getActiveTimeSlots(): Promise<TimeSlot[]>;
+  getTimeSlotById(id: number): Promise<TimeSlot | undefined>;
   createTimeSlot(timeSlotData: InsertTimeSlot): Promise<TimeSlot>;
   updateTimeSlot(id: number, timeSlotData: Partial<InsertTimeSlot>): Promise<TimeSlot>;
   bulkUpdateTimeSlotCapacity(maxCapacity: number): Promise<TimeSlot[]>;
@@ -382,6 +383,11 @@ export class DatabaseStorage implements IStorage {
       .from(timeSlots)
       .where(eq(timeSlots.isActive, true))
       .orderBy(asc(timeSlots.startTime));
+  }
+
+  async getTimeSlotById(id: number): Promise<TimeSlot | undefined> {
+    const [timeSlot] = await db.select().from(timeSlots).where(eq(timeSlots.id, id));
+    return timeSlot;
   }
 
   async createTimeSlot(timeSlotData: InsertTimeSlot): Promise<TimeSlot> {

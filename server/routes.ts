@@ -966,7 +966,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email } = req.params;
       const bookings = await storage.getBookingsByEmail(email);
-      res.json(bookings);
+      
+      // Fetch time slot information for each booking
+      const bookingsWithTimeSlots = await Promise.all(
+        bookings.map(async (booking) => {
+          if (booking.timeSlotId) {
+            const timeSlot = await storage.getTimeSlotById(booking.timeSlotId);
+            return {
+              ...booking,
+              timeSlot: timeSlot || null
+            };
+          }
+          return { ...booking, timeSlot: null };
+        })
+      );
+      
+      res.json(bookingsWithTimeSlots);
     } catch (error) {
       console.error("Error fetching bookings by email:", error);
       res.status(500).json({ message: "Failed to fetch bookings" });
@@ -1057,7 +1072,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = (req.user as any)?.claims?.sub;
       const bookings = await storage.getBookingsByUser(userId);
-      res.json(bookings);
+      
+      // Fetch time slot information for each booking
+      const bookingsWithTimeSlots = await Promise.all(
+        bookings.map(async (booking) => {
+          if (booking.timeSlotId) {
+            const timeSlot = await storage.getTimeSlotById(booking.timeSlotId);
+            return {
+              ...booking,
+              timeSlot: timeSlot || null
+            };
+          }
+          return { ...booking, timeSlot: null };
+        })
+      );
+      
+      res.json(bookingsWithTimeSlots);
     } catch (error) {
       console.error("Error fetching bookings:", error);
       res.status(500).json({ message: "Failed to fetch bookings" });
@@ -1080,7 +1110,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied" });
       }
       
-      res.json(booking);
+      // Fetch time slot information
+      let timeSlot = null;
+      if (booking.timeSlotId) {
+        timeSlot = await storage.getTimeSlotById(booking.timeSlotId) || null;
+      }
+      
+      res.json({ ...booking, timeSlot });
     } catch (error) {
       console.error("Error fetching booking:", error);
       res.status(500).json({ message: "Failed to fetch booking" });
@@ -1254,7 +1290,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
       }
       
-      res.json(bookings);
+      // Fetch time slot information for each booking
+      const bookingsWithTimeSlots = await Promise.all(
+        bookings.map(async (booking) => {
+          if (booking.timeSlotId) {
+            const timeSlot = await storage.getTimeSlotById(booking.timeSlotId);
+            return {
+              ...booking,
+              timeSlot: timeSlot || null
+            };
+          }
+          return { ...booking, timeSlot: null };
+        })
+      );
+      
+      res.json(bookingsWithTimeSlots);
     } catch (error) {
       console.error("Error fetching admin bookings:", error);
       res.status(500).json({ message: "Failed to fetch bookings" });

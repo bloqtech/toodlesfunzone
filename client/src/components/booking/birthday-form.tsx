@@ -76,7 +76,7 @@ export function BirthdayForm({ onClose }: BirthdayFormProps) {
 
   const handleSubmit = () => {
     const packagePrices = {
-      starter: 2999,
+      starter: 7999,
       deluxe: 4999,
       ultimate: 7999
     };
@@ -112,10 +112,10 @@ export function BirthdayForm({ onClose }: BirthdayFormProps) {
     {
       id: 'starter',
       name: 'Magic Starter',
-      price: 2999,
+      price: 3999,
       duration: 2,
       guests: 10,
-      features: ['2-hour party slot', 'Themed decorations', 'Birthday cake (1kg)', 'Basic photography']
+      features: ['3-hour party slot', 'Themed decorations', 'Birthday cake (1kg)', 'Basic photography']
     },
     {
       id: 'deluxe',
@@ -261,7 +261,7 @@ export function BirthdayForm({ onClose }: BirthdayFormProps) {
                       <SelectValue placeholder="Select time slot" />
                     </SelectTrigger>
                     <SelectContent>
-                      {timeSlots?.map((slot: any) => (
+                      {Array.isArray(timeSlots) && timeSlots.map((slot: any) => (
                         <SelectItem key={slot.id} value={slot.id.toString()}>
                           {slot.startTime} - {slot.endTime}
                         </SelectItem>
@@ -416,6 +416,17 @@ export function BirthdayForm({ onClose }: BirthdayFormProps) {
                       <span>Date:</span>
                       <span className="font-medium">{formData.partyDate}</span>
                     </div>
+                    {formData.timeSlotId && Array.isArray(timeSlots) && (
+                      <div className="flex justify-between">
+                        <span>Time:</span>
+                        <span className="font-medium">
+                          {(() => {
+                            const selectedSlot = timeSlots.find((slot: any) => slot.id.toString() === formData.timeSlotId);
+                            return selectedSlot ? `${selectedSlot.startTime} - ${selectedSlot.endTime}` : '';
+                          })()}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span>Guests:</span>
                       <span className="font-medium">{formData.numberOfGuests}</span>

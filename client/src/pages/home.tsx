@@ -126,6 +126,11 @@ export default function Home() {
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 text-toodles-primary mr-2" />
                         <span className="text-sm">{booking.bookingDate}</span>
+                        {booking.timeSlot && (
+                          <span className="text-sm ml-2 text-gray-600">
+                            • {booking.timeSlot.startTime} - {booking.timeSlot.endTime}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center">
                         <Users className="h-4 w-4 text-toodles-primary mr-2" />

@@ -268,6 +268,16 @@ export default function AdminBookings() {
                       </div>
                       
                       <div className="mt-2 text-sm text-gray-600">
+                        <span className="font-medium">Date:</span> {booking.bookingDate}
+                        {booking.timeSlot && (
+                          <> • <span className="font-medium">Time:</span> {booking.timeSlot.startTime} - {booking.timeSlot.endTime}</>
+                        )}
+                        {!booking.timeSlot && booking.timeSlotId && (
+                          <> • <span className="font-medium">Time Slot ID:</span> {booking.timeSlotId}</>
+                        )}
+                      </div>
+                      
+                      <div className="mt-2 text-sm text-gray-600">
                         <span className="font-medium">Children:</span> {booking.numberOfChildren} • 
                         <span className="font-medium"> Amount:</span> ₹{booking.totalAmount} • 
                         <span className="font-medium"> Created:</span> {new Date(booking.createdAt).toLocaleDateString()}

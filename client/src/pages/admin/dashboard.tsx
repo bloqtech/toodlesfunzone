@@ -261,7 +261,12 @@ export default function AdminDashboard() {
                   <div key={booking.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p className="font-medium text-toodles-text">{booking.parentName}</p>
-                      <p className="text-sm text-gray-600">{booking.bookingDate}</p>
+                      <p className="text-sm text-gray-600">
+                        {booking.bookingDate}
+                        {booking.timeSlot && (
+                          <span className="ml-2">• {booking.timeSlot.startTime} - {booking.timeSlot.endTime}</span>
+                        )}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-toodles-primary">₹{booking.totalAmount}</p>

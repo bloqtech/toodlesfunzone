@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { X, Calendar, Clock, Users, CreditCard, Gift } from "lucide-react";
+import { X, Calendar, Clock, Users, CreditCard, Gift, Loader2 } from "lucide-react";
+import { loadRazorpay, openRazorpayCheckout, formatAmount, RazorpayResponse } from "@/lib/razorpay";
 
 interface BookingModalProps {
   onClose: () => void;
@@ -33,10 +34,40 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
   const [availability, setAvailability] = useState<any>(null);
   const [voucher, setVoucher] = useState<any>(null);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const [razorpayKeyId, setRazorpayKeyId] = useState<string>('');
 
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
+
+  // Fetch Razorpay key and load SDK
+  useEffect(() => {
+    const initializeRazorpay = async () => {
+      try {
+        // Fetch Razorpay key from backend
+        const keyResponse = await fetch('/api/payment/key');
+        if (keyResponse.ok) {
+          const { keyId } = await keyResponse.json();
+          setRazorpayKeyId(keyId);
+        }
+        
+        // Load Razorpay SDK
+        await loadRazorpay();
+        setRazorpayLoaded(true);
+      } catch (error) {
+        console.error('Failed to initialize Razorpay:', error);
+        toast({
+          title: "Payment Error",
+          description: "Failed to load payment gateway. Please refresh the page.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    initializeRazorpay();
+  }, [toast]);
 
   const { data: timeSlots } = useQuery({
     queryKey: ["/api/time-slots", formData.bookingDate],
@@ -45,35 +76,10 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
         `/api/time-slots?date=${formData.bookingDate}` : 
         '/api/time-slots';
       const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch time slots');
       return response.json();
     },
     enabled: !!formData.bookingDate,
-  });
-
-  const bookingMutation = useMutation({
-    mutationFn: async (data: any) => {
-      if (!isAuthenticated) {
-        window.location.href = '/api/login';
-        return;
-      }
-      const response = await apiRequest('POST', '/api/bookings', data);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Booking Confirmed!",
-        description: "Your play session has been booked successfully.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/bookings"] });
-      onClose();
-    },
-    onError: (error) => {
-      toast({
-        title: "Booking Failed",
-        description: "Failed to create booking. Please try again.",
-        variant: "destructive",
-      });
-    }
   });
 
   const checkAvailability = async () => {
@@ -81,13 +87,72 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
     
     try {
       const response = await fetch(`/api/availability/${formData.bookingDate}/${formData.timeSlotId}`);
+      if (!response.ok) throw new Error('Failed to check availability');
       const data = await response.json();
-      console.log('Availability response:', data); // Debug log
       setAvailability(data);
     } catch (error) {
       console.error('Error checking availability:', error);
+      toast({
+        title: "Availability Check Failed",
+        description: "Could not check slot availability. Please try again.",
+        variant: "destructive",
+      });
     }
   };
+
+  // Auto-check availability when date and slot are selected
+  useEffect(() => {
+    if (formData.bookingDate && formData.timeSlotId) {
+      checkAvailability();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.bookingDate, formData.timeSlotId]);
+
+  // Create booking with payment mutation
+  const createBookingMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/bookings/guest', data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Booking Confirmed!",
+        description: "Your play session has been booked successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/time-slots"] });
+      onClose();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Booking Failed",
+        description: error.message || "Failed to create booking. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Verify payment mutation
+  const verifyPaymentMutation = useMutation({
+    mutationFn: async (data: { paymentId: string; orderId: string; signature: string; bookingId: number }) => {
+      const response = await apiRequest('POST', '/api/payment/verify-booking', data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Payment Verified!",
+        description: "Your booking is now confirmed.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/bookings"] });
+    },
+    onError: () => {
+      toast({
+        title: "Payment Verification Failed",
+        description: "Please contact support if payment was deducted.",
+        variant: "destructive",
+      });
+    }
+  });
 
   const checkVoucher = async () => {
     if (!formData.voucherCode) return;
@@ -132,19 +197,149 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
     return Math.max(baseAmount, 0);
   };
 
-  const handleSubmit = () => {
+  const handlePayment = async () => {
+    if (!razorpayLoaded) {
+      toast({
+        title: "Payment Gateway Not Ready",
+        description: "Please wait for payment gateway to load.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.bookingDate || !formData.timeSlotId || !formData.packageId) {
+      toast({
+        title: "Missing Information",
+        description: "Please complete all booking details.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Final availability check
+    if (availability && !availability.available) {
+      toast({
+        title: "Slot Not Available",
+        description: "This time slot is no longer available. Please select another slot.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const spotsLeft = availability?.remaining ?? availability?.remainingCapacity ?? 0;
+    if (formData.numberOfChildren > spotsLeft) {
+      toast({
+        title: "Not Enough Capacity",
+        description: `Only ${spotsLeft} spots available.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessingPayment(true);
     const selectedPackage = packages.find(p => p.id === parseInt(formData.packageId));
     const calculatedTotal = calculateTotal();
-    
-    const bookingData = {
-      ...formData,
-      packageId: parseInt(formData.packageId),
-      timeSlotId: parseInt(formData.timeSlotId),
-      totalAmount: calculatedTotal,
-      childrenAges: formData.childrenAges.slice(0, formData.numberOfChildren)
-    };
 
-    bookingMutation.mutate(bookingData);
+    try {
+      // Step 1: Create payment order
+      const orderResponse = await fetch('/api/payment/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          amount: calculatedTotal,
+          currency: 'INR',
+          receipt: `booking_${Date.now()}`,
+        }),
+      });
+
+      const orderData = await orderResponse.json();
+      if (!orderResponse.ok) {
+        throw new Error(orderData?.message || 'Failed to create payment order');
+      }
+      const order = orderData;
+
+      // Step 2: Open Razorpay checkout
+      if (!razorpayKeyId) {
+        throw new Error('Payment gateway not initialized');
+      }
+
+      openRazorpayCheckout({
+        key: razorpayKeyId,
+        amount: formatAmount(calculatedTotal),
+        currency: 'INR',
+        name: 'Toodles Funzone',
+        description: `Booking for ${selectedPackage?.name || 'Play Session'}`,
+        order_id: order.id,
+        prefill: {
+          name: formData.parentName,
+          email: formData.parentEmail,
+          contact: formData.parentPhone,
+        },
+        theme: {
+          color: '#EF4444', // Toodles primary color
+        },
+        handler: async (response: RazorpayResponse) => {
+          try {
+            // Step 3: Create booking with payment details
+            const bookingData = {
+              ...formData,
+              packageId: parseInt(formData.packageId),
+              timeSlotId: parseInt(formData.timeSlotId),
+              totalAmount: calculatedTotal,
+              childrenAges: formData.childrenAges.slice(0, formData.numberOfChildren),
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature,
+              voucherCode: formData.voucherCode || undefined,
+            };
+
+            const bookingResponse = await apiRequest('POST', '/api/bookings/guest', bookingData);
+            const booking = await bookingResponse.json();
+
+            // Step 4: Verify payment
+            await verifyPaymentMutation.mutateAsync({
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature,
+              bookingId: booking.id,
+            });
+
+            setIsProcessingPayment(false);
+            toast({
+              title: "Booking Confirmed!",
+              description: `Your booking #${booking.id} is confirmed. See you at Toodles Funzone!`,
+            });
+            queryClient.invalidateQueries({ queryKey: ["/api/bookings"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/time-slots"] });
+            onClose();
+          } catch (error: any) {
+            setIsProcessingPayment(false);
+            toast({
+              title: "Booking Failed",
+              description: error.message || "Failed to complete booking. Please contact support.",
+              variant: "destructive",
+            });
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessingPayment(false);
+            toast({
+              title: "Payment Cancelled",
+              description: "You cancelled the payment. Your booking was not created.",
+            });
+          },
+        },
+      });
+    } catch (error: any) {
+      setIsProcessingPayment(false);
+      toast({
+        title: "Payment Error",
+        description: error.message || "Failed to initialize payment. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleChange = (field: string, value: any) => {
@@ -521,11 +716,16 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
                   Back
                 </Button>
                 <Button 
-                  onClick={handleSubmit}
-                  disabled={bookingMutation.isPending}
+                  onClick={handlePayment}
+                  disabled={isProcessingPayment || !razorpayLoaded || createBookingMutation.isPending}
                   className="flex-1 bg-toodles-primary hover:bg-red-600 text-white"
                 >
-                  {bookingMutation.isPending ? 'Processing...' : (
+                  {isProcessingPayment || createBookingMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
                     <>
                       <CreditCard className="h-4 w-4 mr-2" />
                       Pay ₹{calculateTotal()}

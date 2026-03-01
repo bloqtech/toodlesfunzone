@@ -408,13 +408,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if date is a holiday
       const holiday = await storage.getHolidayByDate(date);
       if (holiday) {
-        return res.json({ available: false, reason: holiday.name });
+        return res.json({ available: false, reason: holiday.name, remaining: 0, capacity: 0 });
       }
 
       // Use the same availability logic as the time slots endpoint
       const availability = await storage.getTimeSlotAvailability(parseInt(timeSlotId), date);
       res.json({
         available: availability.available,
+        remaining: availability.remaining,
         remainingCapacity: availability.remaining,
         capacity: availability.capacity,
         booked: availability.booked
@@ -988,6 +989,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Guest booking creation with payment (public endpoint)
+  app.post('/api/bookings/guest', async (req, res) => {
+    try {
+      const { paymentId, orderId, signature, voucherCode, ...bookingData } = req.body;
+      
+      // Validate booking data
+      const validatedBookingData = insertBookingSchema.parse({
+        ...bookingData,
+        userId: null, // Guest booking
+        isGuestBooking: true,
+        status: 'pending', // Will be confirmed after payment verification
+      });
+      
+      // Check availability before creating booking
+      if (!validatedBookingData.timeSlotId) {
+        return res.status(400).json({ message: "Time slot ID is required" });
+      }
+      
+      const availability = await storage.getTimeSlotAvailability(
+        validatedBookingData.timeSlotId,
+        validatedBookingData.bookingDate
+      );
+      
+      if (!availability.available) {
+        return res.status(400).json({ 
+          message: "Selected time slot is not available",
+          details: `Only ${availability.remaining} spots remaining`
+        });
+      }
+      
+      const numChildren = validatedBookingData.numberOfChildren || 1;
+      if (availability.remaining < numChildren) {
+        return res.status(400).json({ 
+          message: `Not enough capacity. Only ${availability.remaining} spots available`,
+          details: `You requested ${numChildren} children but only ${availability.remaining} spots are available`
+        });
+      }
+
+      // Verify payment before creating booking
+      if (paymentId && orderId && signature) {
+        const isValid = await verifyPayment(paymentId, orderId, signature);
+        if (!isValid) {
+          return res.status(400).json({ message: "Payment verification failed" });
+        }
+        
+        // Payment verified, create booking with confirmed status
+        validatedBookingData.status = 'confirmed' as any;
+        validatedBookingData.paymentId = paymentId;
+        validatedBookingData.paymentStatus = 'completed';
+      } else {
+        // No payment provided, create pending booking
+        validatedBookingData.status = 'pending' as any;
+      }
+      
+      // Create the booking
+      const booking = await storage.createBooking(validatedBookingData);
+      
+      // Send confirmation email and WhatsApp
+      try {
+        if (booking.packageId) {
+          const packageData = await storage.getPackageById(booking.packageId);
+          if (packageData) {
+            await sendBookingConfirmation(booking);
+          }
+        }
+        
+        // Send WhatsApp notifications
+        try {
+          const { sendBookingConfirmationToCustomer, sendBookingNotificationToToodles } = await import('./whatsapp');
+          
+          const packageDetails = booking.packageId ? await storage.getPackageById(booking.packageId) : null;
+          
+          if (packageDetails) {
+            const timeSlot = booking.timeSlotId ? await storage.getTimeSlotById(booking.timeSlotId) : null;
+            const notificationData = {
+              bookingId: booking.id.toString(),
+              customerName: booking.parentName || '',
+              customerPhone: booking.parentPhone || '',
+              packageName: packageDetails.name,
+              date: booking.bookingDate || '',
+              timeSlot: timeSlot ? `${timeSlot.startTime} - ${timeSlot.endTime}` : '',
+              numberOfChildren: booking.numberOfChildren || 1,
+              totalAmount: parseFloat(booking.totalAmount || '0'),
+              status: booking.status || 'pending'
+            };
+
+            await Promise.all([
+              sendBookingConfirmationToCustomer(notificationData),
+              sendBookingNotificationToToodles(notificationData)
+            ]);
+          }
+        } catch (whatsappError) {
+          console.error('Error sending WhatsApp notifications:', whatsappError);
+          // Don't fail the booking if WhatsApp fails
+        }
+      } catch (emailError) {
+        console.error("Failed to send confirmation:", emailError);
+        // Don't fail the booking if email fails
+      }
+      
+      res.status(201).json(booking);
+    } catch (error: any) {
+      console.error("Error creating guest booking:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Invalid booking data",
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: error.message || "Failed to create booking" });
+    }
+  });
+
   // Protected routes
 
   // Create booking
@@ -1179,19 +1293,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create payment order
-  app.post('/api/payment/create-order', isAuthenticated, async (req, res) => {
+  // Get Razorpay public key (for frontend)
+  app.get('/api/payment/key', async (req, res) => {
     try {
-      const { amount, currency = 'INR', receipt } = req.body;
-      const order = await createPaymentOrder(amount, currency, receipt);
-      res.json(order);
+      const keyId = process.env.RAZORPAY_KEY_ID || '';
+      res.json({ keyId });
     } catch (error) {
-      console.error("Error creating payment order:", error);
-      res.status(500).json({ message: "Failed to create payment order" });
+      console.error("Error fetching Razorpay key:", error);
+      res.status(500).json({ message: "Failed to fetch payment key" });
     }
   });
 
-  // Verify payment
+  // Create payment order (public endpoint for guest bookings)
+  app.post('/api/payment/create-order', async (req, res) => {
+    try {
+      const { amount, currency = 'INR', receipt } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const order = await createPaymentOrder(amount, currency, receipt);
+      res.json(order);
+    } catch (error: any) {
+      console.error("Error creating payment order:", error);
+      const message = error?.message || "Failed to create payment order";
+      res.status(500).json({ message });
+    }
+  });
+
+  // Verify payment (public endpoint for guest bookings)
+  app.post('/api/payment/verify-booking', async (req, res) => {
+    try {
+      const { paymentId, orderId, signature, bookingId } = req.body;
+      
+      if (!paymentId || !orderId || !signature || !bookingId) {
+        return res.status(400).json({ message: "Missing required payment details" });
+      }
+
+      const isValid = await verifyPayment(paymentId, orderId, signature);
+      
+      if (isValid) {
+        // Update booking payment status
+        await storage.updateBookingPayment(bookingId, paymentId, 'completed');
+        const updatedBooking = await storage.updateBookingStatus(bookingId, 'confirmed');
+        
+        // Send payment confirmation WhatsApp message
+        try {
+          const { sendWhatsAppMessage } = await import('./whatsapp');
+          await sendWhatsAppMessage(
+            updatedBooking.parentPhone,
+            `🎉 Payment Confirmed! Your booking #${updatedBooking.id} for ${updatedBooking.bookingDate} is now confirmed. See you at Toodles Funzone!`
+          );
+        } catch (whatsappError) {
+          console.error('Error sending payment confirmation WhatsApp:', whatsappError);
+        }
+        
+        res.json({ success: true, booking: updatedBooking });
+      } else {
+        res.status(400).json({ message: "Payment verification failed" });
+      }
+    } catch (error) {
+      console.error("Error verifying payment:", error);
+      res.status(500).json({ message: "Failed to verify payment" });
+    }
+  });
+
+  // Verify payment (authenticated endpoint for existing bookings)
   app.post('/api/payment/verify', isAuthenticated, async (req, res) => {
     try {
       const { paymentId, orderId, signature, bookingId } = req.body;
@@ -1758,13 +1926,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // File upload endpoint for activities
-  app.post('/api/upload', isAuthenticated, adminAuth, upload.single('image'), (req, res) => {
+  // File upload endpoint for activities and gallery (with Cloudinary support)
+  app.post('/api/upload', isAuthenticated, adminAuth, upload.single('image'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
       }
       
+      // Check if Cloudinary is configured
+      if (process.env.CLOUDINARY_CLOUDNAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+        try {
+          // Upload to Cloudinary for better CDN and storage
+          const cloudinaryResult = await uploadOnCloudinary(req.file.path);
+          if (cloudinaryResult && cloudinaryResult.url) {
+            return res.json({ 
+              url: cloudinaryResult.url,
+              publicId: cloudinaryResult.public_id,
+              format: cloudinaryResult.format,
+              size: cloudinaryResult.bytes
+            });
+          }
+        } catch (cloudinaryError) {
+          console.error("Cloudinary upload failed, falling back to local storage:", cloudinaryError);
+          // Fall through to local storage
+        }
+      }
+      
+      // Fallback to local storage
       const fileUrl = `/uploads/${req.file.filename}`;
       res.json({ url: fileUrl });
     } catch (error) {

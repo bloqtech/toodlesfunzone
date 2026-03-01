@@ -33,7 +33,7 @@ export default function Contact() {
     {
       icon: Clock,
       title: "Operating Hours",
-      details: ["Monday - Sunday", "10:00 AM - 8:00 PM", "Last entry at 7:00 PM"],
+      details: ["Monday - Sunday", "11:00 AM - 8:30 PM", "We're open 7 days a week for your convenience"],
       color: "from-toodles-success to-green-400"
     }
   ];
@@ -191,7 +191,8 @@ export default function Contact() {
                       <Clock className="h-6 w-6" />
                     </div>
                     <h3 className="font-display text-toodles-text mb-2">Hours</h3>
-                    <p className="text-gray-600 text-sm">10:00 AM - 8:00 PM</p>
+                    <p className="text-gray-600 text-sm font-medium mb-1">11:00 AM - 8:30 PM</p>
+                    <p className="text-gray-500 text-xs italic">We're open 7 days a week for your convenience</p>
                     <p className="text-gray-500 text-xs">Monday - Sunday</p>
                   </div>
                 </div>

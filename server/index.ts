@@ -1,3 +1,4 @@
+import "./env";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -68,5 +69,9 @@ app.use((req, res, next) => {
     // reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    const keyId = (process.env.RAZORPAY_KEY_ID || "").trim();
+    const keySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim();
+    const razorpayOk = !!(keyId && keySecret && keyId !== "your_razorpay_key_id");
+    log(razorpayOk ? "Razorpay: configured" : `Razorpay: NOT configured (KEY_ID len=${keyId.length}, SECRET len=${keySecret.length})`);
   });
 })();

@@ -1,30 +1,45 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
-// Initialize Razorpay instance
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || 'your_razorpay_key_id',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || 'your_razorpay_key_secret',
-});
+function getRazorpayClient() {
+  const keyId = process.env.RAZORPAY_KEY_ID || '';
+  const keySecret = process.env.RAZORPAY_KEY_SECRET || '';
+  if (!keyId || !keySecret || keyId === 'your_razorpay_key_id' || keySecret === 'your_razorpay_key_secret') {
+    throw new Error('Payment gateway not configured. Please add Razorpay keys in .env');
+  }
+  return new Razorpay({ key_id: keyId, key_secret: keySecret });
+}
 
 export const createPaymentOrder = async (
   amount: number,
   currency: string = 'INR',
   receipt: string
 ) => {
+  const keyId = process.env.RAZORPAY_KEY_ID || '';
+  const keySecret = process.env.RAZORPAY_KEY_SECRET || '';
+  if (!keyId || !keySecret || keyId === 'your_razorpay_key_id' || keySecret === 'your_razorpay_key_secret') {
+    console.error('Razorpay: RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET must be set in .env (no quotes, no spaces)');
+    throw new Error('Payment gateway not configured. Please add Razorpay keys in .env');
+  }
+
+  const amountPaise = Math.round(amount * 100);
+  if (amountPaise < 100) {
+    throw new Error('Amount must be at least ₹1');
+  }
+
   try {
-    const options = {
-      amount: amount * 100, // Razorpay expects amount in paise
+    const razorpay = getRazorpayClient();
+    const order = await razorpay.orders.create({
+      amount: amountPaise,
       currency,
       receipt,
-      payment_capture: 1, // Auto capture payment
-    };
-
-    const order = await razorpay.orders.create(options);
+      payment_capture: 1,
+    });
     return order;
-  } catch (error) {
-    console.error('Error creating payment order:', error);
-    throw new Error('Failed to create payment order');
+  } catch (error: any) {
+    const msg = error?.description || error?.error?.description || error?.message || 'Unknown error';
+    console.error('Razorpay create order error:', msg, error?.response?.data || error);
+    throw new Error(msg || 'Failed to create payment order');
   }
 };
 
@@ -49,6 +64,7 @@ export const verifyPayment = async (
 
 export const getPaymentDetails = async (paymentId: string) => {
   try {
+    const razorpay = getRazorpayClient();
     const payment = await razorpay.payments.fetch(paymentId);
     return payment;
   } catch (error) {
@@ -59,14 +75,13 @@ export const getPaymentDetails = async (paymentId: string) => {
 
 export const refundPayment = async (paymentId: string, amount?: number) => {
   try {
+    const razorpay = getRazorpayClient();
     const refundOptions: any = {
       payment_id: paymentId,
     };
-
     if (amount) {
       refundOptions.amount = amount * 100; // Convert to paise
     }
-
     const refund = await razorpay.payments.refund(paymentId, refundOptions);
     return refund;
   } catch (error) {

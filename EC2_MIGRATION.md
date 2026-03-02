@@ -1,216 +1,139 @@
-# Step-by-Step EC2 Hosting Guide — toodlesfunzone.com
+# EC2 Deployment Guide — toodlesfunzone.com
 
-Host toodlesfunzone on AWS EC2. Domain: toodlesfunzone.com (Hostinger).  
-Instance: **t2.micro** (1 vCPU, 1 GB RAM).
+Deploy toodlesfunzone on AWS EC2 with Nginx, PM2, and Let's Encrypt SSL.
+
+**Target:** t2.micro · Ubuntu 22.04 · Hostinger domain
+
+---
+
+## Table of Contents
+
+1. [Prerequisites](#prerequisites)
+2. [Launch EC2](#1-launch-ec2)
+3. [Connect via SSH](#2-connect-via-ssh)
+4. [Install Software](#3-install-software)
+5. [Clone & Build](#4-clone--build)
+6. [Environment Variables](#5-environment-variables)
+7. [Database Setup](#6-database-setup)
+8. [Start with PM2](#7-start-with-pm2)
+9. [Configure Nginx](#8-configure-nginx)
+10. [DNS (Hostinger)](#9-dns-hostinger)
+11. [SSL (HTTPS)](#10-ssl-https)
+12. [Verify & Maintain](#11-verify--maintain)
 
 ---
 
 ## Prerequisites
 
-- [ ] AWS account
-- [ ] Domain on Hostinger (toodlesfunzone.com)
-- [ ] GitHub repo URL for toodlesfunzone
-- [ ] Environment variables from current Render deployment
+| Item | Description |
+|------|-------------|
+| AWS account | [console.aws.amazon.com](https://console.aws.amazon.com) |
+| Domain | toodlesfunzone.com on Hostinger |
+| GitHub | Repo URL + [Personal Access Token (PAT)](https://github.com/settings/tokens) for private repos |
+| Env vars | From Render or local `.env` |
 
 ---
 
-# STEP 1: Launch EC2 Instance
+## 1. Launch EC2
 
-### Step 1.1 — Open AWS Console
-
-1. Go to [https://console.aws.amazon.com](https://console.aws.amazon.com)
-2. Sign in to your AWS account
-3. Search for **EC2** in the top search bar and open **EC2**
-
-### Step 1.2 — Launch Instance
-
-1. Click **Launch Instance**
-2. Configure:
-   - **Name:** `toodlesfunzone`
-   - **Application and OS Images (AMI):** Ubuntu
-   - **AMI:** Ubuntu Server 22.04 LTS
-   - **Instance type:** t2.micro (Free tier eligible)
-   - **Key pair (login):** Click **Create new key pair**
-     - Name: `toodlesfunzone-key`
-     - Type: RSA
-     - Format: `.pem` (for Mac/Linux) or `.ppk` (for Windows PuTTY)
-     - Download and save the key in a safe place
-   - **Network settings:** Click **Edit**
-     - Allow SSH from: **My IP** (recommended) or **Anywhere** (0.0.0.0/0)
-     - Allow HTTPS from: **Anywhere** (0.0.0.0/0)
-     - Allow HTTP from: **Anywhere** (0.0.0.0/0)
-   - **Storage:** 20 GiB
-3. Click **Launch instance**
-
-### Step 1.3 — Get Public IP
-
-1. In EC2 Dashboard, go to **Instances**
-2. Select your instance
-3. Copy the **Public IPv4 address** (e.g. `54.123.45.67`) — you'll use this everywhere.
+1. **AWS Console** → Search **EC2** → **Launch Instance**
+2. **Settings:**
+   - Name: `toodlesfunzone`
+   - AMI: **Ubuntu Server 22.04 LTS**
+   - Instance type: **t2.micro**
+   - Key pair: **Create new** → Name: `toodlesfunzone-key` → Download `.pem`
+   - Network: Edit → Allow **SSH (22)**, **HTTP (80)**, **HTTPS (443)**
+   - Storage: **20 GiB**
+3. **Launch** → Note the **Public IPv4 address**
 
 ---
 
-# STEP 2: Connect to EC2 via SSH
+## 2. Connect via SSH
 
-### Step 2.1 — Set Key Permissions (Mac/Linux only)
+**Local machine:**
 
 ```bash
 chmod 400 ~/path/to/toodlesfunzone-key.pem
+ssh -i ~/path/to/toodlesfunzone-key.pem ubuntu@YOUR_EC2_IP
 ```
 
-Replace `~/path/to/` with the actual path where you saved the `.pem` file.
-
-### Step 2.2 — Connect
-
-```bash
-ssh -i ~/path/to/toodlesfunzone-key.pem ubuntu@YOUR_EC2_PUBLIC_IP
-```
-
-Example:
-
-```bash
-ssh -i ~/Downloads/toodlesfunzone-key.pem ubuntu@54.123.45.67
-```
-
-When prompted "Are you sure you want to continue connecting?" type `yes`.
-
-You should now see a prompt like: `ubuntu@ip-xxx-xxx-xxx-xxx:~$`
+Type `yes` when prompted. You should see `ubuntu@ip-xxx:~$`.
 
 ---
 
-# STEP 3: Install Required Software
+## 3. Install Software
 
-Run these commands one by one on the EC2 instance.
-
-### Step 3.1 — Update System
+**All commands below run on EC2.**
 
 ```bash
-sudo apt update
-```
-
-```bash
-sudo apt upgrade -y
-```
-
-### Step 3.2 — Install Node.js 20
-
-```bash
+sudo apt update && sudo apt upgrade -y
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-```
-
-```bash
-sudo apt install -y nodejs
-```
-
-Verify:
-
-```bash
-node -v
-npm -v
-```
-
-### Step 3.3 — Install Git
-
-```bash
-sudo apt install -y git
-```
-
-### Step 3.4 — Install PM2
-
-```bash
+sudo apt install -y nodejs git nginx certbot python3-certbot-nginx
 sudo npm install -g pm2
 ```
 
-### Step 3.5 — Install Nginx
-
-```bash
-sudo apt install -y nginx
-```
-
-### Step 3.6 — Install Certbot (for SSL)
-
-```bash
-sudo apt install -y certbot python3-certbot-nginx
-```
+Verify: `node -v` and `npm -v`.
 
 ---
 
-# STEP 4: Clone and Build the App
+## 4. Clone & Build
 
-### Step 4.1 — Create App Directory
-
-```bash
-sudo mkdir -p /var/www
-```
+### 4.1 Create directory
 
 ```bash
-sudo chown ubuntu:ubuntu /var/www
-```
-
-```bash
+sudo mkdir -p /var/www && sudo chown ubuntu:ubuntu /var/www
 cd /var/www
 ```
 
-### Step 4.2 — Clone Repository
+### 4.2 Clone with PAT (private repo)
+
+Replace `GITHUB_PAT` and `YOUR_USERNAME`:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/toodlesfunzone.git
-```
-
-Replace `YOUR_USERNAME` with your GitHub username.  
-If the repo is private, use:
-
-```bash
-git clone https://YOUR_GITHUB_TOKEN@github.com/YOUR_USERNAME/toodlesfunzone.git
-```
-
-### Step 4.3 — Enter Project and Install Dependencies
-
-```bash
+git clone https://GITHUB_PAT@github.com/YOUR_USERNAME/toodlesfunzone.git
 cd toodlesfunzone
 ```
 
+**Public repo:**
+
 ```bash
-npm install
+git clone https://github.com/YOUR_USERNAME/toodlesfunzone.git
+cd toodlesfunzone
 ```
 
-### Step 4.4 — Build the App
+### 4.3 Build
 
 ```bash
+npm install
 npm run build
 ```
 
-Wait until the build completes. You should see output like "Build completed" or similar.
-
 ---
 
-# STEP 5: Configure Environment Variables
+## 5. Environment Variables
 
-You can either **copy from your local .env** (recommended) or **create manually**.
+### Option A — Copy from local (recommended)
 
-### Option A — Copy from Your Local Machine (Recommended)
-
-From your **local machine** (not EC2), run:
+**From your local machine:**
 
 ```bash
-scp -i ~/path/to/toodlesfunzone-key.pem /path/to/toodlesfunzone/.env ubuntu@YOUR_EC2_PUBLIC_IP:/var/www/toodlesfunzone/.env
+scp -i ~/path/to/toodlesfunzone-key.pem \
+  /path/to/toodlesfunzone/.env \
+  ubuntu@YOUR_EC2_IP:/var/www/toodlesfunzone/.env
 ```
 
-Then on EC2, update `GOOGLE_REDIRECT_URI` for production:
+**On EC2**, edit if needed:
 
 ```bash
 cd /var/www/toodlesfunzone
 nano .env
 ```
 
-Change:
-- `GOOGLE_REDIRECT_URI` → `https://toodlesfunzone.com/api/auth/google/callback`
-- `NODE_ENV` → `production` (if needed)
-- Remove duplicate `DATABASE_URL` if present (keep only one)
+- Set `NODE_ENV=production`
+- Set `GOOGLE_REDIRECT_URI=https://toodlesfunzone.com/api/auth/google/callback`
+- Keep only one `DATABASE_URL` line
 
-### Option B — Create .env Manually
-
-On EC2:
+### Option B — Create manually
 
 ```bash
 cd /var/www/toodlesfunzone
@@ -218,130 +141,55 @@ cp .env.example .env
 nano .env
 ```
 
-Fill in values (or copy from Render). See `.env.example` in the repo for the full list. Minimum required:
+Fill values. Minimum required:
 
-```bash
-NODE_ENV=production
-PORT=5000
+| Variable | Description |
+|----------|-------------|
+| `NODE_ENV` | `production` |
+| `PORT` | `5000` |
+| `DATABASE_URL` | Neon PostgreSQL connection string |
+| `SESSION_SECRET` | Random 32+ char string |
+| `RAZORPAY_KEY_ID` | From Razorpay dashboard |
+| `RAZORPAY_KEY_SECRET` | From Razorpay dashboard |
 
-# Database (Neon PostgreSQL)
-DATABASE_URL=postgresql://user:password@host.neon.tech/dbname?sslmode=require
-
-# Session
-SESSION_SECRET=your_random_32_char_secret_here
-
-# Razorpay
-RAZORPAY_KEY_ID=rzp_live_xxxxx
-RAZORPAY_KEY_SECRET=your_secret
-
-# Email (project uses SMTP_* not EMAIL_*)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
-ADMIN_EMAIL=admin@toodlesfunzone.com
-ADMIN_PHONE=+919901218980
-
-# Cloudinary (optional)
-CLOUDINARY_CLOUDNAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-
-# WhatsApp (optional) — uses WHATSAPP_ACCESS_TOKEN
-WHATSAPP_API_URL=https://graph.facebook.com/v17.0
-WHATSAPP_ACCESS_TOKEN=
-WHATSAPP_PHONE_NUMBER_ID=
-
-# Google OAuth, VITE_GA_MEASUREMENT_ID — optional
-```
-
-Save and exit: Press `Ctrl + X`, then `Y`, then `Enter`.
+See `.env.example` for optional vars (SMTP, Cloudinary, WhatsApp, etc.).
 
 ---
 
-# STEP 6: Database Setup
+## 6. Database Setup
 
 ```bash
 cd /var/www/toodlesfunzone
-```
 
-### Step 6.1 — Push Schema
-
-```bash
 npm run db:push
-```
-
-### Step 6.2 — Create Time Slots
-
-```bash
 npm run db:create-slots
-```
-
-### Step 6.3 — Update Operating Hours
-
-```bash
 npm run db:update-hours
-```
-
-### Step 6.4 — Seed Data (Optional)
-
-Only if you need initial/seed data:
-
-```bash
-npm run db:seed
+npm run db:seed   # optional
 ```
 
 ---
 
-# STEP 7: Start App with PM2
-
-### Step 7.1 — Start the App
+## 7. Start with PM2
 
 ```bash
 cd /var/www/toodlesfunzone
-```
 
-```bash
 pm2 start dist/index.js --name toodlesfunzone
-```
-
-### Step 7.2 — Enable Auto-Start on Reboot
-
-```bash
-pm2 startup
-```
-
-Copy and run the command it outputs (it will look like `sudo env PATH=...`).
-
-```bash
+pm2 startup    # run the command it outputs
 pm2 save
 ```
 
-### Step 7.3 — Verify
-
-```bash
-pm2 status
-```
-
-You should see `toodlesfunzone` with status **online**.
-
-```bash
-curl http://localhost:5000
-```
-
-You should get HTML output. If yes, the app is running.
+Verify: `pm2 status` and `curl http://localhost:5000`.
 
 ---
 
-# STEP 8: Configure Nginx
-
-### Step 8.1 — Create Nginx Config
+## 8. Configure Nginx
 
 ```bash
 sudo nano /etc/nginx/sites-available/toodlesfunzone.com
 ```
 
-### Step 8.2 — Paste Config
+Paste:
 
 ```nginx
 server {
@@ -361,158 +209,107 @@ server {
 }
 ```
 
-Save and exit: `Ctrl + X`, `Y`, `Enter`.
-
-### Step 8.3 — Enable Site
+Enable and test:
 
 ```bash
 sudo ln -s /etc/nginx/sites-available/toodlesfunzone.com /etc/nginx/sites-enabled/
-```
-
-### Step 8.4 — Remove Default Site (Optional)
-
-```bash
-sudo rm /etc/nginx/sites-enabled/default
-```
-
-### Step 8.5 — Test and Reload Nginx
-
-```bash
-sudo nginx -t
-```
-
-Should say "syntax is ok" and "test is successful".
-
-```bash
-sudo systemctl reload nginx
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ---
 
-# STEP 9: Update Hostinger DNS
+## 9. DNS (Hostinger)
 
-### Step 9.1 — Log in to Hostinger
+1. Hostinger → **Domains** → **toodlesfunzone.com** → **Manage DNS**
+2. Add/update A records:
 
-1. Go to [https://www.hostinger.com](https://www.hostinger.com) and sign in
-2. Open **Domains** or **hPanel**
-3. Select **toodlesfunzone.com**
+   | Type | Name | Value | TTL |
+   |------|------|-------|-----|
+   | A | @ | `YOUR_EC2_IP` | 3600 |
+   | A | www | `YOUR_EC2_IP` | 3600 |
 
-### Step 9.2 — Open DNS Settings
-
-1. Go to **DNS / Nameservers** or **Manage DNS**
-2. Find the **A records** section
-
-### Step 9.3 — Add or Edit A Records
-
-| Type | Name | Value | TTL |
-|------|------|-------|-----|
-| A | @ | YOUR_EC2_PUBLIC_IP | 3600 |
-| A | www | YOUR_EC2_PUBLIC_IP | 3600 |
-
-Example: If EC2 IP is `54.123.45.67`, set both records to `54.123.45.67`.
-
-### Step 9.4 — Remove Old Records
-
-- Delete or update any A record pointing to Render
-- Disable any redirect that sends traffic to Render
-
-### Step 9.5 — Save and Wait
-
-Save the DNS changes. Propagation can take **5–30 minutes** (sometimes up to 48 hours).
-
-Check with:
-
-```bash
-ping toodlesfunzone.com
-```
-
-When the IP shown matches your EC2 IP, DNS is ready.
+3. Remove any A record or redirect pointing to Render.
+4. Wait 5–30 min. Check: `ping toodlesfunzone.com` (should show EC2 IP).
 
 ---
 
-# STEP 10: Install SSL (HTTPS)
+## 10. SSL (HTTPS)
 
-Do this only after the domain points to your EC2 IP (Step 9 done and propagated).
-
-### Step 10.1 — Run Certbot
+**Run only after DNS points to EC2.**
 
 ```bash
 sudo certbot --nginx -d toodlesfunzone.com -d www.toodlesfunzone.com
 ```
 
-### Step 10.2 — Follow Prompts
+Follow prompts. Test renewal: `sudo certbot renew --dry-run`
 
-- Enter your email for renewal notices
-- Agree to terms
-- Choose whether to share email (optional)
-- Certbot will obtain and install the certificate
+### If Certbot fails (IPv6 / 500 error)
 
-### Step 10.3 — Test Renewal
+Let's Encrypt may hit Hostinger via AAAA (IPv6) instead of your EC2. Use **DNS challenge**:
+
+**Step 1** — On EC2:
 
 ```bash
-sudo certbot renew --dry-run
+sudo certbot certonly --manual --preferred-challenges dns -d toodlesfunzone.com -d www.toodlesfunzone.com
 ```
 
-Should complete without errors. Certificates renew automatically.
+**Step 2** — Certbot will prompt: "Please deploy a DNS TXT record..."
 
----
+- **Name:** `_acme-challenge` (or `_acme-challenge.toodlesfunzone.com` / `_acme-challenge.www` as shown)
+- **Value:** the long string Certbot prints
+- Add TXT records in Hostinger for both domains if asked
+- Wait 1–2 min for DNS propagation, then press Enter in the terminal
 
-# STEP 11: Verify Everything
-
-1. Open **https://toodlesfunzone.com** in a browser  
-2. Open **https://www.toodlesfunzone.com**  
-3. Test booking, login, payments if applicable  
-
----
-
-# Quick Reference — Useful Commands
+**Step 3** — Install cert into Nginx:
 
 ```bash
-# App status
-pm2 status
+sudo certbot install --cert-name toodlesfunzone.com
+```
 
-# App logs
+**Step 4** — Reload Nginx:
+
+```bash
+sudo systemctl reload nginx
+```
+
+**Tip:** Delete AAAA records in Hostinger so future renewals can use HTTP challenge.
+
+---
+
+## 11. Verify & Maintain
+
+### Verify
+
+- [ ] https://toodlesfunzone.com loads
+- [ ] https://www.toodlesfunzone.com loads
+- [ ] Booking and payment flow work
+
+### Common commands
+
+```bash
+# Status & logs
+pm2 status
 pm2 logs toodlesfunzone
 
-# Restart app
+# Restart
 pm2 restart toodlesfunzone
 
-# Deploy updates
+# Deploy update
 cd /var/www/toodlesfunzone && git pull && npm install && npm run build && pm2 restart toodlesfunzone
 
 # Nginx
 sudo nginx -t
 sudo systemctl reload nginx
-
-# Test app locally on EC2
-curl http://localhost:5000
 ```
 
----
+### Troubleshooting
 
-# Checklist
-
-- [ ] EC2 instance launched (t2.micro, Ubuntu 22.04)
-- [ ] Connected via SSH
-- [ ] Node.js 20, Git, PM2, Nginx, Certbot installed
-- [ ] Repo cloned to `/var/www/toodlesfunzone`
-- [ ] `npm install` and `npm run build` completed
-- [ ] `.env` configured
-- [ ] Database: `db:push`, `db:create-slots`, `db:update-hours` done
-- [ ] PM2 running `toodlesfunzone` on port 5000
-- [ ] Nginx config created and enabled
-- [ ] Hostinger A records point to EC2 IP
-- [ ] SSL installed via Certbot
-- [ ] https://toodlesfunzone.com works
-
----
-
-# Troubleshooting
-
-| Issue | Check |
-|-------|-------|
-| Can't SSH | Security group allows SSH (22) from your IP; correct key file |
-| App not loading | `pm2 status`; `pm2 logs toodlesfunzone` |
-| 502 Bad Gateway | App running? `curl http://localhost:5000` |
-| Domain not resolving | Wait for DNS propagation; verify A records in Hostinger |
-| Certbot fails | Domain must point to EC2 IP first |
+| Problem | Action |
+|---------|--------|
+| Can't SSH | Security group: allow port 22 from your IP |
+| `drizzle-kit: not found` or `tsx: not found` | Run `npm install` (not `--production`). If NODE_ENV=production, use: `NODE_ENV=development npm install` |
+| 502 Bad Gateway | `pm2 status`; `curl http://localhost:5000` |
+| Domain not resolving | Check A records; wait for DNS propagation |
+| Certbot fails (HTTP) | Domain must resolve to EC2 IPv4. Delete AAAA records in Hostinger. |
+| Certbot fails (IPv6/500) | Use DNS challenge: `sudo certbot certonly --manual --preferred-challenges dns -d toodlesfunzone.com -d www.toodlesfunzone.com` then `sudo certbot install --cert-name toodlesfunzone.com` |

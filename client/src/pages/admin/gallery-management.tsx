@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus, Edit, Trash2, Image, Save, Filter, Calendar } from "lucide-react";
+import { Plus, Edit, Trash2, Image, Save, Filter, Calendar, Upload, Loader2 } from "lucide-react";
 
 interface GalleryItem {
   id: string;
@@ -37,6 +37,7 @@ export default function GalleryManagement() {
     isActive: true,
     featured: false
   });
+  const [uploading, setUploading] = useState(false);
 
   const { toast } = useToast();
 
@@ -128,6 +129,64 @@ export default function GalleryManagement() {
       isActive: true,
       featured: false
     });
+    setUploading(false);
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload an image file (JPG, PNG, GIF, etc.)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload an image smaller than 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('image', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const data = await response.json();
+      setFormData(prev => ({ ...prev, image: data.url }));
+      
+      toast({
+        title: "Image Uploaded",
+        description: "Image has been uploaded successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Upload Failed", 
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleEdit = (item: GalleryItem) => {
@@ -221,15 +280,59 @@ export default function GalleryManagement() {
                   </div>
                   
                   <div>
-                    <Label htmlFor="image" className="text-gray-700 dark:text-gray-300">Image URL</Label>
-                    <Input
-                      id="image"
-                      value={formData.image}
-                      onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                      placeholder="https://example.com/image.jpg"
-                      className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-                      required
-                    />
+                    <Label htmlFor="image" className="text-gray-700 dark:text-gray-300">Image</Label>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          id="image"
+                          value={formData.image}
+                          onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                          placeholder="https://example.com/image.jpg or upload file below"
+                          className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                          required
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="relative">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileUpload}
+                            disabled={uploading}
+                            className="hidden"
+                            id="file-upload"
+                          />
+                          <Label 
+                            htmlFor="file-upload"
+                            className="cursor-pointer inline-flex items-center px-4 py-2 bg-toodles-primary hover:bg-toodles-primary/80 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {uploading ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Uploading...
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="h-4 w-4 mr-2" />
+                                Upload Image
+                              </>
+                            )}
+                          </Label>
+                        </div>
+                        {formData.image && (
+                          <div className="flex-1">
+                            <img 
+                              src={formData.image} 
+                              alt="Preview" 
+                              className="h-20 w-20 object-cover rounded border border-gray-300 dark:border-gray-600"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Upload an image file (JPG, PNG, GIF) or paste an image URL. Max file size: 10MB
+                      </p>
+                    </div>
                   </div>
                   
                   <div className="flex items-center space-x-6">

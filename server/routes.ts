@@ -1031,7 +1031,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (paymentId && orderId && signature) {
         const isValid = await verifyPayment(paymentId, orderId, signature);
         if (!isValid) {
-          return res.status(400).json({ message: "Payment verification failed" });
+          console.error("Guest booking: payment verification failed", { orderId, paymentId: paymentId?.slice(0, 12) + "…" });
+          return res.status(400).json({ message: "Payment verification failed. Please contact support with your payment details." });
         }
         
         // Payment verified, create booking with confirmed status
@@ -1046,21 +1047,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create the booking
       const booking = await storage.createBooking(validatedBookingData);
       
-      // Send confirmation email and WhatsApp
-      try {
-        if (booking.packageId) {
-          const packageData = await storage.getPackageById(booking.packageId);
-          if (packageData) {
-            await sendBookingConfirmation(booking);
-          }
-        }
-        
-        // Send WhatsApp notifications
+      // Respond immediately so client doesn't timeout; send email/WhatsApp in background
+      res.status(201).json(booking);
+      
+      // Fire-and-forget: send confirmation email and WhatsApp (don't block or await)
+      setImmediate(async () => {
         try {
+          if (booking.packageId) {
+            const packageData = await storage.getPackageById(booking.packageId);
+            if (packageData) {
+              await sendBookingConfirmation(booking);
+            }
+          }
           const { sendBookingConfirmationToCustomer, sendBookingNotificationToToodles } = await import('./whatsapp');
-          
           const packageDetails = booking.packageId ? await storage.getPackageById(booking.packageId) : null;
-          
           if (packageDetails) {
             const timeSlot = booking.timeSlotId ? await storage.getTimeSlotById(booking.timeSlotId) : null;
             const notificationData = {
@@ -1074,22 +1074,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               totalAmount: parseFloat(booking.totalAmount || '0'),
               status: booking.status || 'pending'
             };
-
             await Promise.all([
               sendBookingConfirmationToCustomer(notificationData),
               sendBookingNotificationToToodles(notificationData)
             ]);
           }
-        } catch (whatsappError) {
-          console.error('Error sending WhatsApp notifications:', whatsappError);
-          // Don't fail the booking if WhatsApp fails
+        } catch (err) {
+          console.error('Background: send confirmation/WhatsApp failed:', err);
         }
-      } catch (emailError) {
-        console.error("Failed to send confirmation:", emailError);
-        // Don't fail the booking if email fails
-      }
-      
-      res.status(201).json(booking);
+      });
     } catch (error: any) {
       console.error("Error creating guest booking:", error);
       if (error.name === 'ZodError') {

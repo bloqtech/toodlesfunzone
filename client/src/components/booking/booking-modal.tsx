@@ -52,15 +52,18 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
           const { keyId } = await keyResponse.json();
           setRazorpayKeyId(keyId);
         }
-        
         // Load Razorpay SDK
         await loadRazorpay();
         setRazorpayLoaded(true);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to initialize Razorpay:', error);
+        const msg = String(error?.message || '').toLowerCase();
+        const isNetwork = msg.includes('fetch') || msg.includes('network') || msg.includes('load failed') || msg.includes('connection');
         toast({
           title: "Payment Error",
-          description: "Failed to load payment gateway. Please refresh the page.",
+          description: isNetwork
+            ? "Cannot reach the server. Make sure the app is running at http://localhost:5000."
+            : "Failed to load payment gateway. Please refresh the page.",
           variant: "destructive",
         });
       }
@@ -242,18 +245,30 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
 
     try {
       // Step 1: Create payment order
-      const orderResponse = await fetch('/api/payment/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          amount: calculatedTotal,
-          currency: 'INR',
-          receipt: `booking_${Date.now()}`,
-        }),
-      });
+      let orderResponse: Response;
+      try {
+        orderResponse = await fetch('/api/payment/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            amount: calculatedTotal,
+            currency: 'INR',
+            receipt: `booking_${Date.now()}`,
+          }),
+        });
+      } catch (networkError: any) {
+        const msg = String(networkError?.message || '').toLowerCase();
+        const isNetwork = msg.includes('fetch') || msg.includes('network') || msg.includes('load failed') || msg.includes('connection');
+        if (isNetwork) {
+          throw new Error('Cannot reach the server. Make sure the app is running at http://localhost:5000 and try again.');
+        }
+        throw networkError;
+      }
 
-      const orderData = await orderResponse.json();
+      const contentType = orderResponse.headers.get('content-type');
+      const isJson = contentType?.includes('application/json');
+      const orderData = isJson ? await orderResponse.json() : { message: 'Server returned an invalid response' };
       if (!orderResponse.ok) {
         throw new Error(orderData?.message || 'Failed to create payment order');
       }
@@ -315,9 +330,17 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
             onClose();
           } catch (error: any) {
             setIsProcessingPayment(false);
+            const msg = String(error?.message || "Failed to complete booking. Please contact support.");
+            const msgLower = msg.toLowerCase();
+            const isNetwork = msgLower.includes('fetch') || msgLower.includes('network') || msgLower.includes('load failed') || msgLower.includes('connection');
+            // apiRequest throws "400: {\"message\":\"...\"}" — extract the message for a cleaner toast
+            const jsonMatch = msg.match(/\{\s*"message"\s*:\s*"([^"]+)"/);
+            const description = isNetwork
+              ? "We couldn't confirm the booking (connection issue). Your payment went through — please contact support with your payment details to get your booking confirmed."
+              : (jsonMatch ? jsonMatch[1] : msg);
             toast({
-              title: "Booking Failed",
-              description: error.message || "Failed to complete booking. Please contact support.",
+              title: isNetwork ? "Connection Issue" : "Booking Failed",
+              description,
               variant: "destructive",
             });
           }
@@ -334,9 +357,14 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
       });
     } catch (error: any) {
       setIsProcessingPayment(false);
+      const message = String(error?.message || "Failed to initialize payment. Please try again.");
+      const msgLower = message.toLowerCase();
+      const isNetworkError = msgLower.includes('fetch') || msgLower.includes('network') || msgLower.includes('load failed') || msgLower.includes('connection');
       toast({
         title: "Payment Error",
-        description: error.message || "Failed to initialize payment. Please try again.",
+        description: isNetworkError
+          ? "Cannot reach the server. Make sure the app is running at http://localhost:5000 and try again."
+          : message,
         variant: "destructive",
       });
     }

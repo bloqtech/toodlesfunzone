@@ -164,7 +164,7 @@ export default function OperatingHours() {
                 <div>
                   <strong>Typical Schedule:</strong>
                   <ul className="list-disc list-inside text-blue-700 dark:text-blue-300 mt-1">
-                    <li>Weekdays: 10:00 AM - 8:00 PM</li>
+                    <li>Weekdays: 11:00 AM - 8:30 PM</li>
                     <li>Weekends: 9:00 AM - 9:00 PM</li>
                     <li>Consider maintenance days</li>
                   </ul>

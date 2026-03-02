@@ -89,8 +89,8 @@ export function MetaTags({
         "longitude": 77.7214
       },
       "openingHours": [
-        "Mo-Fr 10:00-20:00",
-        "Sa 09:00-21:00"
+        "Mo-Fr 11:00-20:30",
+        "Sa-Su 11:00-20:30"
       ],
       "priceRange": "₹₹",
       "servesCuisine": "Family Entertainment",

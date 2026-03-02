@@ -5,7 +5,7 @@ function getRazorpayClient() {
   const keyId = process.env.RAZORPAY_KEY_ID || '';
   const keySecret = process.env.RAZORPAY_KEY_SECRET || '';
   if (!keyId || !keySecret || keyId === 'your_razorpay_key_id' || keySecret === 'your_razorpay_key_secret') {
-    throw new Error('Payment gateway not configured. Please add Razorpay keys in .env');
+    throw new Error('Payment gateway not configured. In project root .env add RAZORPAY_KEY_ID= and RAZORPAY_KEY_SECRET= with your keys from Razorpay Dashboard → API Keys (use Test keys for local).');
   }
   return new Razorpay({ key_id: keyId, key_secret: keySecret });
 }
@@ -18,8 +18,8 @@ export const createPaymentOrder = async (
   const keyId = process.env.RAZORPAY_KEY_ID || '';
   const keySecret = process.env.RAZORPAY_KEY_SECRET || '';
   if (!keyId || !keySecret || keyId === 'your_razorpay_key_id' || keySecret === 'your_razorpay_key_secret') {
-    console.error('Razorpay: RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET must be set in .env (no quotes, no spaces)');
-    throw new Error('Payment gateway not configured. Please add Razorpay keys in .env');
+    console.error('Razorpay: Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in project root .env (no quotes, no spaces after =)');
+    throw new Error('Payment gateway not configured. In project root .env add RAZORPAY_KEY_ID= and RAZORPAY_KEY_SECRET= with your keys from Razorpay Dashboard → API Keys (use Test keys for local).');
   }
 
   const amountPaise = Math.round(amount * 100);
@@ -49,13 +49,22 @@ export const verifyPayment = async (
   signature: string
 ): Promise<boolean> => {
   try {
+    const secret = (process.env.RAZORPAY_KEY_SECRET || '').trim();
+    if (!secret) {
+      console.error('Razorpay: KEY_SECRET missing, cannot verify payment');
+      return false;
+    }
     const text = `${orderId}|${paymentId}`;
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'your_razorpay_key_secret')
+      .createHmac('sha256', secret)
       .update(text)
       .digest('hex');
 
-    return expectedSignature === signature;
+    const ok = expectedSignature === (signature || '').trim();
+    if (!ok) {
+      console.error('Razorpay: signature mismatch (verify failed)');
+    }
+    return ok;
   } catch (error) {
     console.error('Error verifying payment:', error);
     return false;

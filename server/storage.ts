@@ -49,7 +49,7 @@ import {
   type InsertBirthdayPackage,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lte, desc, asc, sql, count } from "drizzle-orm";
+import { eq, ne, and, gte, lte, desc, asc, sql, count, inArray } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -101,6 +101,8 @@ export interface IStorage {
   updateTimeSlot(id: number, timeSlotData: Partial<InsertTimeSlot>): Promise<TimeSlot>;
   bulkUpdateTimeSlotCapacity(maxCapacity: number): Promise<TimeSlot[]>;
   getTimeSlotAvailability(timeSlotId: number, bookingDate: string): Promise<any>;
+  /** Fetch active slots and their availability for a date in 2 queries (fast). */
+  getActiveTimeSlotsWithAvailability(bookingDate: string): Promise<(TimeSlot & { availability: { available: boolean; capacity: number; booked: number; remaining: number } })[]>;
   
   // Booking operations
   createBooking(bookingData: InsertBooking): Promise<Booking>;
@@ -109,6 +111,7 @@ export interface IStorage {
     guestPassword?: string;
   }): Promise<{ booking: Booking; user?: User; isNewUser?: boolean }>;
   getBookingById(id: number): Promise<Booking | undefined>;
+  getBookingByPaymentId(paymentId: string): Promise<Booking | undefined>;
   getBookingsByUser(userId: string): Promise<Booking[]>;
   getBookingsByEmail(email: string): Promise<Booking[]>;
   getBookingsByDate(date: string): Promise<Booking[]>;
@@ -438,6 +441,47 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  async getActiveTimeSlotsWithAvailability(bookingDate: string): Promise<(TimeSlot & { availability: { available: boolean; capacity: number; booked: number; remaining: number } })[]> {
+    const slots = await db
+      .select()
+      .from(timeSlots)
+      .where(eq(timeSlots.isActive, true))
+      .orderBy(asc(timeSlots.startTime));
+    if (!slots.length) return [];
+    const slotIds = slots.map((s) => s.id);
+    const bookingsOnDate = await db
+      .select({ timeSlotId: bookings.timeSlotId, numberOfChildren: bookings.numberOfChildren })
+      .from(bookings)
+      .where(
+        and(
+          inArray(bookings.timeSlotId, slotIds),
+          eq(bookings.bookingDate, bookingDate),
+          ne(bookings.status, 'cancelled')
+        )
+      );
+    const bookedBySlot: Record<number, number> = {};
+    for (const row of bookingsOnDate) {
+      const id = row.timeSlotId;
+      if (id != null) {
+        bookedBySlot[id] = (bookedBySlot[id] ?? 0) + (row.numberOfChildren ?? 0);
+      }
+    }
+    return slots.map((slot) => {
+      const booked = bookedBySlot[slot.id] ?? 0;
+      const capacity = slot.maxCapacity ?? 20;
+      const remaining = Math.max(0, capacity - booked);
+      return {
+        ...slot,
+        availability: {
+          available: booked < capacity,
+          capacity,
+          booked,
+          remaining,
+        },
+      };
+    });
+  }
+
   // Booking operations
   async createBooking(bookingData: InsertBooking): Promise<Booking> {
     const [newBooking] = await db.insert(bookings).values(bookingData as any).returning();
@@ -446,6 +490,12 @@ export class DatabaseStorage implements IStorage {
 
   async getBookingById(id: number): Promise<Booking | undefined> {
     const [booking] = await db.select().from(bookings).where(eq(bookings.id, id));
+    return booking;
+  }
+
+  async getBookingByPaymentId(paymentId: string): Promise<Booking | undefined> {
+    if (!paymentId) return undefined;
+    const [booking] = await db.select().from(bookings).where(eq(bookings.paymentId, paymentId));
     return booking;
   }
 

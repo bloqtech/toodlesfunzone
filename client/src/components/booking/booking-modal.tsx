@@ -72,7 +72,7 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
     initializeRazorpay();
   }, [toast]);
 
-  const { data: timeSlots } = useQuery({
+  const { data: timeSlots, isPending: timeSlotsLoading } = useQuery({
     queryKey: ["/api/time-slots", formData.bookingDate],
     queryFn: async () => {
       const url = formData.bookingDate ? 
@@ -239,6 +239,19 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
       return;
     }
 
+    // Quick server check before opening payment (avoids paying then hitting "Connection Issue")
+    try {
+      const ping = await fetch('/api/payment/key', { method: 'GET', credentials: 'include' });
+      if (!ping.ok) throw new Error('Server error');
+    } catch (_) {
+      toast({
+        title: "Server Not Reachable",
+        description: "Start the app first: in terminal run 'npm run dev', then open http://localhost:5000",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsProcessingPayment(true);
     const selectedPackage = packages.find(p => p.id === parseInt(formData.packageId));
     const calculatedTotal = calculateTotal();
@@ -309,8 +322,21 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
               voucherCode: formData.voucherCode || undefined,
             };
 
-            const bookingResponse = await apiRequest('POST', '/api/bookings/guest', bookingData);
-            const booking = await bookingResponse.json();
+            // Retry up to 3 times (connection can be briefly unavailable right after payment)
+            let lastErr: any;
+            let booking: any;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+              try {
+                const bookingResponse = await apiRequest('POST', '/api/bookings/guest', bookingData);
+                booking = await bookingResponse.json();
+                lastErr = null;
+                break;
+              } catch (e) {
+                lastErr = e;
+                if (attempt < 3) await new Promise((r) => setTimeout(r, 1500));
+              }
+            }
+            if (lastErr) throw lastErr;
 
             // Step 4: Verify payment
             await verifyPaymentMutation.mutateAsync({
@@ -504,6 +530,9 @@ export function BookingModal({ onClose, packages }: BookingModalProps) {
                       ))}
                     </SelectContent>
                   </Select>
+                  {formData.bookingDate && !timeSlotsLoading && Array.isArray(timeSlots) && timeSlots.length === 0 && (
+                    <p className="text-sm text-amber-600 mt-1">No time slots available for this date. Try another date or contact us.</p>
+                  )}
                   
                   {/* Show availability info if slot is selected */}
                   {selectedTimeSlot?.availability && (

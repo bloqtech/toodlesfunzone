@@ -77,6 +77,52 @@ export const sendBookingConfirmation = async (booking: any) => {
   }
 };
 
+/** Send a copy of new booking to Toodles (ADMIN_EMAIL) for intimation. */
+export const sendBookingNotificationToAdmin = async (booking: any, packageName?: string, timeSlotText?: string) => {
+  const adminEmail = (process.env.ADMIN_EMAIL || '').trim();
+  if (!adminEmail) {
+    console.warn('[Email] ADMIN_EMAIL not set; skipping Toodles notification');
+    return;
+  }
+  if (!emailConfig.auth.user || !emailConfig.auth.pass || emailConfig.auth.pass === 'your-app-password') {
+    console.warn('[Email] SMTP_USER/SMTP_PASS not configured; skipping Toodles notification');
+    return;
+  }
+  try {
+    const mailOptions = {
+      from: `"Toodles Funzone System" <${emailConfig.auth.user}>`,
+      to: adminEmail,
+      subject: `🔔 New Booking #${booking.id} – ${booking.parentName || 'Guest'}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #2C3E50; padding: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0;">New Booking Alert</h1>
+          </div>
+          <div style="padding: 20px; background: #f9f9f9;">
+            <p><strong>Booking ID:</strong> #${booking.id}</p>
+            <p><strong>Customer:</strong> ${booking.parentName || '–'}</p>
+            <p><strong>Phone:</strong> ${booking.parentPhone || '–'}</p>
+            <p><strong>Email:</strong> ${booking.parentEmail || '–'}</p>
+            <p><strong>Date:</strong> ${booking.bookingDate || '–'}</p>
+            <p><strong>Time slot:</strong> ${timeSlotText || '–'}</p>
+            <p><strong>Package:</strong> ${packageName || '–'}</p>
+            <p><strong>Children:</strong> ${booking.numberOfChildren ?? '–'}</p>
+            <p><strong>Amount:</strong> ₹${booking.totalAmount ?? '–'}</p>
+            <p><strong>Status:</strong> ${booking.status || 'pending'}</p>
+            <p style="color: #666; margin-top: 20px; font-size: 12px;">Received at ${new Date().toLocaleString()}</p>
+          </div>
+        </div>
+      `
+    };
+    await transporter.sendMail(mailOptions);
+    console.log('[Email] Booking notification sent to Toodles:', adminEmail);
+  } catch (error: any) {
+    const msg = error?.message ?? String(error);
+    const response = error?.response ?? '';
+    console.error('[Email] Failed to send Toodles notification to', adminEmail, ':', msg, response ? String(response) : '');
+  }
+};
+
 export const sendBirthdayPartyConfirmation = async (party: any) => {
   try {
     const mailOptions = {

@@ -49,9 +49,53 @@ The server will start on **port 5000**:
    - Enter parent and children details
    - Complete payment via Razorpay
 
-## 🔧 Environment Variables Required
+## 🔧 Razorpay Setup (Step-by-Step)
 
-Make sure you have these set in your environment:
+### Step 1 — Create Razorpay Account
+
+1. Go to [https://dashboard.razorpay.com/signup](https://dashboard.razorpay.com/signup)
+2. Sign up with your email and business details
+3. Complete verification (phone, business docs as required)
+
+### Step 2 — Get API Keys
+
+1. Log in to [Razorpay Dashboard](https://dashboard.razorpay.com)
+2. Open **Settings** (gear icon) → **API Keys**
+3. Click **Generate Key** (or use existing test keys)
+4. **Test mode** (for development):
+   - Toggle **Test Mode** ON (top-right)
+   - Keys look like `rzp_test_xxxxx`
+5. **Live mode** (for production):
+   - Toggle **Test Mode** OFF
+   - Keys look like `rzp_live_xxxxx`
+6. Copy both:
+   - **Key ID** (public) — used in frontend
+   - **Key Secret** — used in backend only, never expose
+
+### Step 3 — Add to .env
+
+In your project root `.env` file:
+
+```bash
+RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
+RAZORPAY_KEY_SECRET=your_secret_from_dashboard
+```
+
+### Step 4 — Restart Server
+
+```bash
+npm run dev
+```
+
+### Step 5 — Test
+
+1. Open http://localhost:5000
+2. Click **Book Now**
+3. Complete the flow and use test card: `4111 1111 1111 1111`
+
+---
+
+## 🔧 Environment Variables Required
 
 ```bash
 RAZORPAY_KEY_ID=your_razorpay_key_id

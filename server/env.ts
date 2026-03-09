@@ -1,15 +1,30 @@
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 
-// Load .env from project root. Works for: tsx server/index.ts (__dirname = server) and node dist/index.js (__dirname = dist).
+// Load .env from project root. Try .env first, then .env.example so keys are found.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
-const envPath = path.join(projectRoot, ".env");
-let result = dotenv.config({ path: envPath, override: false });
-if (!result.parsed || Object.keys(result.parsed).length === 0) {
-  const cwdPath = path.join(process.cwd(), ".env");
-  if (cwdPath !== envPath) {
-    result = dotenv.config({ path: cwdPath, override: false });
-  }
+const cwdRoot = process.cwd();
+
+// Prefer project root (where package.json and .env live) so we don't depend on cwd
+const rootEnv = path.join(projectRoot, ".env");
+const rootEnvExample = path.join(projectRoot, ".env.example");
+const cwdEnv = path.join(cwdRoot, ".env");
+const cwdEnvExample = path.join(cwdRoot, ".env.example");
+
+// Load .env from project root first, then cwd, so Razorpay keys are always found
+if (fs.existsSync(rootEnv)) {
+  dotenv.config({ path: rootEnv, override: true });
 }
+if (fs.existsSync(cwdEnv) && cwdEnv !== rootEnv) {
+  dotenv.config({ path: cwdEnv, override: true });
+}
+if (fs.existsSync(rootEnvExample)) {
+  dotenv.config({ path: rootEnvExample, override: false });
+}
+if (fs.existsSync(cwdEnvExample) && cwdEnvExample !== rootEnvExample) {
+  dotenv.config({ path: cwdEnvExample, override: false });
+}
+

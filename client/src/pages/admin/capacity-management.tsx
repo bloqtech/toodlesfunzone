@@ -162,7 +162,7 @@ export default function CapacityManagement() {
                 <h3 className="font-semibold text-blue-900 dark:text-blue-100">Operating Hours & Capacity Rules</h3>
               </div>
               <p className="text-blue-800 dark:text-blue-200 text-sm">
-                Toodles Funzone operates from 10:00 AM to 8:00 PM daily. Each time slot can accommodate a maximum number of children based on the capacity you set below. 
+                Toodles Funzone operates from 11:00 AM to 8:30 PM daily. Each time slot can accommodate a maximum number of children based on the capacity you set below. 
                 Once capacity is reached for a time slot, new bookings will be blocked for that slot.
               </p>
             </CardContent>

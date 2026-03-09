@@ -72,7 +72,7 @@ export function Footer() {
 
               <div className="flex items-center">
                 <div className="text-toodles-primary mr-3">🕒</div>
-                <span className="text-gray-300">10 AM - 8 PM Daily</span>
+                <span className="text-gray-300">11 AM - 8:30 PM Daily</span>
               </div>
             </div>
           </div>

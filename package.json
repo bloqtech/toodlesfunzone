@@ -9,11 +9,11 @@
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "check": "tsc",
-    "db:push": "drizzle-kit push",
-    "db:check": "tsx check-db.ts",
-    "db:seed": "tsx seed-db.ts",
-    "db:create-slots": "tsx create-hourly-slots.ts",
-    "db:update-hours": "tsx update-operating-hours.ts"
+    "db:push": "npx drizzle-kit push",
+    "db:check": "npx tsx scripts/check-db.ts",
+    "db:seed": "npx tsx scripts/seed-db.ts",
+    "db:create-slots": "npx tsx scripts/create-hourly-slots.ts",
+    "db:update-hours": "npx tsx scripts/update-operating-hours.ts"
   },
   "dependencies": {
     "@google-cloud/local-auth": "^3.0.1",

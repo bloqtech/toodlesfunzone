@@ -17,7 +17,7 @@ import {
   insertPackageUsageSchema,
   videos
 } from "@shared/schema";
-import { sendBookingConfirmation, sendBirthdayPartyConfirmation, sendEnquiryNotification } from "./services/email";
+import { sendBookingConfirmation, sendBookingNotificationToAdmin, sendBirthdayPartyConfirmation, sendEnquiryNotification } from "./services/email";
 import { sendWhatsAppNotification } from "./services/whatsapp";
 import { createPaymentOrder, verifyPayment } from "./services/payment";
 import { generateOTP, sendOTPWhatsApp } from "./whatsapp";
@@ -308,25 +308,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get time slots with availability
+  // Get time slots with availability (batched when date provided — fast)
   app.get('/api/time-slots', async (req, res) => {
     try {
       const { date } = req.query;
-      const timeSlots = await storage.getActiveTimeSlots();
-      
       if (date) {
-        // Add availability information for the requested date
-        const slotsWithAvailability = await Promise.all(
-          timeSlots.map(async (slot) => {
-            const availability = await storage.getTimeSlotAvailability(slot.id, date as string);
-            return {
-              ...slot,
-              availability
-            };
-          })
-        );
-        res.json(slotsWithAvailability);
+        try {
+          const slotsWithAvailability = await storage.getActiveTimeSlotsWithAvailability(date as string);
+          res.json(slotsWithAvailability);
+        } catch (batchErr) {
+          console.error("Time slots batched availability failed, falling back to per-slot:", batchErr);
+          const timeSlots = await storage.getActiveTimeSlots();
+          const slotsWithAvailability = await Promise.all(
+            timeSlots.map(async (slot) => {
+              const availability = await storage.getTimeSlotAvailability(slot.id, date as string);
+              return { ...slot, availability };
+            })
+          );
+          res.json(slotsWithAvailability);
+        }
       } else {
+        const timeSlots = await storage.getActiveTimeSlots();
         res.json(timeSlots);
       }
     } catch (error) {
@@ -992,15 +994,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Guest booking creation with payment (public endpoint)
   app.post('/api/bookings/guest', async (req, res) => {
     try {
-      const { paymentId, orderId, signature, voucherCode, ...bookingData } = req.body;
-      
-      // Validate booking data
-      const validatedBookingData = insertBookingSchema.parse({
+      const { paymentId, orderId, signature, voucherCode, ...rest } = req.body;
+      // Normalize payload for schema (decimal as string, required fields with fallbacks)
+      const bookingData = {
+        packageId: rest.packageId != null ? Number(rest.packageId) : undefined,
+        timeSlotId: rest.timeSlotId != null ? Number(rest.timeSlotId) : undefined,
+        numberOfChildren: rest.numberOfChildren != null ? Number(rest.numberOfChildren) : 1,
+        totalAmount: rest.totalAmount != null ? String(Number(rest.totalAmount)) : '0',
+        bookingDate: rest.bookingDate != null ? String(rest.bookingDate).slice(0, 10) : '',
+        parentName: rest.parentName != null ? String(rest.parentName) : '',
+        parentPhone: rest.parentPhone != null ? String(rest.parentPhone) : '',
+        parentEmail: rest.parentEmail != null ? String(rest.parentEmail) : '',
+        childrenAges: Array.isArray(rest.childrenAges) ? rest.childrenAges.map(Number) : [],
+        specialRequests: rest.specialRequests != null ? String(rest.specialRequests) : null,
+      };
+      // Schema expects totalAmount as string (decimal); ensure it's never a number
+      const payload = {
         ...bookingData,
+        totalAmount: String(bookingData.totalAmount ?? rest.totalAmount ?? 0),
         userId: null, // Guest booking
         isGuestBooking: true,
         status: 'pending', // Will be confirmed after payment verification
-      });
+      };
+      const validatedBookingData = insertBookingSchema.parse(payload);
       
       // Check availability before creating booking
       if (!validatedBookingData.timeSlotId) {
@@ -1031,7 +1047,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (paymentId && orderId && signature) {
         const isValid = await verifyPayment(paymentId, orderId, signature);
         if (!isValid) {
-          return res.status(400).json({ message: "Payment verification failed" });
+          console.error("Guest booking: payment verification failed", { orderId, paymentId: paymentId?.slice(0, 12) + "…" });
+          return res.status(400).json({ message: "Payment verification failed. Please contact support with your payment details." });
         }
         
         // Payment verified, create booking with confirmed status
@@ -1046,55 +1063,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create the booking
       const booking = await storage.createBooking(validatedBookingData);
       
-      // Send confirmation email and WhatsApp
-      try {
-        if (booking.packageId) {
-          const packageData = await storage.getPackageById(booking.packageId);
-          if (packageData) {
+      // Respond immediately so client doesn't timeout; send email/WhatsApp in background
+      res.status(201).json(booking);
+      
+      // Fire-and-forget: send confirmation email and WhatsApp (don't block or await)
+      setImmediate(async () => {
+        let packageDetails: Awaited<ReturnType<typeof storage.getPackageById>> = null;
+        let timeSlotText: string | undefined;
+        try {
+          packageDetails = booking.packageId ? await storage.getPackageById(booking.packageId) : null;
+          const timeSlot = booking.timeSlotId ? await storage.getTimeSlotById(booking.timeSlotId) : null;
+          timeSlotText = timeSlot ? `${timeSlot.startTime} - ${timeSlot.endTime}` : undefined;
+        } catch (_) {}
+        // Send Toodles notification first so it's not skipped by customer/WhatsApp errors
+        try {
+          await sendBookingNotificationToAdmin(booking, packageDetails?.name ?? undefined, timeSlotText);
+        } catch (err: any) {
+          console.error('Background: Toodles admin email failed:', err?.message ?? err);
+        }
+        try {
+          if (booking.packageId && packageDetails) {
             await sendBookingConfirmation(booking);
           }
-        }
-        
-        // Send WhatsApp notifications
-        try {
           const { sendBookingConfirmationToCustomer, sendBookingNotificationToToodles } = await import('./whatsapp');
-          
-          const packageDetails = booking.packageId ? await storage.getPackageById(booking.packageId) : null;
-          
           if (packageDetails) {
-            const timeSlot = booking.timeSlotId ? await storage.getTimeSlotById(booking.timeSlotId) : null;
             const notificationData = {
               bookingId: booking.id.toString(),
               customerName: booking.parentName || '',
               customerPhone: booking.parentPhone || '',
               packageName: packageDetails.name,
               date: booking.bookingDate || '',
-              timeSlot: timeSlot ? `${timeSlot.startTime} - ${timeSlot.endTime}` : '',
+              timeSlot: timeSlotText || '',
               numberOfChildren: booking.numberOfChildren || 1,
               totalAmount: parseFloat(booking.totalAmount || '0'),
               status: booking.status || 'pending'
             };
-
             await Promise.all([
               sendBookingConfirmationToCustomer(notificationData),
               sendBookingNotificationToToodles(notificationData)
             ]);
           }
-        } catch (whatsappError) {
-          console.error('Error sending WhatsApp notifications:', whatsappError);
-          // Don't fail the booking if WhatsApp fails
+        } catch (err: any) {
+          console.error('Background: send confirmation/WhatsApp failed:', err?.message ?? err);
         }
-      } catch (emailError) {
-        console.error("Failed to send confirmation:", emailError);
-        // Don't fail the booking if email fails
-      }
-      
-      res.status(201).json(booking);
+      });
     } catch (error: any) {
-      console.error("Error creating guest booking:", error);
-      if (error.name === 'ZodError') {
+      const errMsg = error?.message ?? String(error);
+      const errStack = error?.stack;
+      console.error("Error creating guest booking:", errMsg, errStack ? "\n" + errStack : "");
+      if (error?.name === 'ZodError') {
+        const first = error.errors?.[0];
+        const detail = first ? `${first.path?.join('.') || 'field'}: ${first.message}` : 'validation failed';
+        console.error("Guest booking validation failed:", detail, error.errors);
         return res.status(400).json({ 
           message: "Invalid booking data",
+          detail,
           errors: error.errors 
         });
       }
@@ -2169,11 +2192,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Public: Birthday Packages (for display on frontend)
+  // Data is stored in DB table `birthday_packages` and persists across deployments (same DB, only app code is redeployed).
   app.get('/api/birthday-packages', async (req, res) => {
     try {
       let packages = await storage.getBirthdayPackages();
       
-      // If no packages in database, return mock data for display
+      // Fallback only when DB has no packages yet (e.g. first run); once you add packages in Admin, they are saved in DB and survive deploys.
       if (!packages || packages.length === 0) {
         packages = [
           {

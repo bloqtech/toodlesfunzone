@@ -138,7 +138,7 @@ export default function Activities() {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {activities.map((activity: any, index: number) => {
+              {(activities as any[])?.map((activity: any, index: number) => {
                 const features = parseFeatures(activity.description);
                 const cleanDescription = activity.description.split('\n')[0] || activity.description;
                 
@@ -231,14 +231,14 @@ export default function Activities() {
             <Card className="p-8 text-center bg-gradient-to-br from-toodles-primary to-pink-400 text-white">
               <Clock className="h-12 w-12 mx-auto mb-4" />
               <h3 className="text-2xl font-display mb-2">Weekdays</h3>
-              <p className="text-lg font-accent">10:00 AM - 8:00 PM</p>
+              <p className="text-lg font-accent">11:00 AM - 8:30 PM</p>
               <p className="text-sm opacity-90 mt-2">Monday - Friday</p>
             </Card>
             
             <Card className="p-8 text-center bg-gradient-to-br from-toodles-secondary to-teal-400 text-white">
               <Star className="h-12 w-12 mx-auto mb-4" />
               <h3 className="text-2xl font-display mb-2">Weekends</h3>
-              <p className="text-lg font-accent">10:00 AM - 8:00 PM</p>
+              <p className="text-lg font-accent">11:00 AM - 8:30 PM</p>
               <p className="text-sm opacity-90 mt-2">Saturday - Sunday</p>
             </Card>
             
@@ -258,7 +258,7 @@ export default function Activities() {
       {showBookingModal && (
         <BookingModal 
           onClose={() => setShowBookingModal(false)} 
-          packages={packages || []}
+          packages={(packages as any[]) || []}
         />
       )}
     </div>

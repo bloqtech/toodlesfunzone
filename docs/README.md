@@ -10,5 +10,6 @@
 | [PAYMENT_BOOKING_GUIDE.md](./PAYMENT_BOOKING_GUIDE.md) | Payment & booking feature guide |
 | [PAYMENT_TEST_AND_RELEASE.md](./PAYMENT_TEST_AND_RELEASE.md) | Test vs production payment flow |
 | [PRODUCTION_PAYMENT.md](./PRODUCTION_PAYMENT.md) | Production payment checklist (Live keys, webhook) |
+| [PAYMENT_PRODUCTION_ROLLOUT.md](./PAYMENT_PRODUCTION_ROLLOUT.md) | **Step-by-step: roll out payment changes to production** |
 | [TEST_BOOKING_FLOW.md](./TEST_BOOKING_FLOW.md) | End-to-end booking test steps |
 | [replit.md](./replit.md) | Replit-specific notes |

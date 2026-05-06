@@ -1,28 +1,28 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
+import { FestiveAmbient } from "@/components/common/festive-ambient";
 import { BookingModal } from "@/components/booking/booking-modal";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { 
-  Calendar, 
-  Star, 
-  Users, 
-  Shield, 
-  Clock,
+import {
+  Calendar,
+  Star,
+  Users,
   Gift,
   Crown,
   Check,
-  Zap
+  Zap,
+  Sparkles,
 } from "lucide-react";
 
 export default function Packages() {
   const [showBookingModal, setShowBookingModal] = useState(false);
 
-  const { data: packages } = useQuery({
+  const { data: packages } = useQuery<any[]>({
     queryKey: ["/api/packages"],
   });
 
@@ -30,41 +30,14 @@ export default function Packages() {
     walk_in: Users,
     weekend: Star,
     monthly: Crown,
-    birthday: Gift
-  };
-
-  const packageColors = {
-    walk_in: "from-toodles-primary to-pink-400",
-    weekend: "from-toodles-secondary to-teal-400",
-    monthly: "from-toodles-accent to-orange-400",
-    birthday: "from-toodles-success to-green-400"
+    birthday: Gift,
   };
 
   const addOns = [
-    {
-      name: "Photography Package",
-      description: "Professional photos of your child's play session",
-      price: 299,
-      icon: "📸"
-    },
-    {
-      name: "Snack Combo",
-      description: "Healthy snacks and juice for your little one",
-      price: 149,
-      icon: "🍎"
-    },
-    {
-      name: "Socks (Required)",
-      description: "Non-slip socks for safe play (if forgotten)",
-      price: 49,
-      icon: "🧦"
-    },
-    {
-      name: "Extended Play Time",
-      description: "Add 1 extra hour to your session",
-      price: 149,
-      icon: "⏰"
-    }
+    { name: "Photo memories", description: "Curated photos from your child's session, delivered the next day.", price: 299, icon: "📸" },
+    { name: "Snack combo", description: "Wholesome snacks paired with fresh juice, served during play.", price: 149, icon: "🍎" },
+    { name: "Non-slip socks", description: "Mandatory for safe play. Available at the counter if you forget yours.", price: 49, icon: "🧦" },
+    { name: "Extended play", description: "Add an extra hour to any session — perfect when they're not ready to leave.", price: 149, icon: "⏰" },
   ];
 
   const compareFeatures = [
@@ -77,125 +50,115 @@ export default function Packages() {
     "Priority booking",
     "Bring a friend discount",
     "Birthday party discount",
-    "Exclusive member events"
+    "Exclusive member events",
   ];
 
   return (
-    <div className="min-h-screen bg-toodles-background festive-background">
-      {/* Festive Background Elements */}
-      <div className="balloon balloon-1"></div>
-      <div className="balloon balloon-2"></div>
-      <div className="balloon balloon-3"></div>
-      
-      <div className="doodle doodle-star">⭐</div>
-      <div className="doodle doodle-heart">💖</div>
-      <div className="doodle doodle-smiley">😄</div>
-      
-      <div className="spray-paint spray-1"></div>
-      <div className="spray-paint spray-2"></div>
-
-      {/* Confetti */}
-      {Array.from({length: 8}, (_, i) => (
-        <div key={i} className="confetti" style={{
-          left: `${Math.random() * 100}%`,
-          animationDelay: `${Math.random() * 3}s`,
-          animationDuration: `${3 + Math.random() * 2}s`
-        }}></div>
-      ))}
-      
+    <div className="min-h-screen bg-toodles-background">
       <Header />
-      
-      {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-toodles-primary via-toodles-secondary to-toodles-accent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="text-white">
-            <h1 className="text-4xl md:text-6xl font-display mb-6">
-              Choose Your <span className="text-toodles-accent">Perfect Package</span>
-            </h1>
-            <p className="text-xl md:text-2xl font-accent mb-8">
-              Flexible options for every family's needs
-            </p>
-            <p className="text-lg mb-8 max-w-3xl mx-auto">
-              From walk-in sessions to monthly unlimited passes, we have packages designed to fit your schedule and budget while ensuring maximum fun for your little ones.
-            </p>
-            <Button 
-              size="lg" 
-              className="bg-toodles-accent hover:bg-yellow-400 text-toodles-text font-accent font-bold text-lg"
-              onClick={() => setShowBookingModal(true)}
-            >
-              <Calendar className="mr-2 h-5 w-5" />
-              Book Now
-            </Button>
-          </div>
+
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-toodles-hero">
+        <FestiveAmbient confetti={8} />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.25),_transparent_60%)] pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24 text-center text-white z-10">
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur px-4 py-1.5 text-white/95 text-sm font-medium border border-white/25 mb-6">
+            <Sparkles className="h-4 w-4" />
+            Transparent, all-inclusive pricing
+          </span>
+          <h1 className="text-4xl md:text-6xl font-display mb-5 leading-tight">
+            A plan for every{" "}
+            <span className="text-toodles-accent">family</span>
+          </h1>
+          <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto mb-8">
+            From single visits to monthly unlimited passes — flexible packages
+            that fit your schedule and your child's energy. Cancel-friendly,
+            transparently priced, and easy to book online.
+          </p>
+          <Button
+            size="lg"
+            variant="accent"
+            onClick={() => setShowBookingModal(true)}
+          >
+            <Calendar className="h-5 w-5" />
+            Reserve a play session
+          </Button>
         </div>
       </section>
 
-      {/* Packages Grid */}
-      <section className="py-20 bg-white">
+      {/* Packages grid */}
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display text-toodles-text mb-4">
-              Our <span className="text-toodles-primary">Play Packages</span>
+          <div className="text-center mb-12 max-w-2xl mx-auto">
+            <span className="eyebrow"><Gift className="h-3.5 w-3.5" />Plans & pricing</span>
+            <h2 className="text-3xl md:text-4xl font-display text-toodles-text mt-4 mb-2">
+              Our <span className="text-gradient-sunset">play packages</span>
             </h2>
-            <p className="text-xl text-gray-600 font-accent">Choose the perfect package for your little ones</p>
+            <p className="text-muted-foreground mt-2">
+              Pick what fits today, upgrade anytime — every plan includes full play access and trained supervision.
+            </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {packages?.map((pkg, index) => {
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {packages?.map((pkg: any, index: number) => {
               const IconComponent = packageIcons[pkg.type as keyof typeof packageIcons] || Users;
               const isPopular = index === 1;
-              
+
               return (
-                <Card 
-                  key={pkg.id} 
-                  className={`transform hover:scale-105 transition-all shadow-xl rounded-3xl overflow-hidden relative ${
-                    isPopular ? 'border-4 border-toodles-secondary' : 'border-4 border-toodles-primary'
+                <Card
+                  key={pkg.id}
+                  variant={isPopular ? "elevated" : "default"}
+                  className={`relative overflow-hidden hover-lift ${
+                    isPopular
+                      ? "ring-2 ring-toodles-secondary/60 shadow-glow-secondary md:-translate-y-2"
+                      : ""
                   }`}
                 >
                   {isPopular && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                      <Badge className="bg-toodles-secondary text-white font-accent font-bold text-sm px-4 py-2">
-                        Most Popular
-                      </Badge>
-                    </div>
-                  )}
-                  
-                  <div className={`h-2 bg-gradient-to-r ${packageColors[pkg.type as keyof typeof packageColors] || 'from-toodles-primary to-pink-400'}`}></div>
-                  
-                  <CardContent className="p-8 text-center">
-                    <div className={`${isPopular ? 'bg-toodles-secondary' : 'bg-toodles-primary'} text-white rounded-full p-4 w-16 h-16 flex items-center justify-center mx-auto mb-4`}>
-                      <IconComponent className="h-8 w-8" />
-                    </div>
-                    
-                    <h3 className="text-2xl font-display text-toodles-text mb-2">{pkg.name}</h3>
-                    <p className="text-gray-600 mb-6">{pkg.description}</p>
-                    
-                    <div className="mb-6">
-                      <div className="text-4xl font-display text-toodles-primary mb-2">₹{pkg.price}</div>
-                      <div className="text-sm text-gray-500">
-                        per child ({pkg.duration} hours)
-                        {pkg.type === 'monthly' && ' - unlimited visits'}
+                    <div className="absolute top-0 right-0">
+                      <div className="bg-toodles-secondary text-white text-[0.7rem] font-bold uppercase tracking-wider px-4 py-1.5 rounded-bl-2xl shadow-soft">
+                        Most popular
                       </div>
                     </div>
-                    
-                    <ul className="text-left space-y-3 mb-8">
-                      {pkg.features?.map((feature, idx) => (
-                        <li key={idx} className="flex items-center">
-                          <Check className="h-4 w-4 text-toodles-success mr-3 flex-shrink-0" />
-                          <span className="text-sm">{feature}</span>
+                  )}
+
+                  <CardContent className="p-8 text-center">
+                    <div
+                      className={`rounded-full p-4 w-16 h-16 flex items-center justify-center mx-auto mb-5 text-white ${
+                        isPopular
+                          ? "bg-[image:var(--gradient-sky)]"
+                          : "bg-[image:var(--gradient-sunset)]"
+                      }`}
+                    >
+                      <IconComponent className="h-8 w-8" />
+                    </div>
+
+                    <h3 className="text-2xl font-display text-toodles-text mb-2">{pkg.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-6 px-2">{pkg.description}</p>
+
+                    <div className="mb-1">
+                      <span className="text-4xl font-display text-gradient-sunset">₹{pkg.price}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground mb-6">
+                      per child · {pkg.duration} hours
+                      {pkg.type === "monthly" && " · unlimited visits"}
+                    </div>
+
+                    <ul className="text-left space-y-2.5 mb-8">
+                      {pkg.features?.map((feature: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm">
+                          <Check className="h-4 w-4 text-toodles-success mt-0.5 shrink-0" />
+                          <span>{feature}</span>
                         </li>
                       ))}
                     </ul>
-                    
-                    <Button 
-                      className={`w-full ${
-                        isPopular 
-                          ? 'bg-toodles-secondary hover:bg-teal-600' 
-                          : 'bg-toodles-primary hover:bg-red-600'
-                      } text-white font-accent font-bold`}
+
+                    <Button
+                      variant={isPopular ? "sky" : "festive"}
+                      className="w-full"
                       onClick={() => setShowBookingModal(true)}
                     >
-                      {pkg.type === 'monthly' ? 'Get Monthly Pass' : 'Book Now'}
+                      {pkg.type === "monthly" ? "Get the monthly pass" : "Reserve this package"}
                     </Button>
                   </CardContent>
                 </Card>
@@ -205,28 +168,29 @@ export default function Packages() {
         </div>
       </section>
 
-      {/* Add-ons Section */}
-      <section className="py-20 bg-toodles-background">
+      {/* Add-ons */}
+      <section className="py-20 bg-gradient-to-b from-transparent via-[hsl(320,55%,97%)] to-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display text-toodles-text mb-4">
-              Enhance Your <span className="text-toodles-secondary">Experience</span>
+          <div className="text-center mb-12 max-w-2xl mx-auto">
+            <span className="eyebrow"><Sparkles className="h-3.5 w-3.5" />Add-ons</span>
+            <h2 className="text-3xl md:text-4xl font-display text-toodles-text mt-4 mb-2">
+              Make the visit{" "}
+              <span className="text-gradient-sky">extra special</span>
             </h2>
-            <p className="text-xl text-gray-600 font-accent">Optional add-ons to make your visit even more special</p>
+            <p className="text-muted-foreground">
+              Thoughtful additions you can tack on at booking or at the counter.
+            </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {addOns.map((addon, index) => (
-              <Card key={index} className="text-center p-6 transform hover:scale-105 transition-all">
-                <div className="text-4xl mb-4">{addon.icon}</div>
-                <h3 className="text-xl font-display text-toodles-text mb-2">{addon.name}</h3>
-                <p className="text-gray-600 text-sm mb-4">{addon.description}</p>
-                <div className="text-2xl font-display text-toodles-primary mb-4">₹{addon.price}</div>
-                <Button 
-                  variant="outline" 
-                  className="w-full border-toodles-primary text-toodles-primary hover:bg-toodles-primary hover:text-white"
-                >
-                  Add to Package
+            {addOns.map((addon) => (
+              <Card key={addon.name} variant="elevated" className="text-center p-6">
+                <div className="text-4xl mb-3">{addon.icon}</div>
+                <h3 className="text-lg font-display text-toodles-text mb-1.5">{addon.name}</h3>
+                <p className="text-sm text-muted-foreground mb-4">{addon.description}</p>
+                <div className="text-2xl font-display text-gradient-sunset mb-4">₹{addon.price}</div>
+                <Button variant="outline" className="w-full">
+                  Add to package
                 </Button>
               </Card>
             ))}
@@ -234,96 +198,96 @@ export default function Packages() {
         </div>
       </section>
 
-      {/* Package Comparison */}
-      <section className="py-20 bg-white">
+      {/* Comparison */}
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-display text-toodles-text mb-4">
-              Package <span className="text-toodles-primary">Comparison</span>
+          <div className="text-center mb-12 max-w-2xl mx-auto">
+            <span className="eyebrow"><Check className="h-3.5 w-3.5" />Compare</span>
+            <h2 className="text-3xl md:text-4xl font-display text-toodles-text mt-4 mb-2">
+              Compare <span className="text-toodles-primary">what's included</span>
             </h2>
-            <p className="text-xl text-gray-600 font-accent">Compare features across all packages</p>
+            <p className="text-muted-foreground mt-2">
+              See at a glance which package fits your family best.
+            </p>
           </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full bg-white rounded-lg shadow-xl">
-              <thead>
-                <tr className="bg-toodles-primary text-white">
-                  <th className="px-6 py-4 text-left font-display">Features</th>
-                  <th className="px-6 py-4 text-center font-display">Walk-in</th>
-                  <th className="px-6 py-4 text-center font-display">Weekend</th>
-                  <th className="px-6 py-4 text-center font-display">Monthly</th>
-                </tr>
-              </thead>
-              <tbody>
-                {compareFeatures.map((feature, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                    <td className="px-6 py-4 font-medium text-toodles-text">{feature}</td>
-                    <td className="px-6 py-4 text-center">
-                      {index < 4 ? (
-                        <Check className="h-5 w-5 text-toodles-success mx-auto" />
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      {index < 7 ? (
-                        <Check className="h-5 w-5 text-toodles-success mx-auto" />
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <Check className="h-5 w-5 text-toodles-success mx-auto" />
-                    </td>
+
+          <Card variant="elevated" className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[image:var(--gradient-sunset)] text-white">
+                    <th className="px-6 py-4 text-left font-display">Features</th>
+                    <th className="px-6 py-4 text-center font-display">Walk-in</th>
+                    <th className="px-6 py-4 text-center font-display">Weekend</th>
+                    <th className="px-6 py-4 text-center font-display">Monthly</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {compareFeatures.map((feature, index) => (
+                    <tr
+                      key={feature}
+                      className={index % 2 === 0 ? "bg-muted/40" : "bg-card"}
+                    >
+                      <td className="px-6 py-3.5 font-medium text-toodles-text text-sm">{feature}</td>
+                      <td className="px-6 py-3.5 text-center">
+                        {index < 4 ? <Check className="h-5 w-5 text-toodles-success mx-auto" /> : <span className="text-muted-foreground">—</span>}
+                      </td>
+                      <td className="px-6 py-3.5 text-center">
+                        {index < 7 ? <Check className="h-5 w-5 text-toodles-success mx-auto" /> : <span className="text-muted-foreground">—</span>}
+                      </td>
+                      <td className="px-6 py-3.5 text-center">
+                        <Check className="h-5 w-5 text-toodles-success mx-auto" />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
         </div>
       </section>
 
-      {/* Special Offers */}
-      <section className="py-20 bg-gradient-to-br from-toodles-secondary to-toodles-success">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-white mb-16">
-            <h2 className="text-4xl md:text-5xl font-display mb-4">
-              Special <span className="text-toodles-accent">Offers</span>
+      {/* Special offers */}
+      <section className="relative py-20 overflow-hidden bg-toodles-hero">
+        <div className="absolute inset-0 bg-black/15 pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+          <div className="text-center text-white mb-12">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur px-4 py-1.5 text-white text-sm font-medium border border-white/25 mb-5">
+              <Zap className="h-4 w-4" />
+              Member offers
+            </span>
+            <h2 className="text-3xl md:text-4xl font-display mb-2">
+              Save with our{" "}
+              <span className="text-toodles-accent">family perks</span>
             </h2>
-            <p className="text-xl font-accent">Limited time deals and discounts</p>
+            <p className="text-white/90">
+              Built-in savings — automatically applied at checkout when you qualify.
+            </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="p-8 text-center bg-white bg-opacity-10 backdrop-blur-sm text-white">
-              <Zap className="h-12 w-12 mx-auto mb-4 text-toodles-accent" />
-              <h3 className="text-2xl font-display mb-2">First Visit Special</h3>
-              <p className="text-lg font-accent mb-4">20% OFF</p>
-              <p className="text-sm opacity-90">Valid for first-time visitors only</p>
-            </Card>
-            
-            <Card className="p-8 text-center bg-white bg-opacity-10 backdrop-blur-sm text-white">
-              <Users className="h-12 w-12 mx-auto mb-4 text-toodles-accent" />
-              <h3 className="text-2xl font-display mb-2">Sibling Discount</h3>
-              <p className="text-lg font-accent mb-4">15% OFF</p>
-              <p className="text-sm opacity-90">When booking for 2+ siblings</p>
-            </Card>
-            
-            <Card className="p-8 text-center bg-white bg-opacity-10 backdrop-blur-sm text-white">
-              <Gift className="h-12 w-12 mx-auto mb-4 text-toodles-accent" />
-              <h3 className="text-2xl font-display mb-2">Birthday Month</h3>
-              <p className="text-lg font-accent mb-4">FREE Play</p>
-              <p className="text-sm opacity-90">Free 2-hour session on your child's birthday</p>
-            </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { icon: Zap, title: "First-visit offer", value: "20% off", note: "Applied automatically on your family's first booking." },
+              { icon: Users, title: "Sibling discount", value: "15% off", note: "Bring siblings together and save on every additional child." },
+              { icon: Gift, title: "Birthday month", value: "Free play", note: "Each child enjoys one complimentary 2-hour session in their birthday month." },
+            ].map((offer) => (
+              <Card key={offer.title} variant="glass" className="p-8 text-center text-white">
+                <offer.icon className="h-10 w-10 mx-auto mb-3 text-toodles-accent" />
+                <h3 className="text-xl font-display mb-1">{offer.title}</h3>
+                <p className="text-2xl font-display text-toodles-accent mb-2">{offer.value}</p>
+                <p className="text-sm text-white/85">{offer.note}</p>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
       <Footer />
       <FloatingWhatsApp />
-      
+
       {showBookingModal && (
-        <BookingModal 
-          onClose={() => setShowBookingModal(false)} 
+        <BookingModal
+          onClose={() => setShowBookingModal(false)}
           packages={packages || []}
         />
       )}

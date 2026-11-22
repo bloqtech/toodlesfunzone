@@ -120,7 +120,7 @@ export function MetaTags({
 export const pageMetaConfigs = {
   home: {
     title: "Toodles Funzone - Premier Kids Play Zone in Bangalore | Safe & Fun",
-    description: "Experience the best indoor kids play zone in Bangalore at Toodles Funzone. Safe, supervised activities for children aged 2-12. Book play sessions and birthday parties today!",
+    description: "Experience the indoor kids play zone in Bangalore at Toodles Funzone. Safe, supervised play sessions and birthday parties. Book today!",
     keywords: "kids play zone Bangalore, indoor playground, children activities, family fun, safe play area, Sarjapur Road, Kodathi"
   },
   

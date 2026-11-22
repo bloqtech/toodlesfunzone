@@ -67,7 +67,7 @@ export default function Packages() {
             Transparent, all-inclusive pricing
           </span>
           <h1 className="text-4xl md:text-6xl font-display mb-5 leading-tight">
-            A plan for every{" "}
+            Memberships for every{" "}
             <span className="text-toodles-accent">family</span>
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto mb-8">

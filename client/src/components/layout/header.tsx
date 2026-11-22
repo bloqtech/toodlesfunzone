@@ -1,31 +1,23 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
-import { Menu, User, LogOut, Shield } from "lucide-react";
+import { Gift, Menu, User, LogOut, Shield } from "lucide-react";
 import toodlesLogo from "@assets/Logo Toodles - Edited (1)_1753203790787.png";
 
 export function Header() {
   const [location] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const navigation = [
     { name: "Home", href: "/" },
-    { name: "Activities", href: "/activities" },
-    { name: "Packages", href: "/packages" },
-    { name: "Birthday Parties", href: "/birthday" },
-    { name: "Gallery", href: "/gallery" },
-    { name: "Contact", href: "/contact" },
+    { name: "Playtime", href: "/activities" },
+    { name: "Birthday Bash", href: "/birthday" },
+    { name: "Play Club", href: "/packages" },
+    { name: "School & Events", href: "/school-trips" },
+    { name: "Memory Lane", href: "/gallery" },
   ];
 
   const isActive = (path: string) => location === path;
@@ -66,12 +58,7 @@ export function Header() {
 
   return (
     <header
-      className={[
-        "sticky top-0 z-50 transition-all duration-300",
-        scrolled
-          ? "glass-strong shadow-soft border-b border-border/60"
-          : "bg-white/0 border-b border-transparent",
-      ].join(" ")}
+      className="sticky top-0 z-50 border-b border-border/60 bg-white/95 shadow-soft backdrop-blur"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-3">
@@ -86,17 +73,18 @@ export function Header() {
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navigation.map((item) => {
+          <nav className="hidden md:flex items-center">
+            {navigation.map((item, index) => {
               const active = isActive(item.href);
               return (
                 <Link key={item.name} href={item.href}>
                   <span
                     className={[
-                      "relative cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                      "relative cursor-pointer px-3.5 py-2 font-accent text-[1.05rem] font-semibold tracking-normal transition-colors",
+                      index > 0 ? "before:absolute before:left-0 before:top-1/2 before:h-3 before:w-px before:-translate-y-1/2 before:bg-toodles-primary/25" : "",
                       active
-                        ? "text-toodles-primary bg-toodles-primary/10"
-                        : "text-toodles-text/80 hover:text-toodles-primary hover:bg-toodles-primary/5",
+                        ? "text-toodles-primary after:absolute after:bottom-0 after:left-3.5 after:right-3.5 after:h-0.5 after:rounded-full after:bg-toodles-primary"
+                        : "text-toodles-text/75 hover:text-toodles-primary",
                     ].join(" ")}
                   >
                     {item.name}
@@ -107,6 +95,12 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <Link href="/birthday">
+              <Button variant="accent" size="sm" className="hidden lg:inline-flex">
+                <Gift className="h-4 w-4" />
+                Plan a Party
+              </Button>
+            </Link>
             {isAuthenticated ? (
               <>
                 <div className="hidden md:flex items-center gap-2 rounded-full bg-toodles-primary/10 px-3 py-1.5">
@@ -178,7 +172,7 @@ export function Header() {
                       <Link key={item.name} href={item.href}>
                         <span
                           className={[
-                            "block cursor-pointer rounded-xl px-3 py-2.5 text-base font-medium transition-colors",
+                            "block cursor-pointer rounded-xl px-3 py-2.5 font-accent text-lg font-semibold transition-colors",
                             active
                               ? "bg-toodles-primary/10 text-toodles-primary"
                               : "text-toodles-text hover:bg-muted",
@@ -192,6 +186,12 @@ export function Header() {
                   })}
 
                   <div className="mt-4 border-t pt-4 space-y-2">
+                    <Link href="/birthday">
+                      <Button variant="accent" className="w-full" onClick={() => setIsOpen(false)}>
+                        <Gift className="h-4 w-4" />
+                        Plan a Party
+                      </Button>
+                    </Link>
                     {isAuthenticated ? (
                       <>
                         <div className="flex items-center gap-2 rounded-xl bg-toodles-primary/10 px-3 py-2">

@@ -30,10 +30,24 @@ const uploadOnCloudinary = async (localFilePath: string) => {
         return response;
 
     } catch (error) {
-        fs.unlinkSync(localFilePath as PathLike) // remove the locally saved temporary file as the upload operation got failed
+        // Keep the temporary file so the caller can use local storage as a
+        // fallback when Cloudinary is unavailable.
         return null;
     }
 }
+
+const deleteFromCloudinary = async (publicId: string, mediaType: "photo" | "video" = "photo") => {
+    if (!publicId) return null;
+
+    try {
+        return await cloudinary.uploader.destroy(publicId, {
+            resource_type: mediaType === "video" ? "video" : "image",
+        });
+    } catch (error) {
+        console.error("Cloudinary delete failed:", error);
+        return null;
+    }
+};
 
 const getAllVideos = async(publicIds: string[])=>{
     const videosFiles = publicIds.forEach((publicId)=>{
@@ -89,6 +103,7 @@ const deleteOldVideo= async()=>{
 
 export {
     uploadOnCloudinary,
+    deleteFromCloudinary,
     getAllVideos,
     deleteOldVideo,
     downloadVideoFromCloudinary

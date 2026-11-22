@@ -23,7 +23,9 @@ import { createPaymentOrder, verifyPayment } from "./services/payment";
 import { generateOTP, sendOTPWhatsApp } from "./whatsapp";
 import bcrypt from "bcryptjs";
 import session from "express-session";
-import { uploadOnCloudinary } from "./services/Cloudinary";
+import { deleteFromCloudinary, uploadOnCloudinary } from "./services/Cloudinary";
+import { registerContentRoutes } from "./content-routes";
+import { listLocalMedia } from "./local-media";
 import { db } from "./db";
 
 // Configure multer for file uploads
@@ -32,14 +34,16 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+const mediaDiskStorage = multer.diskStorage({
+  destination: uploadDir,
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: uploadDir,
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
-  }),
+  storage: mediaDiskStorage,
   // // to only allow image file
   // fileFilter: (req, file, cb) => {
   //   if (file.mimetype.startsWith('image/')) {
@@ -52,6 +56,73 @@ const upload = multer({
     fileSize: 50 * 1024 * 1024, // 5MB limit
   }
 });
+
+const galleryCategoryAliases: Record<string, string> = {
+  "play-zones": "play",
+  "birthday-parties": "birthday",
+};
+
+const normalizeGalleryCategory = (category: unknown) => {
+  const value = String(category || "play").trim().toLowerCase();
+  return galleryCategoryAliases[value] || value;
+};
+
+const serializeGalleryImage = (image: any) => ({
+  id: String(image.id),
+  title: image.title,
+  description: image.description || "",
+  caption: image.description || "",
+  image: image.imageUrl,
+  imageUrl: image.imageUrl,
+  src: image.imageUrl,
+  cloudinaryPublicId: image.cloudinaryPublicId,
+  category: image.category,
+  albumId: image.albumId,
+  mediaType: image.mediaType || "photo",
+  altText: image.altText || image.title,
+  eventName: image.eventName || "",
+  eventDate: image.eventDate || "",
+  isActive: image.isActive,
+  featured: image.featured,
+  displayOrder: image.displayOrder,
+  uploadDate: image.createdAt,
+});
+
+const allowedMediaTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "video/mp4",
+  "video/quicktime",
+]);
+
+const mediaUpload = multer({
+  storage: mediaDiskStorage,
+  limits: { fileSize: 50 * 1024 * 1024, files: 20 },
+  fileFilter: (_req, file, cb) => {
+    if (allowedMediaTypes.has(file.mimetype)) cb(null, true);
+    else cb(new Error("Use JPG, PNG, WEBP, MP4, or MOV files."));
+  },
+});
+
+const mediaTypeFor = (mime: string) => (mime.startsWith("video/") ? "video" : "photo");
+
+const titleFromFilename = (filename: string) =>
+  path.basename(filename, path.extname(filename)).replace(/[-_]+/g, " ").trim() || "Toodles moment";
+
+async function storeUploadedFile(file: Express.Multer.File) {
+  if (process.env.CLOUDINARY_CLOUDNAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+    const cloudinaryResult = await uploadOnCloudinary(file.path);
+    if (cloudinaryResult && (cloudinaryResult.secure_url || cloudinaryResult.url)) {
+      return {
+        url: cloudinaryResult.secure_url || cloudinaryResult.url,
+        publicId: cloudinaryResult.public_id || null,
+      };
+    }
+  }
+
+  return { url: `/uploads/${file.filename}`, publicId: null };
+}
 
 // Authentication middleware for WhatsApp OTP
 const isAuthenticated = (req: any, res: any, next: any) => {
@@ -79,6 +150,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve static files
   app.use('/attached_assets', express.static(path.resolve(process.cwd(), 'attached_assets')));
   app.use('/uploads', express.static(uploadDir));
+
+  app.get('/api/media/library', (_req, res) => {
+    res.set("Cache-Control", "no-store");
+    res.json(listLocalMedia());
+  });
 
   // Local admin login route
   app.post('/api/admin/login', async (req, res) => {
@@ -1463,6 +1539,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
+  registerContentRoutes(app, isAuthenticated, adminAuth);
+
   // Admin: Get all bookings
   app.get('/api/admin/bookings', isAuthenticated, adminAuth, async (req, res) => {
     try {
@@ -1961,9 +2039,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           // Upload to Cloudinary for better CDN and storage
           const cloudinaryResult = await uploadOnCloudinary(req.file.path);
-          if (cloudinaryResult && cloudinaryResult.url) {
+          if (cloudinaryResult && (cloudinaryResult.secure_url || cloudinaryResult.url)) {
             return res.json({ 
-              url: cloudinaryResult.url,
+              url: cloudinaryResult.secure_url || cloudinaryResult.url,
               publicId: cloudinaryResult.public_id,
               format: cloudinaryResult.format,
               size: cloudinaryResult.bytes
@@ -2126,6 +2204,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public: Gallery (for display on frontend)
   app.get('/api/gallery', async (req, res) => {
     try {
+      const storedImages = await storage.getGalleryImages(true);
+      if (storedImages.length > 0) {
+        const published = storedImages
+          .map(serializeGalleryImage)
+          .sort((a, b) => Number(b.featured) - Number(a.featured) || a.displayOrder - b.displayOrder);
+        return res.json(published);
+      }
+
       // Mock data for public gallery display
       const galleryItems = [
         { id: '1', title: 'Colorful Indoor Playground', description: 'Our vibrant play area with slides and climbing structures', src: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', category: 'play', imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600' },
@@ -2150,12 +2236,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/gallery', isAuthenticated, adminAuth, async (req, res) => {
     try {
-      // Mock data for now
-      const galleryItems = [
-        { id: '1', title: 'Kids Playing', description: 'Children enjoying play zone', image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256', category: 'play-zones', isActive: true, featured: true, uploadDate: new Date().toISOString() },
-        { id: '2', title: 'Birthday Party', description: 'Celebration in progress', image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d', category: 'birthday-parties', isActive: true, featured: false, uploadDate: new Date().toISOString() }
-      ];
-      res.json(galleryItems);
+      const storedImages = await storage.getGalleryImages();
+      return res.json(storedImages.map(serializeGalleryImage));
     } catch (error) {
       console.error("Error fetching gallery items:", error);
       res.status(500).json({ message: "Failed to fetch gallery items" });
@@ -2164,8 +2246,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/gallery', isAuthenticated, adminAuth, async (req, res) => {
     try {
-      const galleryItem = { id: Date.now().toString(), uploadDate: new Date().toISOString(), ...req.body };
-      res.json(galleryItem);
+      const { title, description, image, publicId, category, isActive, featured, displayOrder, mediaType, altText, eventName, eventDate, albumId } = req.body;
+      if (!title?.trim() || !image?.trim()) {
+        return res.status(400).json({ message: "Title and image are required" });
+      }
+
+      const galleryItem = await storage.createGalleryImage({
+        title: title.trim(),
+        description: String(description || "").trim(),
+        imageUrl: image.trim(),
+        cloudinaryPublicId: publicId || null,
+        category: normalizeGalleryCategory(category),
+        mediaType: mediaType === "video" ? "video" : "photo",
+        altText: String(altText || title).trim(),
+        eventName: eventName ? String(eventName).trim() : null,
+        eventDate: eventDate ? String(eventDate).trim() : null,
+        albumId: albumId ? Number(albumId) : null,
+        isActive: isActive !== false,
+        featured: featured === true,
+        displayOrder: Number.isFinite(Number(displayOrder)) ? Number(displayOrder) : 0,
+      });
+      res.status(201).json(serializeGalleryImage(galleryItem));
     } catch (error) {
       console.error("Error creating gallery item:", error);
       res.status(500).json({ message: "Failed to create gallery item" });
@@ -2174,8 +2275,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/admin/gallery/:id', isAuthenticated, adminAuth, async (req, res) => {
     try {
-      const galleryItem = { id: req.params.id, ...req.body };
-      res.json(galleryItem);
+      const id = parseInt(req.params.id, 10);
+      if (Number.isNaN(id)) {
+        return res.status(400).json({ message: "Invalid gallery item ID" });
+      }
+
+      const existing = await storage.getGalleryImageById(id);
+      if (!existing) {
+        return res.status(404).json({ message: "Gallery item not found" });
+      }
+
+      const { title, description, image, publicId, category, isActive, featured, displayOrder, mediaType, altText, eventName, eventDate, albumId } = req.body;
+      const galleryItem = await storage.updateGalleryImage(id, {
+        title: title?.trim() || existing.title,
+        description: description === undefined ? existing.description : String(description).trim(),
+        imageUrl: image?.trim() || existing.imageUrl,
+        cloudinaryPublicId: publicId === undefined ? existing.cloudinaryPublicId : publicId || null,
+        category: category === undefined ? existing.category : normalizeGalleryCategory(category),
+        mediaType: mediaType === undefined ? existing.mediaType : mediaType === "video" ? "video" : "photo",
+        altText: altText === undefined ? existing.altText : String(altText).trim(),
+        eventName: eventName === undefined ? existing.eventName : eventName ? String(eventName).trim() : null,
+        eventDate: eventDate === undefined ? existing.eventDate : eventDate ? String(eventDate).trim() : null,
+        albumId: albumId === undefined ? existing.albumId : albumId ? Number(albumId) : null,
+        isActive: isActive === undefined ? existing.isActive : isActive === true,
+        featured: featured === undefined ? existing.featured : featured === true,
+        displayOrder: displayOrder === undefined ? existing.displayOrder : Number(displayOrder) || 0,
+      });
+      res.json(serializeGalleryImage(galleryItem));
     } catch (error) {
       console.error("Error updating gallery item:", error);
       res.status(500).json({ message: "Failed to update gallery item" });
@@ -2184,11 +2310,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/admin/gallery/:id', isAuthenticated, adminAuth, async (req, res) => {
     try {
+      const id = parseInt(req.params.id, 10);
+      if (Number.isNaN(id)) {
+        return res.status(400).json({ message: "Invalid gallery item ID" });
+      }
+
+      const existing = await storage.getGalleryImageById(id);
+      if (!existing) {
+        return res.status(404).json({ message: "Gallery item not found" });
+      }
+
+      if (existing.cloudinaryPublicId) {
+        await deleteFromCloudinary(existing.cloudinaryPublicId, existing.mediaType === "video" ? "video" : "photo");
+      }
+      await storage.deleteGalleryImage(id);
       res.json({ message: "Gallery item deleted successfully" });
     } catch (error) {
       console.error("Error deleting gallery item:", error);
       res.status(500).json({ message: "Failed to delete gallery item" });
     }
+  });
+
+  app.post('/api/admin/gallery/bulk-delete', isAuthenticated, adminAuth, async (req, res) => {
+    try {
+      const ids = Array.isArray(req.body?.ids) ? req.body.ids.map((id: unknown) => Number(id)).filter((id: number) => Number.isFinite(id)) : [];
+      if (ids.length === 0) return res.status(400).json({ message: "Select at least one item to delete" });
+
+      for (const id of ids) {
+        const existing = await storage.getGalleryImageById(id);
+        if (!existing) continue;
+        if (existing.cloudinaryPublicId) {
+          await deleteFromCloudinary(existing.cloudinaryPublicId, existing.mediaType === "video" ? "video" : "photo");
+        }
+        await storage.deleteGalleryImage(id);
+      }
+      res.json({ message: "Selected media deleted", deleted: ids.length });
+    } catch (error) {
+      console.error("Error deleting gallery items:", error);
+      res.status(500).json({ message: "Failed to delete selected media" });
+    }
+  });
+
+  app.post('/api/admin/media/batch', isAuthenticated, adminAuth, (req, res) => {
+    mediaUpload.array('files', 20)(req, res, async (uploadError: any) => {
+      if (uploadError) {
+        const tooLarge = uploadError.code === 'LIMIT_FILE_SIZE';
+        return res.status(400).json({
+          message: tooLarge
+            ? "Each file must be 50MB or smaller."
+            : uploadError.message || "Upload failed. Use JPG, PNG, WEBP, MP4, or MOV.",
+        });
+      }
+
+      const files = (req.files as Express.Multer.File[]) || [];
+      if (files.length === 0) return res.status(400).json({ message: "Choose at least one photo or video." });
+
+      const category = normalizeGalleryCategory(req.body.category);
+      const publish = req.body.isActive !== "false" && req.body.isActive !== false;
+      const featured = req.body.featured === "true" || req.body.featured === true;
+      const eventName = req.body.eventName ? String(req.body.eventName).trim() : null;
+      const eventDate = req.body.eventDate ? String(req.body.eventDate).trim() : null;
+      const albumId = req.body.albumId ? Number(req.body.albumId) : null;
+      const created = [];
+      const failed: { name: string; message: string }[] = [];
+
+      for (const file of files) {
+        try {
+          const stored = await storeUploadedFile(file);
+          const title = titleFromFilename(file.originalname);
+          const item = await storage.createGalleryImage({
+            title,
+            description: "",
+            imageUrl: stored.url,
+            cloudinaryPublicId: stored.publicId,
+            category,
+            mediaType: mediaTypeFor(file.mimetype),
+            altText: title,
+            eventName,
+            eventDate,
+            albumId,
+            isActive: publish,
+            featured,
+            displayOrder: 0,
+          });
+          created.push(serializeGalleryImage(item));
+        } catch (error) {
+          console.error("Batch media item failed:", error);
+          failed.push({ name: file.originalname, message: "Could not save this file." });
+        }
+      }
+
+      res.status(created.length ? 201 : 500).json({ created, failed });
+    });
   });
 
   // Public: Birthday Packages (for display on frontend)

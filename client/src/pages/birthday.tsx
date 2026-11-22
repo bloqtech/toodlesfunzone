@@ -2,10 +2,11 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
 import { FestiveAmbient } from "@/components/common/festive-ambient";
 import { BirthdayForm } from "@/components/booking/birthday-form";
+import { BirthdayFeedback, BirthdayMedia } from "@/components/common/birthday-media";
+import { PhotoMosaic } from "@/components/common/photo-mosaic";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "wouter";
@@ -15,7 +16,6 @@ import {
   Camera,
   Music,
   Cake,
-  LifeBuoy,
   Star,
   Heart,
   CheckCircle,
@@ -28,64 +28,6 @@ export default function Birthday() {
   const { data: birthdayPackages = [], isLoading: packagesLoading } = useQuery<any[]>({
     queryKey: ["/api/birthday-packages"],
   });
-
-  const themes = [
-    {
-      name: "Princess Palace",
-      description: "Crowns, castles and fairy-tale decor for an enchanting celebration.",
-      image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=800&q=80",
-      emoji: "👑",
-      gradient: "from-pink-400 via-rose-400 to-fuchsia-500",
-      color: "bg-pink-100 text-pink-800",
-    },
-    {
-      name: "Superhero Adventure",
-      description: "Capes, missions and heroic moments designed to bring out the brave.",
-      image: "https://images.unsplash.com/photo-1635805737707-575885ab0820?auto=format&fit=crop&w=800&q=80",
-      emoji: "🦸",
-      gradient: "from-red-500 via-orange-500 to-blue-600",
-      color: "bg-blue-100 text-blue-800",
-    },
-    {
-      name: "Jungle Safari",
-      description: "An explorer's celebration with lush greenery, animals and adventure.",
-      image: "https://images.unsplash.com/photo-1444930694458-01babe71870e?auto=format&fit=crop&w=800&q=80",
-      emoji: "🦁",
-      gradient: "from-green-500 via-emerald-500 to-lime-500",
-      color: "bg-green-100 text-green-800",
-    },
-    {
-      name: "Space Explorer",
-      description: "A galactic celebration with rockets, planets and astronaut-themed games.",
-      image: "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?auto=format&fit=crop&w=800&q=80",
-      emoji: "🚀",
-      gradient: "from-indigo-700 via-purple-700 to-blue-900",
-      color: "bg-purple-100 text-purple-800",
-    },
-    {
-      name: "Underwater Kingdom",
-      description: "A shimmering ocean party with mermaids, sea creatures and coral-reef colours.",
-      image: "https://images.unsplash.com/photo-1518399681705-1fa54c9b8d4d?auto=format&fit=crop&w=800&q=80",
-      emoji: "🧜‍♀️",
-      gradient: "from-cyan-500 via-teal-500 to-blue-600",
-      color: "bg-teal-100 text-teal-800",
-    },
-    {
-      name: "Rainbow Unicorn",
-      description: "A whimsical celebration with rainbow palettes, glitter and unicorn charm.",
-      image: "https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?auto=format&fit=crop&w=800&q=80",
-      emoji: "🦄",
-      gradient: "from-pink-400 via-yellow-400 to-purple-500",
-      color: "bg-yellow-100 text-yellow-800",
-    },
-  ];
-
-  const addOnServices = [
-    { name: "Professional Photography", description: "A dedicated photographer to capture every moment of the celebration.", price: 6000, from: true, icon: Camera },
-    { name: "DJ & Sound System", description: "Live music, microphones and party-game audio managed by our team.", price: 5000, from: true, icon: Music },
-    { name: "Custom Cake Design", description: "A personalised cake matched to your child's chosen theme.", price: 3000, from: true, icon: Cake },
-    { name: "Premium Decor", description: "Balloon arches, table styling and themed accents that elevate the venue.", price: 4000, from: true, icon: LifeBuoy },
-  ];
 
   const partyInclusions = [
     "Private party area, just for your guests",
@@ -107,8 +49,8 @@ export default function Birthday() {
         <FestiveAmbient confetti={12} />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.25),_transparent_60%)] pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24 z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="text-white">
+          <div className="space-y-10">
+            <div className="text-white max-w-3xl">
               <span className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur px-4 py-1.5 text-white text-sm font-medium border border-white/25 mb-5">
                 <Sparkles className="h-4 w-4" />
                 Birthday parties
@@ -127,7 +69,7 @@ export default function Birthday() {
                   <Gift className="h-5 w-5" />
                   Enquire about a party
                 </Button>
-                <Link href="/gallery">
+                <Link href="/gallery?category=birthday">
                   <Button
                     size="lg"
                     variant="outline"
@@ -139,20 +81,25 @@ export default function Birthday() {
               </div>
             </div>
 
-            <div className="relative lg:pl-6">
-              <div className="absolute -inset-4 bg-white/15 rounded-[2rem] blur-2xl pointer-events-none" />
-              <Card variant="glass" className="relative p-3 md:p-4 rounded-[2rem] border-white/40 -rotate-2 hover:rotate-0 transition-transform duration-500">
-                <img
-                  src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
-                  alt="Birthday Party Celebration"
-                  loading="lazy"
-                  className="rounded-[1.5rem] shadow-elev w-full h-auto"
-                />
-              </Card>
-            </div>
+            <BirthdayMedia />
           </div>
         </div>
       </section>
+
+      <section className="py-16">
+        <div className="mx-auto max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
+          <div>
+            <h2 className="mb-6 font-display text-3xl text-toodles-text md:text-4xl">Birthday celebrations</h2>
+            <PhotoMosaic category="birthday" photosOnly />
+          </div>
+          <div>
+            <h2 className="mb-6 font-display text-3xl text-toodles-text md:text-4xl">Decorations</h2>
+            <PhotoMosaic category="decor" />
+          </div>
+        </div>
+      </section>
+
+      <BirthdayFeedback />
 
       {/* Birthday packages */}
       <section className="py-20">
@@ -238,92 +185,6 @@ export default function Birthday() {
               })}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Themes */}
-      <section className="py-20 bg-gradient-to-b from-transparent via-[hsl(320,55%,97%)] to-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 max-w-2xl mx-auto">
-            <span className="eyebrow"><Sparkles className="h-3.5 w-3.5" />Themes</span>
-            <h2 className="text-3xl md:text-4xl font-display text-toodles-text mt-4 mb-2">
-              Popular <span className="text-gradient-sky">themes</span>
-            </h2>
-            <p className="text-muted-foreground">
-              Choose a world for your child to step into — fully decorated and brought to life by our team.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {themes.map((theme) => (
-              <Card key={theme.name} variant="elevated" interactive className="overflow-hidden p-0">
-                <div className={`relative h-56 bg-gradient-to-br ${theme.gradient}`}>
-                  <img
-                    src={theme.image}
-                    alt={theme.name}
-                    loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                  <div className={`absolute inset-0 bg-gradient-to-t ${theme.gradient} opacity-60 mix-blend-multiply`} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
-                  <span className="absolute top-4 right-4 text-4xl drop-shadow-lg">{theme.emoji}</span>
-                  <div className="absolute bottom-3 left-3 right-3">
-                    <Badge className={`${theme.color} font-accent font-bold border-0 shadow-soft`}>
-                      {theme.name}
-                    </Badge>
-                  </div>
-                </div>
-                <CardContent className="p-5">
-                  <p className="text-sm text-muted-foreground">{theme.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Add-on services */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 max-w-2xl mx-auto">
-            <span className="eyebrow"><Camera className="h-3.5 w-3.5" />Add-ons</span>
-            <h2 className="text-3xl md:text-4xl font-display text-toodles-text mt-4 mb-2">
-              Optional <span className="text-toodles-primary">add-on services</span>
-            </h2>
-            <p className="text-muted-foreground mt-2">
-              Bolt these on to any package to customise the celebration further.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {addOnServices.map((service) => {
-              const IconComponent = service.icon;
-              const formattedPrice = service.price.toLocaleString("en-IN");
-              return (
-                <Card key={service.name} variant="elevated" className="text-center p-6">
-                  <div className="bg-[image:var(--gradient-sunset)] text-white rounded-full p-4 w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                    <IconComponent className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-lg font-display text-toodles-text mb-1.5">{service.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">{service.description}</p>
-                  <div className="mb-4">
-                    {service.from && (
-                      <div className="text-[0.7rem] uppercase tracking-wider text-muted-foreground font-semibold">
-                        Starts from
-                      </div>
-                    )}
-                    <div className="text-2xl font-display text-gradient-sunset">₹{formattedPrice}</div>
-                  </div>
-                  <Button variant="outline" className="w-full">
-                    Add to package
-                  </Button>
-                </Card>
-              );
-            })}
-          </div>
         </div>
       </section>
 

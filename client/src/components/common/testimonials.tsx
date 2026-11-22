@@ -1,76 +1,57 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Star } from "lucide-react";
+import { Quote, Star } from "lucide-react";
 
 interface TestimonialsProps {
-  reviews?: any[];
+  reviews?: Array<{
+    name?: string;
+    rating?: number;
+    comment?: string;
+    role?: string;
+  }>;
 }
 
 export function Testimonials({ reviews = [] }: TestimonialsProps) {
-  // Default testimonials if no reviews provided
-  const defaultTestimonials = [
-    {
-      name: "Priya Sharma",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b2cb6d96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100",
-      rating: 5,
-      comment: "Amazing place for kids! The facilities are clean and safe. My daughter had the best time ever!",
-      role: "Mother of 2"
-    },
-    {
-      name: "Rajesh Kumar",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100",
-      rating: 5,
-      comment: "We celebrated my son's 6th birthday here and it was magical! The team arranged everything perfectly.",
-      role: "Father of 3"
-    },
-    {
-      name: "Anjali Patel",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100",
-      rating: 5,
-      comment: "Clean, safe, and so much fun! My 4-year-old loves the ball pit. Great value for money.",
-      role: "Mother of 1"
-    }
-  ];
-
-  const displayReviews = reviews.length > 0 ? reviews : defaultTestimonials;
+  const displayReviews = reviews.filter((review) => review.comment?.trim()).slice(0, 3);
+  if (displayReviews.length === 0) return null;
 
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-display text-toodles-text mb-4">
-            What <span className="text-toodles-primary">Parents Say</span>
+        <div className="text-center mb-12 max-w-2xl mx-auto">
+          <span className="eyebrow mb-4">
+            <Star className="h-3.5 w-3.5" />
+            Family feedback
+          </span>
+          <h2 className="text-3xl md:text-5xl font-display text-toodles-text mt-4 mb-3">
+            Loved by <span className="text-gradient-sunset">happy families</span>
           </h2>
-          <p className="text-xl text-gray-600 font-accent">Real experiences from happy families</p>
+          <p className="text-base md:text-lg text-muted-foreground">
+            Honest experiences from parents who have made special memories at Toodles.
+          </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {displayReviews.slice(0, 3).map((testimonial, index) => (
-            <Card key={index} className="bg-gradient-to-br from-toodles-background to-white rounded-3xl p-8 shadow-lg transform hover:scale-105 transition-all">
-              <CardContent className="p-0">
-                <div className="flex items-center mb-6">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.name}
-                    className="w-16 h-16 rounded-full mr-4 object-cover"
-                  />
-                  <div>
-                    <div className="font-accent font-bold text-toodles-text">{testimonial.name}</div>
-                    <div className="text-sm text-gray-500">{testimonial.role}</div>
-                  </div>
-                </div>
-                <div className="text-toodles-accent mb-4">
+            <Card key={index} variant="elevated" className="relative h-full">
+              <CardContent className="p-7">
+                <Quote className="absolute top-6 right-6 h-8 w-8 text-toodles-primary/15" />
+                <div className="flex items-center gap-1 mb-5 text-toodles-accent">
                   {Array.from({ length: testimonial.rating || 5 }, (_, i) => (
-                    <Star key={i} className="inline h-4 w-4 fill-current" />
+                    <Star key={i} className="h-4 w-4 fill-current" />
                   ))}
                 </div>
-                <p className="text-gray-700 italic">
-                  "{testimonial.comment}"
+                <p className="text-toodles-text/80 leading-relaxed min-h-24">
+                  “{testimonial.comment}”
                 </p>
+                <div className="mt-6 pt-5 border-t border-border/60">
+                  <div className="font-semibold text-toodles-text">{testimonial.name || "Toodles family"}</div>
+                  <div className="text-sm text-muted-foreground">{testimonial.role || "Toodles Funzone customer"}</div>
+                </div>
               </CardContent>
             </Card>
           ))}
         </div>
-        
+
         {reviews.length > 3 && (
           <div className="text-center mt-12">
             <p className="text-gray-600 mb-4">

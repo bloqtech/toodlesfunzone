@@ -11,6 +11,7 @@ import {
   enquiries,
   operatingHours,
   activities,
+  galleryImages,
   otpVerification,
   packageSales,
   packageUsage,
@@ -41,6 +42,8 @@ import {
   type InsertEnquiry,
   type InsertOperatingHours,
   type InsertActivity,
+  type GalleryImage,
+  type InsertGalleryImage,
   type InsertOtpVerification,
   type InsertPackageSale,
   type InsertPackageUsage,
@@ -180,6 +183,13 @@ export interface IStorage {
   createActivity(activityData: InsertActivity): Promise<Activity>;
   updateActivity(id: number, activityData: Partial<InsertActivity>): Promise<Activity>;
   deleteActivity(id: number): Promise<void>;
+
+  // Gallery operations
+  getGalleryImages(activeOnly?: boolean): Promise<GalleryImage[]>;
+  getGalleryImageById(id: number): Promise<GalleryImage | undefined>;
+  createGalleryImage(imageData: InsertGalleryImage): Promise<GalleryImage>;
+  updateGalleryImage(id: number, imageData: Partial<InsertGalleryImage>): Promise<GalleryImage>;
+  deleteGalleryImage(id: number): Promise<void>;
   
   // Package sales operations
   createPackageSale(saleData: InsertPackageSale): Promise<PackageSale>;
@@ -955,6 +965,49 @@ export class DatabaseStorage implements IStorage {
 
   async deleteActivity(id: number): Promise<void> {
     await db.delete(activities).where(eq(activities.id, id));
+  }
+
+  // Gallery operations
+  async getGalleryImages(activeOnly = false): Promise<GalleryImage[]> {
+    const query = db
+      .select()
+      .from(galleryImages)
+      .orderBy(asc(galleryImages.displayOrder), desc(galleryImages.createdAt), asc(galleryImages.id));
+
+    if (activeOnly) {
+      return await query.where(eq(galleryImages.isActive, true));
+    }
+
+    return await query;
+  }
+
+  async getGalleryImageById(id: number): Promise<GalleryImage | undefined> {
+    const [image] = await db
+      .select()
+      .from(galleryImages)
+      .where(eq(galleryImages.id, id));
+    return image;
+  }
+
+  async createGalleryImage(imageData: InsertGalleryImage): Promise<GalleryImage> {
+    const [image] = await db.insert(galleryImages).values(imageData).returning();
+    return image;
+  }
+
+  async updateGalleryImage(
+    id: number,
+    imageData: Partial<InsertGalleryImage>,
+  ): Promise<GalleryImage> {
+    const [image] = await db
+      .update(galleryImages)
+      .set({ ...imageData, updatedAt: new Date() })
+      .where(eq(galleryImages.id, id))
+      .returning();
+    return image;
+  }
+
+  async deleteGalleryImage(id: number): Promise<void> {
+    await db.delete(galleryImages).where(eq(galleryImages.id, id));
   }
 
   // Birthday Package operations

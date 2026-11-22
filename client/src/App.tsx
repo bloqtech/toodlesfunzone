@@ -16,6 +16,7 @@ import Activities from "@/pages/activities";
 import Packages from "@/pages/packages";
 import Birthday from "@/pages/birthday";
 import Gallery from "@/pages/gallery";
+import SchoolTrips from "@/pages/school-trips";
 import Contact from "@/pages/contact";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminBookings from "@/pages/admin/bookings";
@@ -24,6 +25,7 @@ import AdminUsers from "@/pages/admin/users-advanced";
 import AdminPackages from "@/pages/admin/packages";
 import AdminActivities from "@/pages/admin/activities-management";
 import AdminGallery from "@/pages/admin/gallery-management";
+import AdminContent from "@/pages/admin/site-content";
 import AdminBirthday from "@/pages/admin/birthday-management";
 import AdminCapacity from "@/pages/admin/capacity-management";
 import AdminOperatingHours from "@/pages/admin/operating-hours";
@@ -50,6 +52,7 @@ function Router() {
       <Route path="/packages" component={Packages} />
       <Route path="/birthday" component={Birthday} />
       <Route path="/gallery" component={Gallery} />
+      <Route path="/school-trips" component={SchoolTrips} />
       <Route path="/contact" component={Contact} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/login" component={LoginPage} />
@@ -63,6 +66,7 @@ function Router() {
       <Route path="/admin/packages" component={AdminPackages} />
       <Route path="/admin/activities" component={AdminActivities} />
       <Route path="/admin/gallery" component={AdminGallery} />
+      <Route path="/admin/content" component={AdminContent} />
       <Route path="/admin/birthday" component={AdminBirthday} />
       <Route path="/admin/capacity" component={AdminCapacity} />
       <Route path="/admin/operating-hours" component={AdminOperatingHours} />

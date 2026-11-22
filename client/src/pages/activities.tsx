@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
 import { FestiveAmbient } from "@/components/common/festive-ambient";
 import { BookingModal } from "@/components/booking/booking-modal";
+import { PhotoMosaic } from "@/components/common/photo-mosaic";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Calendar, Star, Users, Shield, Clock, Sparkles } from "lucide-react";
@@ -67,7 +68,7 @@ export default function Activities() {
             <span className="text-toodles-accent">grow</span>
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto mb-8">
-            Every zone is purpose-built for children aged 2 to 8 — balancing
+            Every zone is purpose-built for children — balancing
             active play with quieter, sensory experiences in a fully supervised
             environment.
           </p>
@@ -79,6 +80,13 @@ export default function Activities() {
             <Calendar className="h-5 w-5" />
             Reserve a play session
           </Button>
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-6 font-display text-3xl text-toodles-text md:text-4xl">Play area</h2>
+          <PhotoMosaic category="play" />
         </div>
       </section>
 

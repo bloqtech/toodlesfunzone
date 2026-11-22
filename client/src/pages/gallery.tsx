@@ -1,68 +1,59 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { FloatingWhatsApp } from "@/components/common/floating-whatsapp";
-import { FestiveAmbient } from "@/components/common/festive-ambient";
 import { BookingModal } from "@/components/booking/booking-modal";
+import { PhotoLightbox } from "@/components/common/photo-lightbox";
+import { mediaFilters, mosaicSpan, useLocalMedia } from "@/lib/local-media";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import {
-  Camera,
-  Play,
-  Smile,
-  Calendar,
-  ZoomIn,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useLocation, useSearch } from "wouter";
+import { Calendar, Camera, Play } from "lucide-react";
 
 export default function Gallery() {
+  const search = useSearch();
+  const [, navigate] = useLocation();
+  const requested = new URLSearchParams(search).get("category") || "all";
+  const [selectedCategory, setSelectedCategory] = useState(requested);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const { data: packages } = useQuery<any[]>({
-    queryKey: ["/api/packages"],
+  const { data: packages } = useQuery<any[]>({ queryKey: ["/api/packages"] });
+  const { data: media = [], isLoading } = useLocalMedia();
+  const hasVideos = media.some((item) => item.mediaType === "video");
+  const filters = mediaFilters.filter((filter) => filter.id !== "video" || hasVideos);
+
+  useEffect(() => {
+    const next = new URLSearchParams(search).get("category") || "all";
+    const known = mediaFilters.some((filter) => filter.id === next) && (next !== "video" || hasVideos);
+    setSelectedCategory(known ? next : "all");
+    setOpenIndex(null);
+  }, [search, hasVideos]);
+
+  const filtered = media.filter((item) => {
+    if (selectedCategory === "all") return item.mediaType !== "video";
+    if (selectedCategory === "video") return item.mediaType === "video";
+    return item.category === selectedCategory;
   });
 
-  const { data: galleryImages = [], isLoading: galleryLoading } = useQuery<any[]>({
-    queryKey: ["/api/gallery"],
-  });
-
-  const categories = [
-    { id: "all", name: "All photos", icon: Camera },
-    { id: "play", name: "Play activities", icon: Play },
-    { id: "birthday", name: "Birthday parties", icon: Calendar },
-    { id: "kids", name: "Happy kids", icon: Smile },
-    { id: "facilities", name: "Facilities", icon: Camera },
-  ];
-
-  const filteredImages =
-    selectedCategory === "all"
-      ? galleryImages
-      : galleryImages.filter((img: any) => img.category === selectedCategory);
+  const choose = (id: string) => {
+    setSelectedCategory(id);
+    setOpenIndex(null);
+    const url = id === "all" ? "/gallery" : `/gallery?category=${id}`;
+    navigate(url, { replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-toodles-background">
       <Header />
 
-      {/* Hero */}
       <section className="relative overflow-hidden bg-toodles-hero">
-        <FestiveAmbient confetti={8} />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.25),_transparent_60%)] pointer-events-none" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24 text-center text-white z-10">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/20 backdrop-blur px-4 py-1.5 text-white/95 text-sm font-medium border border-white/25 mb-6">
-            <Sparkles className="h-4 w-4" />
-            Moments from Toodles
-          </span>
-          <h1 className="text-4xl md:text-6xl font-display mb-5 leading-tight">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 text-center text-white sm:px-6 md:py-20 lg:px-8">
+          <h1 className="mb-4 font-display text-4xl leading-tight md:text-6xl">
             Our <span className="text-toodles-accent">gallery</span>
           </h1>
-          <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto mb-8">
-            A glimpse of the everyday joy at Toodles Funzone — captured across
-            play sessions, birthday parties and our celebrated little guests.
+          <p className="mx-auto mb-8 max-w-2xl text-lg text-white/90">
+            Play, birthdays, decorations, and school visits at Toodles Funzone.
           </p>
           <Button size="lg" variant="accent" onClick={() => setShowBookingModal(true)}>
             <Calendar className="h-5 w-5" />
@@ -71,152 +62,85 @@ export default function Gallery() {
         </div>
       </section>
 
-      {/* Category filter */}
-      <section className="py-6 border-b border-border bg-card/40 backdrop-blur sticky top-[68px] z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center gap-2">
-            {categories.map((category) => {
-              const IconComponent = category.icon;
-              const active = selectedCategory === category.id;
-              return (
-                <Button
-                  key={category.id}
-                  variant={active ? "festive" : "outline"}
-                  size="sm"
-                  className="font-medium"
-                  onClick={() => setSelectedCategory(category.id)}
-                >
-                  <IconComponent className="h-4 w-4" />
-                  {category.name}
-                </Button>
-              );
-            })}
-          </div>
+      <section className="sticky top-[68px] z-30 border-b border-border bg-card/90 py-4 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl flex-wrap justify-center gap-2 px-4 sm:px-6 lg:px-8">
+          {filters.map((filter) => (
+            <Button
+              key={filter.id}
+              variant={selectedCategory === filter.id ? "festive" : "outline"}
+              size="sm"
+              onClick={() => choose(filter.id)}
+            >
+              {filter.name}
+            </Button>
+          ))}
         </div>
       </section>
 
-      {/* Gallery grid */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {galleryLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(12)].map((_, i) => (
-                <Card key={i} variant="default" className="overflow-hidden animate-pulse">
-                  <div className="h-48 bg-muted" />
-                  <CardContent className="p-4 space-y-2">
-                    <div className="h-4 bg-muted rounded" />
-                    <div className="h-3 bg-muted rounded w-2/3" />
-                  </CardContent>
-                </Card>
+      <section className="py-12 md:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {isLoading ? (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div key={index} className="min-h-[180px] animate-pulse rounded-[1.5rem] bg-muted" />
               ))}
             </div>
-          ) : filteredImages.length === 0 ? (
-            <Card variant="default" className="p-12 text-center">
-              <Camera className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-              <p className="text-muted-foreground">No photos in this category yet — check back soon!</p>
-            </Card>
+          ) : filtered.length === 0 ? (
+            <div className="rounded-[1.5rem] bg-card px-6 py-16 text-center shadow-sm">
+              <Camera className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+              <p className="text-muted-foreground">No photos in this category yet.</p>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredImages.map((image: any) => (
-                <Card
-                  key={image.id}
-                  variant="elevated"
-                  interactive
-                  className="overflow-hidden group p-0"
-                  onClick={() => setSelectedImage(image.imageUrl || image.src)}
+            <div className="grid grid-cols-2 items-start gap-3 md:grid-cols-4">
+              {filtered.map((item, index) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`group relative overflow-hidden rounded-[1.5rem] bg-muted text-left shadow-md ${mosaicSpan(index, filtered.length)}`}
+                  aria-label={`Open ${item.title || item.categoryLabel}`}
+                  onClick={() => setOpenIndex(index)}
                 >
-                  <div className="relative">
+                  {item.mediaType === "video" && !item.poster ? (
+                    <video src={`${item.src}#t=1`} muted playsInline preload="auto" className="absolute inset-0 h-full w-full object-cover" />
+                  ) : (
                     <img
-                      src={
-                        image.imageUrl ||
-                        image.src ||
-                        "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
-                      }
-                      alt={image.title}
+                      src={item.mediaType === "video" ? item.poster || item.src : item.src}
+                      alt={item.title || item.categoryLabel}
                       loading="lazy"
-                      className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-                      <ZoomIn className="h-7 w-7 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-                    <Badge className="absolute top-3 right-3 shadow-soft">
-                      {categories.find((c) => c.id === image.category)?.name || "All"}
-                    </Badge>
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-display text-toodles-text mb-1">{image.title}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{image.description}</p>
-                  </CardContent>
-                </Card>
+                  )}
+                  <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-toodles-text">
+                    {item.categoryLabel}
+                  </span>
+                  {item.mediaType === "video" && (
+                    <span className="absolute inset-0 grid place-items-center">
+                      <span className="grid h-12 w-12 place-items-center rounded-full bg-white/90 text-toodles-primary shadow-elev">
+                        <Play className="h-5 w-5 fill-current" />
+                      </span>
+                    </span>
+                  )}
+                </button>
               ))}
             </div>
           )}
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="relative py-20 overflow-hidden bg-toodles-hero">
-        <div className="absolute inset-0 bg-black/15 pointer-events-none" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-          <div className="text-white">
-            <h2 className="text-3xl md:text-5xl font-display mb-5 leading-tight">
-              Make your own <span className="text-toodles-accent">memories with us</span>
-            </h2>
-            <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Join thousands of families who choose Toodles Funzone for play
-              sessions and birthday celebrations.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button size="lg" variant="accent" onClick={() => setShowBookingModal(true)}>
-                <Calendar className="h-5 w-5" />
-                Reserve a play session
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/70 text-white bg-white/10 hover:bg-white/20 hover:text-white hover:border-white"
-              >
-                <Camera className="h-5 w-5" />
-                Share your photos
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <Footer />
       <FloatingWhatsApp />
 
-      {/* Image modal */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm"
-          onClick={() => setSelectedImage(null)}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="relative max-w-5xl max-h-full" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={selectedImage}
-              alt="Gallery"
-              className="max-w-full max-h-[88vh] object-contain rounded-2xl shadow-elev-lg"
-            />
-            <button
-              className="absolute -top-3 -right-3 grid place-items-center h-10 w-10 rounded-full bg-white text-toodles-text shadow-elev hover:bg-toodles-accent transition-colors"
-              onClick={() => setSelectedImage(null)}
-              aria-label="Close"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
+      {openIndex !== null && (
+        <PhotoLightbox
+          items={filtered}
+          index={openIndex}
+          onIndex={setOpenIndex}
+          onClose={() => setOpenIndex(null)}
+        />
       )}
 
       {showBookingModal && (
-        <BookingModal
-          onClose={() => setShowBookingModal(false)}
-          packages={packages || []}
-        />
+        <BookingModal onClose={() => setShowBookingModal(false)} packages={packages || []} />
       )}
     </div>
   );

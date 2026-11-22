@@ -21,7 +21,8 @@ import {
   MessageCircle,
   Package,
   PlayCircle,
-  Image
+  Image,
+  Sparkles
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -123,7 +124,8 @@ export default function AdminDashboard() {
     { name: "Hour Package Sales", href: "/admin/package-management", icon: Clock },
     { name: "Activities Management", href: "/admin/activities", icon: PlayCircle },
     { name: "Add-ons Management", href: "/admin/addons", icon: Package },
-    { name: "Gallery Management", href: "/admin/gallery", icon: Image },
+    { name: "Upload photos / videos", href: "/admin/gallery", icon: Image },
+    { name: "Albums, offers & events", href: "/admin/content", icon: Sparkles },
     { name: "Birthday Management", href: "/admin/birthday", icon: Gift },
     { name: "Capacity Management", href: "/admin/capacity", icon: Clock },
     { name: "Operating Hours", href: "/admin/operating-hours", icon: Clock },

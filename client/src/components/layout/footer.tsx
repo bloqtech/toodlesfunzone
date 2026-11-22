@@ -36,8 +36,8 @@ export function Footer() {
               className="h-20 w-auto mb-4 toodles-logo-hover"
             />
             <p className="text-white/75 mb-5 text-sm leading-relaxed">
-              Bengaluru's most-loved indoor play zone for children aged 2–8 —
-              where safety, imagination and joy come together.
+              Bengaluru's indoor play zone for children — where safety,
+              imagination and joy come together.
             </p>
             <div className="flex items-center gap-2">
               {[
@@ -65,14 +65,16 @@ export function Footer() {
             </h3>
             <ul className="space-y-2.5 text-sm">
               {[
-                { label: "Activities", href: "/activities" },
-                { label: "Packages", href: "/packages" },
-                { label: "Birthday Parties", href: "/birthday" },
-                { label: "Gallery", href: "/gallery" },
+                { label: "Home", href: "/" },
+                { label: "Playtime", href: "/activities" },
+                { label: "Birthday Bash", href: "/birthday" },
+                { label: "Play Club", href: "/packages" },
+                { label: "School & Events", href: "/school-trips" },
+                { label: "Memory Lane", href: "/gallery" },
               ].map((l) => (
                 <li key={l.label}>
                   <Link href={l.href}>
-                    <span className="text-white/75 hover:text-toodles-accent hover:translate-x-0.5 inline-block transition-all cursor-pointer">
+                    <span className="font-accent text-base text-white/75 hover:text-toodles-accent hover:translate-x-0.5 inline-block transition-all cursor-pointer">
                       {l.label}
                     </span>
                   </Link>

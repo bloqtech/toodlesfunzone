@@ -252,6 +252,92 @@ export const addOns = pgTable("add_ons", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Gallery images table. Image files live in Cloudinary; this table stores
+// metadata and the permanent URL used by the public and admin galleries.
+export const galleryImages = pgTable("gallery_images", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  description: text("description").notNull().default(""),
+  imageUrl: varchar("image_url").notNull(),
+  cloudinaryPublicId: varchar("cloudinary_public_id"),
+  category: varchar("category").notNull().default("play"),
+  mediaType: varchar("media_type").notNull().default("photo"),
+  altText: text("alt_text").notNull().default(""),
+  eventName: varchar("event_name"),
+  eventDate: varchar("event_date"),
+  albumId: integer("album_id"),
+  isActive: boolean("is_active").notNull().default(true),
+  featured: boolean("featured").notNull().default(false),
+  displayOrder: integer("display_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const albums = pgTable("albums", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  description: text("description").notNull().default(""),
+  coverImageUrl: varchar("cover_image_url"),
+  category: varchar("category").notNull().default("play"),
+  eventDate: varchar("event_date"),
+  isActive: boolean("is_active").notNull().default(false),
+  featured: boolean("featured").notNull().default(false),
+  displayOrder: integer("display_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const promotions = pgTable("promotions", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  title: varchar("title").notNull(),
+  description: text("description").notNull().default(""),
+  imageUrl: varchar("image_url"),
+  category: varchar("category").default("general"),
+  startsOn: varchar("starts_on"),
+  endsOn: varchar("ends_on"),
+  terms: text("terms"),
+  promoCode: varchar("promo_code"),
+  ctaLabel: varchar("cta_label").default("Enquire"),
+  ctaHref: varchar("cta_href").default("/contact"),
+  isActive: boolean("is_active").notNull().default(false),
+  featured: boolean("featured").notNull().default(false),
+  displayOrder: integer("display_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const siteEvents = pgTable("site_events", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  description: text("description").notNull().default(""),
+  imageUrl: varchar("image_url"),
+  eventDate: varchar("event_date").notNull(),
+  startTime: varchar("start_time"),
+  endTime: varchar("end_time"),
+  category: varchar("category").default("events"),
+  price: varchar("price"),
+  ctaLabel: varchar("cta_label").default("Enquire"),
+  ctaHref: varchar("cta_href").default("/contact"),
+  albumId: integer("album_id"),
+  isActive: boolean("is_active").notNull().default(false),
+  featured: boolean("featured").notNull().default(false),
+  displayOrder: integer("display_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const faqs = pgTable("faqs", {
+  id: serial("id").primaryKey(),
+  question: varchar("question").notNull(),
+  answer: text("answer").notNull(),
+  category: varchar("category").notNull().default("general"),
+  isActive: boolean("is_active").notNull().default(true),
+  displayOrder: integer("display_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Activities table
 export const activities = pgTable("activities", {
   id: serial("id").primaryKey(),
@@ -449,6 +535,15 @@ export const insertBlogPostSchema = createInsertSchema(blogPosts);
 export const insertEnquirySchema = createInsertSchema(enquiries);
 export const insertOperatingHoursSchema = createInsertSchema(operatingHours);
 export const insertAddOnSchema = createInsertSchema(addOns);
+export const insertGalleryImageSchema = createInsertSchema(galleryImages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertAlbumSchema = createInsertSchema(albums).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertPromotionSchema = createInsertSchema(promotions).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertSiteEventSchema = createInsertSchema(siteEvents).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertFaqSchema = createInsertSchema(faqs).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertActivitySchema = createInsertSchema(activities);
 export const insertBirthdayPackageSchema = createInsertSchema(birthdayPackages);
 export const insertOtpVerificationSchema = createInsertSchema(otpVerification);
@@ -497,6 +592,16 @@ export type InsertEnquiry = z.infer<typeof insertEnquirySchema>;
 export type InsertOperatingHours = z.infer<typeof insertOperatingHoursSchema>;
 export type AddOn = typeof addOns.$inferSelect;
 export type InsertAddOn = z.infer<typeof insertAddOnSchema>;
+export type GalleryImage = typeof galleryImages.$inferSelect;
+export type InsertGalleryImage = z.infer<typeof insertGalleryImageSchema>;
+export type Album = typeof albums.$inferSelect;
+export type InsertAlbum = z.infer<typeof insertAlbumSchema>;
+export type Promotion = typeof promotions.$inferSelect;
+export type InsertPromotion = z.infer<typeof insertPromotionSchema>;
+export type SiteEvent = typeof siteEvents.$inferSelect;
+export type InsertSiteEvent = z.infer<typeof insertSiteEventSchema>;
+export type Faq = typeof faqs.$inferSelect;
+export type InsertFaq = z.infer<typeof insertFaqSchema>;
 export type Activity = typeof activities.$inferSelect;
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type BirthdayPackage = typeof birthdayPackages.$inferSelect;
